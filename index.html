@@ -1,1 +1,1247 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>처방 도우미</title>
+  <style>
+    :root {
+      --bg:#f4f7fb; --panel:#fff; --panel-2:#f8fafc;
+      --text:#1f2937; --muted:#6b7280; --line:#dbe3ef;
+      --primary:#2563eb; --primary-soft:#dbeafe;
+      --danger:#dc2626; --success:#059669;
+      --shadow:0 10px 30px rgba(15,23,42,.08);
+      --radius:14px;
+      --font:"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",Arial,sans-serif;
+    }
+    *{box-sizing:border-box;}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--font);}
+    body{min-width:1100px;}
+    button,input,select,textarea{font:inherit;}
+    .app{max-width:1880px;margin:0 auto;padding:18px;}
+
+    /* ── Lock Screen ── */
+    #lockScreen{
+      position:fixed;inset:0;z-index:9999;
+      background:linear-gradient(135deg,#0f2044 0%,#1d4ed8 100%);
+      display:flex;align-items:center;justify-content:center;
+    }
+    #lockScreen.hidden{display:none!important;}
+    .lock-card{
+      background:#fff;border-radius:22px;padding:40px 36px;
+      width:min(400px,calc(100vw - 40px));
+      box-shadow:0 30px 80px rgba(0,0,0,.4);
+      display:flex;flex-direction:column;gap:16px;align-items:center;
+    }
+    .lock-logo{font-size:36px;margin-bottom:4px;}
+    .lock-card h2{margin:0;font-size:22px;color:#1d4ed8;text-align:center;}
+    .lock-card p{margin:0;font-size:13px;color:var(--muted);text-align:center;line-height:1.6;}
+    .lock-input{
+      width:100%;padding:12px 14px;border:1.5px solid var(--line);
+      border-radius:12px;font-size:15px;outline:none;transition:.15s border;
+    }
+    .lock-input:focus{border-color:#3b82f6;box-shadow:0 0 0 4px rgba(59,130,246,.12);}
+    .lock-btn{
+      width:100%;padding:13px;background:#2563eb;color:#fff;border:none;
+      border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;
+      transition:.15s background;
+    }
+    .lock-btn:hover{background:#1d4ed8;}
+    .lock-btn.google{
+      background:#fff;color:#374151;border:1.5px solid #d1d5db;
+      display:flex;align-items:center;justify-content:center;gap:10px;
+    }
+    .lock-btn.google:hover{background:#f9fafb;}
+    .lock-error{font-size:12px;color:var(--danger);min-height:16px;text-align:center;}
+    .lock-footer{font-size:11px;color:var(--muted);text-align:center;}
+    .lock-divider{width:100%;display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;}
+    .lock-divider::before,.lock-divider::after{content:'';flex:1;height:1px;background:var(--line);}
+
+    /* ── Topbar ── */
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:16px;
+      background:linear-gradient(135deg,#1d4ed8,#3b82f6);
+      color:white;padding:18px 22px;border-radius:18px;box-shadow:var(--shadow);margin-bottom:16px;
+    }
+    .title-wrap h1{margin:0;font-size:24px;}
+    .title-wrap p{margin:6px 0 0;font-size:13px;opacity:.9;}
+    .topbar-right{display:flex;gap:10px;align-items:center;}
+    .status-badge{
+      background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);
+      padding:8px 12px;border-radius:999px;font-size:12px;white-space:nowrap;
+    }
+    .btn-ghost-white{
+      background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);
+      color:white;padding:8px 14px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;
+      transition:.15s background;
+    }
+    .btn-ghost-white:hover{background:rgba(255,255,255,.28);}
+    .btn-ghost-white.danger-ghost{background:rgba(220,38,38,.25);border-color:rgba(255,180,180,.4);}
+    .btn-ghost-white.danger-ghost:hover{background:rgba(220,38,38,.4);}
+
+    /* ── Panels ── */
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+    .panel-header{
+      padding:14px 16px;border-bottom:1px solid var(--line);background:var(--panel-2);
+      display:flex;justify-content:space-between;align-items:center;gap:12px;
+    }
+    .panel-header h2{margin:0;font-size:16px;}
+    .panel-header .sub{font-size:12px;color:var(--muted);}
+    .panel-body{padding:16px;}
+
+    /* ── Layout ── */
+    .stack{display:grid;gap:12px;}
+    .stack-lg{display:grid;gap:16px;}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .three{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+    .four{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+    .field{display:grid;gap:6px;}
+    .field label{font-size:12px;font-weight:700;color:var(--muted);}
+    .field input,.field textarea,.field select{
+      width:100%;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 11px;
+      outline:none;transition:.15s border,.15s box-shadow;
+    }
+    .field input:focus,.field textarea:focus,.field select:focus{
+      border-color:#93c5fd;box-shadow:0 0 0 4px rgba(59,130,246,.12);
+    }
+    .field input[readonly]{background:#f8fafc;color:var(--muted);cursor:default;}
+    textarea{resize:vertical;min-height:74px;}
+    .hint{font-size:11px;color:var(--muted);line-height:1.5;}
+
+    /* ── Buttons ── */
+    .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+    .btn{
+      border:1px solid var(--line);background:white;color:var(--text);
+      padding:9px 12px;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;
+      transition:.15s transform,.15s background,.15s border;
+    }
+    .btn:hover{transform:translateY(-1px);}
+    .btn.primary{background:var(--primary);color:#fff;border-color:var(--primary);}
+    .btn.soft{background:var(--primary-soft);color:#1d4ed8;border-color:#bfdbfe;}
+    .btn.danger{background:#fef2f2;color:var(--danger);border-color:#fecaca;}
+    .btn.success{background:#ecfdf5;color:var(--success);border-color:#a7f3d0;}
+    .btn-sm{padding:4px 8px!important;font-size:11px!important;}
+    .btn-xs{padding:3px 7px;font-size:10px;border-radius:6px;border:1px solid var(--line);background:white;cursor:pointer;font-weight:600;}
+    .btn-xs:hover{background:#f0f9ff;}
+
+    /* ── Toolbar ── */
+    .toolbar{
+      display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;
+      margin-bottom:12px;
+      background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+      padding:12px 14px;box-shadow:var(--shadow);
+    }
+    .toolbar-left,.toolbar-right{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+    .toolbar .meta{font-size:12px;color:var(--muted);}
+
+    /* ── Table ── */
+    .table-wrap{overflow:auto;}
+    table{width:100%;border-collapse:collapse;min-width:1380px;background:white;}
+    th,td{border:1px solid var(--line);padding:6px 7px;vertical-align:top;font-size:9px;}
+    th{position:sticky;top:0;background:#eff6ff;z-index:1;text-align:left;font-size:9px;}
+    tbody tr:nth-child(even){background:#fbfdff;}
+    tbody tr.deleted-row{background:#fff7ed;}
+    .nowrap{white-space:nowrap;}
+    .small{font-size:8px;color:var(--muted);}
+    .meds-cell{font-size:6.5px;line-height:1.6;word-break:break-word;}
+    .change-cell{font-size:9px;white-space:pre-line;}
+    .cell-stack{display:flex;flex-direction:column;gap:1px;}
+    .cell-stack .main{font-size:9px;font-weight:700;}
+    .cell-stack .sub{font-size:8px;color:var(--muted);}
+    .lab-prev{font-size:8px;color:var(--muted);margin-top:2px;}
+    .note-check-row{display:flex;align-items:center;gap:5px;margin-top:4px;padding-top:4px;border-top:1px dashed var(--line);}
+    .note-check-row input[type=checkbox]{width:13px;height:13px;cursor:pointer;accent-color:var(--success);}
+    .note-check-label{font-size:8px;cursor:pointer;color:var(--muted);user-select:none;}
+    .note-check-label.done{color:var(--success);font-weight:700;}
+
+    /* ── Pills ── */
+    .pill-list{display:flex;flex-wrap:wrap;gap:6px;}
+    .pill{background:#f3f4f6;border:1px solid #e5e7eb;border-radius:999px;padding:5px 8px;font-size:12px;cursor:pointer;}
+    .pill:hover{background:#e0ecff;border-color:#bfdbfe;}
+
+    /* ── Misc ── */
+    .section-title{font-size:13px;font-weight:800;margin-bottom:6px;}
+    .divider{height:1px;background:var(--line);margin:4px 0;}
+    .note-box{background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;padding:10px;font-size:12px;color:var(--muted);}
+    .empty{padding:24px 10px;text-align:center;color:var(--muted);font-size:13px;border:1px dashed var(--line);border-radius:12px;background:#fcfdff;}
+    .footer-note{font-size:12px;color:var(--muted);margin-top:10px;}
+    .dc-hint{font-size:11px;color:var(--success);margin-top:4px;display:none;}
+    .lab-row{display:flex;flex-direction:column;gap:6px;}
+    .lab-prev-row{display:flex;align-items:center;gap:8px;}
+    .lab-prev-row label{font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap;}
+
+    /* ── Auth info bar ── */
+    .auth-user-badge{
+      background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);
+      padding:6px 12px;border-radius:999px;font-size:12px;
+      display:flex;align-items:center;gap:6px;
+    }
+
+    /* ── Print date ── */
+    .print-date{display:none;}
+
+    /* ── Dialogs ── */
+    dialog{
+      border:none;border-radius:18px;padding:0;
+      box-shadow:0 30px 70px rgba(0,0,0,.22);
+      position:fixed;top:50%;left:50%;
+      transform:translate(-50%,-50%);
+      margin:0;
+    }
+    dialog:not([open]){display:none!important;}
+    dialog::backdrop{background:rgba(15,23,42,.42);}
+    .modal-header{padding:14px 18px;background:#eff6ff;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+    .modal-header h3{margin:0;font-size:16px;}
+    .modal-body{padding:16px 18px;display:grid;gap:14px;}
+    .modal-footer{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;background:var(--panel-2);}
+    #patientFormDialog{width:min(900px,calc(100vw - 32px));max-height:calc(100vh - 48px);}
+    #patientFormDialog[open]{display:flex;flex-direction:column;}
+    #patientFormDialog .modal-body{overflow-y:auto;flex:1;}
+    #medEditDialog{width:min(720px,calc(100vw - 32px));}
+    #firebaseDialog{width:min(560px,calc(100vw - 32px));}
+    #changePwDialog{width:min(420px,calc(100vw - 32px));}
+
+    /* ── Print ── */
+    @page{size:A4 landscape;margin:6mm;}
+    @media print{
+      body{min-width:auto;background:white;}
+      .app{max-width:none;padding:0;}
+      .topbar,.toolbar,.footer-note,dialog,#lockScreen,.note-check-row{display:none!important;}
+      .panel{border:none;box-shadow:none;border-radius:0;}
+      .panel-header{padding:0 0 6px;background:white;border:none;display:flex;justify-content:space-between;align-items:baseline;}
+      .panel-header h2{font-size:10pt;}
+      .panel-body{padding:0;}
+      .table-wrap{overflow:visible;}
+      table{min-width:auto;table-layout:fixed;}
+      th,td{font-size:9pt;padding:2px 3px;line-height:1.2;word-break:break-word;}
+      th{position:static;background:#f3f4f6!important;}
+      td.meds-cell{font-size:6.5pt;line-height:1.3;}
+      .small{font-size:8pt;color:#111827;}
+      .lab-prev{font-size:7pt;color:#374151;}
+      .cell-stack .sub{color:#374151;font-size:8pt;}
+      .panel-header .sub{display:none;}
+      .print-date{display:block!important;font-size:9pt;color:#374151;white-space:nowrap;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     Lock Screen (비밀번호 / Google 로그인)
+════════════════════════════════════════ -->
+<div id="lockScreen">
+  <div class="lock-card">
+    <div class="lock-logo">🔒</div>
+    <h2>처방 도우미</h2>
+    <p>환자 개인정보 보호를 위해<br>로그인이 필요합니다.</p>
+
+    <!-- Google 로그인 버튼 (Firebase Auth 연결 시 표시) -->
+    <button class="lock-btn google" id="googleLoginBtn" style="display:none;">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#4285F4" d="M47.5 24.6c0-1.6-.1-3.1-.4-4.6H24v8.7h13.2c-.6 3-2.3 5.5-4.9 7.2v6h7.9c4.6-4.3 7.3-10.6 7.3-17.3z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.9-6c-2.1 1.4-4.9 2.3-8 2.3-6.1 0-11.3-4.1-13.2-9.7H2.7v6.2C6.7 42.8 14.8 48 24 48z"/><path fill="#FBBC05" d="M10.8 28.8c-.5-1.4-.7-2.8-.7-4.3s.2-2.9.7-4.3v-6.2H2.7C1 17.2 0 20.5 0 24s1 6.8 2.7 9.9l8.1-5.1z"/><path fill="#EA4335" d="M24 9.6c3.4 0 6.5 1.2 8.9 3.5l6.7-6.7C35.9 2.4 30.4 0 24 0 14.8 0 6.7 5.2 2.7 14.1l8.1 6.2C12.7 13.7 17.9 9.6 24 9.6z"/></svg>
+      Google로 로그인
+    </button>
+    <div class="lock-divider" id="lockDivider" style="display:none;">또는</div>
+
+    <!-- 비밀번호 입력 -->
+    <input class="lock-input" type="password" id="pwInput" placeholder="비밀번호 입력" autocomplete="current-password" />
+    <div class="lock-error" id="loginError"></div>
+    <button class="lock-btn" id="loginBtn">입장</button>
+    <div class="lock-footer">초기 비밀번호: 12341234 · 로그인 후 변경 가능</div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     Main App
+════════════════════════════════════════ -->
+<div class="app" id="mainApp" style="display:none;">
+
+  <!-- ── Topbar ── -->
+  <div class="topbar">
+    <div class="title-wrap">
+      <h1>처방 도우미</h1>
+      <p>환자 기본정보 · 주상병 · 약물 복붙 입력 · soft delete(14일) · A4 가로 출력</p>
+    </div>
+    <div class="topbar-right">
+      <div class="status-badge" id="syncStatus">로컬 모드</div>
+      <div class="auth-user-badge" id="authUserBadge" style="display:none;"></div>
+      <button class="btn-ghost-white" id="changePwBtn">🔑 비밀번호 변경</button>
+      <button class="btn-ghost-white" id="openFirebaseBtn">⚙ Firebase 설정</button>
+      <button class="btn-ghost-white danger-ghost" id="logoutBtn">로그아웃</button>
+    </div>
+  </div>
+
+  <!-- ── Toolbar ── -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <button class="btn primary" id="openNewPatientBtn">+ 환자 등록</button>
+      <button class="btn" data-sort="roomAsc">호실 ↑</button>
+      <button class="btn" data-sort="roomDesc">호실 ↓</button>
+      <button class="btn" data-sort="stayAsc">재원일수 ↑</button>
+      <button class="btn" data-sort="stayDesc">재원일수 ↓</button>
+      <button class="btn soft" id="toggleDeletedBtn">삭제 환자 보기</button>
+      <button class="btn success" id="printBtn">🖨 A4 가로 출력</button>
+    </div>
+    <div class="toolbar-right">
+      <span class="meta" id="patientCountMeta">환자 0명</span>
+    </div>
+  </div>
+
+  <!-- ── Patient List Panel ── -->
+  <section class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>환자 목록</h2>
+        <div class="sub">입원일 · 재원일수 · 퇴원예정일 · 약 목록 · 최근 변경 · lab · 참고사항</div>
+      </div>
+      <div id="printDate" class="print-date"></div>
+    </div>
+    <div class="panel-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="nowrap" style="width:36px;">No.</th>
+              <th class="nowrap" style="width:52px;">호실</th>
+              <th class="nowrap" style="width:88px;">환자번호</th>
+              <th style="width:76px;">이름<br><span style="font-weight:400;font-size:8px;">Sex/Age</span></th>
+              <th style="width:108px;">입원날짜<br><span style="font-weight:400;font-size:8px;">퇴원예정일</span></th>
+              <th style="width:158px;">주상병 / onset</th>
+              <th style="width:360px;">약 처방 목록</th>
+              <th style="width:190px;">최근 약 변경 내역</th>
+              <th class="nowrap" style="width:88px;">마지막 lab</th>
+              <th style="width:210px;">처방 참고사항 / 오더확인</th>
+              <th class="nowrap" style="width:76px;">작업</th>
+            </tr>
+          </thead>
+          <tbody id="patientTableBody"></tbody>
+        </table>
+      </div>
+      <div id="emptyState" class="empty">아직 등록된 환자가 없습니다. <strong>+ 환자 등록</strong> 버튼으로 추가하세요.</div>
+      <div class="footer-note">인쇄 시 A4 가로 — 약 처방목록 6.5pt, 나머지 9pt · 처방확인 체크박스 인쇄 제외</div>
+    </div>
+  </section>
+
+</div><!-- /.app -->
+
+
+<!-- ════════════════════════════════════════
+     Dialog: 환자 등록 / 수정
+════════════════════════════════════════ -->
+<dialog id="patientFormDialog">
+  <div class="modal-header">
+    <h3 id="patientFormTitle">환자 등록</h3>
+    <button class="btn" id="closePatientFormBtn">✕ 닫기</button>
+  </div>
+  <div class="modal-body stack-lg">
+    <div class="stack">
+      <div class="section-title">1) 환자 한 줄 복붙</div>
+      <div class="field">
+        <label>복붙 입력</label>
+        <textarea id="pastePatient" rows="2" placeholder="예: 1019-01&#9;0000015840&#9;김금자&#9;F&#9;82&#9;04.29"></textarea>
+      </div>
+      <div class="actions"><button class="btn soft" id="parsePatientBtn">환자 복붙 파싱</button></div>
+    </div>
+    <div class="divider"></div>
+    <div class="stack">
+      <div class="section-title">2) 주상병 복붙</div>
+      <div class="field">
+        <label>상병 입력</label>
+        <textarea id="pasteDiagnosis" rows="2" placeholder="예: 상세불명의 뇌내출혈&#9;상세불명의 뇌내출혈&#9;2026-03-24"></textarea>
+      </div>
+      <div class="actions"><button class="btn soft" id="parseDiagnosisBtn">상병 복붙 파싱</button></div>
+    </div>
+    <div class="divider"></div>
+    <div class="stack">
+      <div class="section-title">3) 개별 입력</div>
+      <div class="two">
+        <div class="field"><label>병실 원본</label><input id="roomRaw" placeholder="1019-01"/></div>
+        <div class="field"><label>호실 정렬키</label><input id="roomSortKey" placeholder="1019"/></div>
+      </div>
+      <div class="four">
+        <div class="field"><label>bed</label><input id="bedNo" placeholder="01"/></div>
+        <div class="field"><label>환자 번호</label><input id="patientNo" placeholder="0000015840"/></div>
+        <div class="field"><label>환자 이름</label><input id="patientName" placeholder="김금자"/></div>
+        <div class="field"><label>성별</label>
+          <select id="sex"><option value="">선택</option><option value="M">M</option><option value="F">F</option></select>
+        </div>
+      </div>
+      <div class="four">
+        <div class="field"><label>생년월일</label><input id="birthDate" type="date"/></div>
+        <div class="field"><label>붙여넣기 나이</label><input id="pastedAge" type="number" min="0" step="1" placeholder="82"/></div>
+        <div class="field"><label>입원날짜</label><input id="admissionDate" type="date"/></div>
+        <div class="field"><label>퇴원예정일</label><input id="expectedDischargeDate" type="date"/></div>
+      </div>
+      <div class="two">
+        <div class="field"><label>주상병</label><input id="primaryDiagnosis" placeholder="상세불명의 뇌내출혈"/></div>
+        <div class="field"><label>onset 날짜</label><input id="primaryDiagnosisOnsetDate" type="date"/></div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="stack">
+      <div class="section-title">4) 약물 / 참고사항</div>
+      <div class="field">
+        <label>약 복붙 입력</label>
+        <textarea id="pasteMeds" rows="5" placeholder="케프라 액 150ml&#9;&#9;1ml&#9;145&#9;5&#9;*&#9;2&#9;1&#9;BID&#10;▶ DC 아트로벤트 흡입액…  ← DC쌍 자동제외"></textarea>
+      </div>
+      <div class="actions">
+        <button class="btn soft" id="parseMedsBtn">약 복붙 파싱</button>
+        <button class="btn" id="clearMedsBtn">약 목록 비우기</button>
+      </div>
+      <div id="dcHintMsg" class="dc-hint"></div>
+      <div class="pill-list" id="medPills"></div>
+      <div class="two">
+        <div class="field">
+          <label>마지막 lab 날짜</label>
+          <div class="lab-row">
+            <input id="lastLabDate" type="date"/>
+            <div class="lab-prev-row">
+              <label>이전 lab:</label>
+              <input id="prevLabDate" type="date"/>
+              <button type="button" class="btn-xs" id="moveToPreLabBtn">← 이전날짜로 이동</button>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label>최근 약 변경 내역 (자유 입력)</label>
+          <textarea id="recentMedChangeInput" rows="3" placeholder="2026-05-12 케프라 용량 증량&#10;2026-05-10 아트로벤트 추가"></textarea>
+        </div>
+      </div>
+      <div class="field">
+        <label>처방 참고 사항</label>
+        <textarea id="prescriptionNote" placeholder="자유 입력"></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" id="resetFormBtn">↺ 입력 초기화</button>
+    <button class="btn primary" id="savePatientBtn">💾 환자 저장</button>
+  </div>
+</dialog>
+
+<!-- Dialog: 약 항목 수정 -->
+<dialog id="medEditDialog">
+  <div class="modal-header"><h3>약 항목 수정</h3><button class="btn" id="closeMedDialogBtn">✕ 닫기</button></div>
+  <div class="modal-body">
+    <div class="two">
+      <div class="field"><label>약 이름</label><input id="editMedName"/></div>
+      <div class="field"><label>용법</label><input id="editMedFrequency" placeholder="BID"/></div>
+    </div>
+    <div class="three">
+      <div class="field"><label>기본 단위</label><input id="editMedBaseUnit" placeholder="1ml"/></div>
+      <div class="field"><label>배수</label><input id="editMedMultiplier" type="number" step="0.1" min="0"/></div>
+      <div class="field"><label>실제 용량</label><input id="editMedDoseText" placeholder="5ml"/></div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn danger" id="deleteMedBtn">삭제</button>
+    <button class="btn primary" id="saveMedBtn">저장</button>
+  </div>
+</dialog>
+
+<!-- Dialog: 비밀번호 변경 -->
+<dialog id="changePwDialog">
+  <div class="modal-header"><h3>🔑 비밀번호 변경</h3><button class="btn" id="closeChangePwBtn">✕ 닫기</button></div>
+  <div class="modal-body">
+    <div class="note-box">
+      새 비밀번호는 이 기기의 브라우저에 저장됩니다.<br>
+      같은 앱을 다른 기기/브라우저에서 열면 초기 비밀번호(12341234)를 사용합니다.
+    </div>
+    <div class="field"><label>현재 비밀번호</label><input id="curPw" type="password" placeholder="현재 비밀번호"/></div>
+    <div class="field"><label>새 비밀번호</label><input id="newPw" type="password" placeholder="8자 이상 권장"/></div>
+    <div class="field"><label>새 비밀번호 확인</label><input id="newPw2" type="password" placeholder="다시 입력"/></div>
+    <div class="lock-error" id="changePwError"></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn primary" id="doChangePwBtn">변경 저장</button>
+  </div>
+</dialog>
+
+<!-- Dialog: Firebase 설정 -->
+<dialog id="firebaseDialog">
+  <div class="modal-header"><h3>⚙ Firebase 설정</h3><button class="btn" id="closeFirebaseBtn">✕ 닫기</button></div>
+  <div class="modal-body">
+    <div class="note-box" style="line-height:1.8;">
+      <strong>Firebase + Google 로그인 설정 방법</strong><br>
+      ① <a href="https://console.firebase.google.com" target="_blank">Firebase 콘솔</a> → 프로젝트 생성<br>
+      ② Authentication → Google 공급업체 활성화<br>
+      ③ Firestore Database → 데이터베이스 생성<br>
+      ④ 프로젝트 설정 → 웹 앱 추가 → firebaseConfig 복사<br>
+      ⑤ 이 파일 소스의 <code>firebaseConfig</code> 값 교체<br>
+      ⑥ Authentication → 승인된 도메인에 사용 도메인 추가<br>
+      <br>
+      설정 후 새로고침하면 Google 로그인 버튼이 나타납니다.<br>
+      <strong>허용 이메일</strong>은 아래에서 관리하세요.
+    </div>
+    <div class="field">
+      <label>허용 이메일 목록 (한 줄에 하나씩, Firebase Auth 사용 시에만 적용)</label>
+      <textarea id="allowedEmailsInput" rows="4" placeholder="example@gmail.com&#10;doctor@hospital.com"></textarea>
+    </div>
+    <div class="field">
+      <label>현재 연결 상태</label>
+      <input readonly id="fbStatusDisplay" value="Firebase 미연결 · 로컬 모드"/>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn primary" id="saveFirebaseSettingsBtn">저장</button>
+    <button class="btn" id="closeFirebaseBtn2">닫기</button>
+  </div>
+</dialog>
+
+
+<!-- ════════════════════════════════════════
+     Script
+════════════════════════════════════════ -->
+<script type="module">
+  import { initializeApp }    from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js';
+  import {
+    getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut
+  } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js';
+  import {
+    getFirestore, collection, doc, setDoc, getDocs, updateDoc,
+    serverTimestamp, query, orderBy
+  } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js';
+
+  const CURRENT_YEAR     = new Date().getFullYear();
+  const SOFT_DELETE_DAYS = 14;
+  const PW_HASH_KEY      = 'presc-helper-pw-hash';
+  const ALLOWED_EMAILS_KEY = 'presc-helper-allowed-emails';
+
+  /* ══════════════════════════════════════════
+     Firebase 설정
+     ↓ 아래 값을 Firebase 콘솔에서 복사해 넣으세요
+  ══════════════════════════════════════════ */
+const firebaseConfig = {
+  apiKey: "AIzaSyDjT1nOr92qMQrwSq7fyWoe8Dkj0zf5Pcs",
+  authDomain: "patient-order.firebaseapp.com",
+  projectId: "patient-order",
+  storageBucket: "patient-order.firebasestorage.app",
+  messagingSenderId: "1002723577041",
+  appId: "1:1002723577041:web:2afff99e05fc1a92a389f0"
+};
+  /* ══════════════════════════════════════════ */
+
+  let app = null, db = null, auth = null, fbUser = null;
+  const firebaseEnabled = Object.values(firebaseConfig).every(Boolean);
+
+  if (firebaseEnabled) {
+    try {
+      app  = initializeApp(firebaseConfig);
+      db   = getFirestore(app);
+      auth = getAuth(app);
+    } catch (err) { console.error('Firebase init:', err); }
+  }
+
+  /* ── DOM ── */
+  const el = id => document.getElementById(id);
+
+  /* ══════════════════════════════════════════
+     인증 (Auth)
+  ══════════════════════════════════════════ */
+
+  /* SHA-256 해시 (Web Crypto API — 모든 브라우저 지원) */
+  async function sha256(text) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  /* 기본 비밀번호 해시 초기화 */
+  async function ensureDefaultPw() {
+    if (!localStorage.getItem(PW_HASH_KEY)) {
+      localStorage.setItem(PW_HASH_KEY, await sha256('12341234'));
+    }
+  }
+
+  /* 앱 잠금 해제 */
+  function unlockApp(displayName) {
+    sessionStorage.setItem('presc-auth', 'ok');
+    el('lockScreen').classList.add('hidden');
+    el('mainApp').style.display = '';
+    if (displayName) {
+      el('authUserBadge').textContent = '👤 ' + displayName;
+      el('authUserBadge').style.display = 'flex';
+      el('changePwBtn').style.display = 'none'; // Google 로그인이면 비번변경 불필요
+    }
+    refreshPrintDate();
+    loadPatients();
+  }
+
+  /* 로그아웃 */
+  async function doLogout() {
+    sessionStorage.removeItem('presc-auth');
+    if (auth && fbUser) { try { await signOut(auth); } catch(e){} }
+    fbUser = null;
+    location.reload();
+  }
+
+  /* ── 비밀번호 모드 로그인 ── */
+  async function initPasswordAuth() {
+    await ensureDefaultPw();
+
+    const doLogin = async () => {
+      const pw    = el('pwInput').value;
+      const hash  = await sha256(pw);
+      const stored = localStorage.getItem(PW_HASH_KEY);
+      if (hash === stored) {
+        unlockApp(null);
+      } else {
+        el('loginError').textContent = '비밀번호가 틀렸습니다.';
+        el('pwInput').select();
+      }
+    };
+
+    el('loginBtn').addEventListener('click', doLogin);
+    el('pwInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  }
+
+  /* ── Google 로그인 모드 ── */
+  function initGoogleAuth() {
+    const allowedEmails = getAllowedEmails();
+    el('googleLoginBtn').style.display = '';
+    el('lockDivider').style.display    = '';
+
+    el('googleLoginBtn').addEventListener('click', async () => {
+      try {
+        const provider = new GoogleAuthProvider();
+        const result   = await signInWithPopup(auth, provider);
+        const user     = result.user;
+
+        if (allowedEmails.length > 0 && !allowedEmails.includes(user.email)) {
+          await signOut(auth);
+          el('loginError').textContent = `접근 권한이 없는 계정입니다: ${user.email}`;
+          return;
+        }
+        fbUser = user;
+        unlockApp(user.displayName || user.email);
+      } catch (err) {
+        if (err.code !== 'auth/popup-closed-by-user') {
+          el('loginError').textContent = '로그인 실패: ' + err.message;
+        }
+      }
+    });
+
+    // 이미 로그인 상태 감지
+    onAuthStateChanged(auth, user => {
+      if (user && !sessionStorage.getItem('presc-auth')) {
+        if (allowedEmails.length === 0 || allowedEmails.includes(user.email)) {
+          fbUser = user;
+          unlockApp(user.displayName || user.email);
+        }
+      }
+    });
+  }
+
+  function getAllowedEmails() {
+    const raw = localStorage.getItem(ALLOWED_EMAILS_KEY) || '';
+    return raw.split('\n').map(e => e.trim()).filter(Boolean);
+  }
+
+  /* ── 인증 초기화 진입점 ── */
+  async function initAuth() {
+    // 세션 내 재인증 생략
+    if (sessionStorage.getItem('presc-auth') === 'ok') {
+      unlockApp(null); return;
+    }
+
+    if (firebaseEnabled && auth) {
+      initGoogleAuth();
+    }
+    // 비밀번호 폼은 항상 초기화 (Google + 비번 둘 다 지원)
+    await initPasswordAuth();
+  }
+
+  /* ── 비밀번호 변경 ── */
+  el('doChangePwBtn').addEventListener('click', async () => {
+    const cur  = el('curPw').value;
+    const nw   = el('newPw').value;
+    const nw2  = el('newPw2').value;
+    const errEl = el('changePwError');
+    errEl.textContent = '';
+
+    if (!cur || !nw || !nw2) { errEl.textContent = '모든 항목을 입력하세요.'; return; }
+    if (nw !== nw2)          { errEl.textContent = '새 비밀번호가 일치하지 않습니다.'; return; }
+    if (nw.length < 4)       { errEl.textContent = '비밀번호는 4자 이상이어야 합니다.'; return; }
+
+    const curHash = await sha256(cur);
+    if (curHash !== localStorage.getItem(PW_HASH_KEY)) {
+      errEl.textContent = '현재 비밀번호가 틀렸습니다.'; return;
+    }
+
+    localStorage.setItem(PW_HASH_KEY, await sha256(nw));
+    el('curPw').value = ''; el('newPw').value = ''; el('newPw2').value = '';
+    el('changePwDialog').close();
+    alert('✅ 비밀번호가 변경되었습니다.');
+  });
+
+  el('changePwBtn').addEventListener('click',  () => el('changePwDialog').showModal());
+  el('closeChangePwBtn').addEventListener('click', () => el('changePwDialog').close());
+  el('logoutBtn').addEventListener('click', doLogout);
+
+
+  /* ══════════════════════════════════════════
+     KST 날짜 (인쇄용)
+  ══════════════════════════════════════════ */
+  function getKSTDateString() {
+    const kst   = new Date(Date.now() + 9 * 3600000);
+    const y     = kst.getUTCFullYear();
+    const m     = kst.getUTCMonth() + 1;
+    const d     = kst.getUTCDate();
+    const days  = ['일','월','화','수','목','금','토'];
+    return `${y}.${m}.${d}(${days[kst.getUTCDay()]})`;
+  }
+  function refreshPrintDate() {
+    el('printDate').textContent = getKSTDateString();
+  }
+  el('printBtn').addEventListener('click', () => { refreshPrintDate(); window.print(); });
+
+
+  /* ══════════════════════════════════════════
+     State
+  ══════════════════════════════════════════ */
+  const state = {
+    patients: [], medicationsDraft: [],
+    sort: 'roomAsc', showDeleted: false,
+    editingId: null, medEditingIndex: null
+  };
+
+  const formEls = {
+    roomRaw:                   el('roomRaw'),
+    roomSortKey:               el('roomSortKey'),
+    bedNo:                     el('bedNo'),
+    patientNo:                 el('patientNo'),
+    patientName:               el('patientName'),
+    sex:                       el('sex'),
+    birthDate:                 el('birthDate'),
+    pastedAge:                 el('pastedAge'),
+    admissionDate:             el('admissionDate'),
+    expectedDischargeDate:     el('expectedDischargeDate'),
+    primaryDiagnosis:          el('primaryDiagnosis'),
+    primaryDiagnosisOnsetDate: el('primaryDiagnosisOnsetDate'),
+    lastLabDate:               el('lastLabDate'),
+    prevLabDate:               el('prevLabDate'),
+    recentMedChangeInput:      el('recentMedChangeInput'),
+    prescriptionNote:          el('prescriptionNote')
+  };
+
+  /* ── LocalStorage ── */
+  function loadLocal() {
+    const raw = localStorage.getItem('prescription-helper-patients');
+    if (!raw) return;
+    try { state.patients = JSON.parse(raw); } catch(e) {}
+  }
+  function saveLocal() {
+    localStorage.setItem('prescription-helper-patients', JSON.stringify(state.patients));
+  }
+
+  async function loadPatients() {
+    if (!firebaseEnabled || !db) { loadLocal(); render(); return; }
+    try {
+      const snap = await getDocs(query(collection(db,'patients'), orderBy('roomSortKey','asc')));
+      state.patients = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      el('syncStatus').textContent = 'Firestore 연결됨';
+      render();
+    } catch(err) {
+      console.error(err);
+      loadLocal();
+      el('syncStatus').textContent = 'Firestore 읽기 실패 · 로컬 모드';
+      render();
+    }
+  }
+
+
+  /* ══════════════════════════════════════════
+     처방 오더 체크 (매주 월요일 기준)
+  ══════════════════════════════════════════ */
+  function getThisMonday() {
+    /* KST 기준 이번 주 월요일 날짜 반환 */
+    const kst  = new Date(Date.now() + 9 * 3600000);
+    const day  = kst.getUTCDay(); // 0=일
+    const diff = (day === 0) ? -6 : 1 - day;
+    kst.setUTCDate(kst.getUTCDate() + diff);
+    return kst.toISOString().split('T')[0];
+  }
+  function isCheckedThisWeek(patient) {
+    return !!(patient.prescriptionNoteCheckedWeek &&
+              patient.prescriptionNoteCheckedWeek === getThisMonday());
+  }
+
+
+  /* ══════════════════════════════════════════
+     파싱 헬퍼
+  ══════════════════════════════════════════ */
+  function padRoomSort(s) { return String(s||'').replace(/\D/g,'').padStart(4,'0').slice(-4); }
+  function parseRoomRaw(r) {
+    const t = String(r||'').trim();
+    const [rp='',bp=''] = t.split('-');
+    return { roomRaw:t, roomSortKey:padRoomSort(rp), bedNo:bp };
+  }
+  function parseKoreanShortDate(text) {
+    const t = String(text||'').trim();
+    if (!t) return '';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return t;
+    const m = t.match(/^(\d{1,2})[./-](\d{1,2})$/);
+    if (!m) return '';
+    return `${CURRENT_YEAR}-${String(m[1]).padStart(2,'0')}-${String(m[2]).padStart(2,'0')}`;
+  }
+  function calcAge(birthDate, pastedAge) {
+    if (birthDate) {
+      const today = new Date(), birth = new Date(birthDate);
+      let age = today.getFullYear() - birth.getFullYear();
+      const mo = today.getMonth() - birth.getMonth();
+      if (mo < 0 || (mo === 0 && today.getDate() < birth.getDate())) age--;
+      return age >= 0 ? age : '';
+    }
+    return pastedAge || '';
+  }
+  function calcStayDays(ad) {
+    if (!ad) return '';
+    const diff = Math.floor((Date.now() - new Date(ad+'T00:00:00').getTime()) / 86400000);
+    return diff >= 0 ? diff + 1 : 0;
+  }
+  function fmtDate(d) { return d || ''; }
+
+  function parsePatientLine(line) {
+    const parts = String(line||'').split('\t').map(v=>v.trim()).filter(Boolean);
+    if (parts.length < 6) return null;
+    const [roomRaw,patientNo,patientName,sex,ageText,admissionText] = parts;
+    return { ...parseRoomRaw(roomRaw), patientNo, patientName, sex,
+      pastedAge: Number(ageText)||'', admissionDate: parseKoreanShortDate(admissionText) };
+  }
+  function parseDiagnosisLine(line) {
+    const parts = String(line||'').split('\t').map(v=>v.trim()).filter(Boolean);
+    if (!parts.length) return null;
+    let onset=''; const names=[];
+    parts.forEach(p => { if (/^\d{4}-\d{2}-\d{2}$/.test(p)) onset=p; else names.push(p); });
+    return { primaryDiagnosis: [...new Set(names)][0]||'', primaryDiagnosisOnsetDate: onset };
+  }
+
+  /* DC 쌍 필터 */
+  function filterDCPairs(lines) {
+    const dcNames = new Set();
+    lines.forEach(line => {
+      const m = line.match(/^▶?\s*DC\s+(.*)/i);
+      if (m) { const n=m[1].split('\t')[0].trim().toLowerCase(); if(n) dcNames.add(n); }
+    });
+    return lines.filter(line => {
+      if (/^▶?\s*DC\s+/i.test(line)) return false;
+      return !dcNames.has(line.split('\t')[0].trim().toLowerCase());
+    });
+  }
+
+  function splitUnit(text) {
+    const m = String(text||'').trim().match(/^([0-9]*\.?[0-9]+)\s*(.*)$/);
+    if (!m) return { num:1, unit:String(text||'').trim() };
+    return { num:Number(m[1]), unit:(m[2]||'').trim() };
+  }
+  function buildDoseText(baseUnitText, multiplier) {
+    const {num,unit} = splitUnit(baseUnitText);
+    const result = (num||0) * Number(multiplier||0);
+    const safe   = Number.isInteger(result) ? String(result) : String(Number(result.toFixed(2)));
+    return unit ? `${safe}${unit}` : safe;
+  }
+  function parseMedicationLine(line) {
+    const trimmed = String(line||'').split('\t').map(v=>v.trim());
+    const name = trimmed[0]||'';
+    if (!name) return null;
+    const starIdx    = trimmed.findIndex(v => v==='*');
+    const multiplier = starIdx > 0 ? Number(trimmed[starIdx-1])||1 : 1;
+    const frequency  = trimmed[trimmed.length-1]||'';
+    let baseUnitText = '';
+    for (let i=1;i<trimmed.length;i++) {
+      if (/^[0-9]*\.?[0-9]+\s*[가-힣a-zA-Z]+$/.test(trimmed[i]) ||
+          /^[0-9]*\.?[0-9]+(ml|정|캡슐|포|앰플|병|IU|mg|g)$/i.test(trimmed[i])) {
+        baseUnitText=trimmed[i]; break;
+      }
+    }
+    if (!baseUnitText) baseUnitText='1회';
+    const doseText = buildDoseText(baseUnitText, multiplier);
+    return { id:crypto.randomUUID(), name, baseUnitText, multiplier, doseText, frequency,
+      displayText:`${name} ${doseText} ${frequency}`.trim(), rawLine:line };
+  }
+
+  function refreshMedDraftPills() {
+    const root = el('medPills');
+    root.innerHTML = '';
+    state.medicationsDraft.forEach((med,i) => {
+      const btn = document.createElement('button');
+      btn.className='pill'; btn.type='button'; btn.textContent=med.displayText;
+      btn.addEventListener('click', () => openMedEditor(i));
+      root.appendChild(btn);
+    });
+  }
+
+
+  /* ══════════════════════════════════════════
+     환자 데이터 CRUD
+  ══════════════════════════════════════════ */
+  function buildPatientPayload() {
+    return {
+      roomRaw:                   formEls.roomRaw.value.trim(),
+      roomSortKey:               formEls.roomSortKey.value.trim() || padRoomSort(formEls.roomRaw.value.split('-')[0]||''),
+      bedNo:                     formEls.bedNo.value.trim(),
+      patientNo:                 formEls.patientNo.value.trim(),
+      patientName:               formEls.patientName.value.trim(),
+      sex:                       formEls.sex.value,
+      birthDate:                 formEls.birthDate.value||'',
+      pastedAge:                 formEls.pastedAge.value ? Number(formEls.pastedAge.value) : '',
+      admissionDate:             formEls.admissionDate.value||'',
+      expectedDischargeDate:     formEls.expectedDischargeDate.value||'',
+      primaryDiagnosis:          formEls.primaryDiagnosis.value.trim(),
+      primaryDiagnosisOnsetDate: formEls.primaryDiagnosisOnsetDate.value||'',
+      medications:               state.medicationsDraft,
+      recentMedChanges:          formEls.recentMedChangeInput.value.trim(),
+      lastLabDate:               formEls.lastLabDate.value||'',
+      prevLabDate:               formEls.prevLabDate.value||'',
+      prescriptionNote:          formEls.prescriptionNote.value.trim(),
+      deleted:false, deletedAt:'', expireAt:'',
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  function fillForm(patient) {
+    state.editingId = patient.id;
+    formEls.roomRaw.value                   = patient.roomRaw||'';
+    formEls.roomSortKey.value               = patient.roomSortKey||'';
+    formEls.bedNo.value                     = patient.bedNo||'';
+    formEls.patientNo.value                 = patient.patientNo||'';
+    formEls.patientName.value               = patient.patientName||'';
+    formEls.sex.value                       = patient.sex||'';
+    formEls.birthDate.value                 = patient.birthDate||'';
+    formEls.pastedAge.value                 = patient.pastedAge||'';
+    formEls.admissionDate.value             = patient.admissionDate||'';
+    formEls.expectedDischargeDate.value     = patient.expectedDischargeDate||'';
+    formEls.primaryDiagnosis.value          = patient.primaryDiagnosis||'';
+    formEls.primaryDiagnosisOnsetDate.value = patient.primaryDiagnosisOnsetDate||'';
+    formEls.lastLabDate.value               = patient.lastLabDate||'';
+    formEls.prevLabDate.value               = patient.prevLabDate||'';
+    formEls.prescriptionNote.value          = patient.prescriptionNote||'';
+    if (typeof patient.recentMedChanges === 'string') {
+      formEls.recentMedChangeInput.value = patient.recentMedChanges;
+    } else if (Array.isArray(patient.recentMedChanges)) {
+      formEls.recentMedChangeInput.value = patient.recentMedChanges.map(m=>m.summary).join('\n');
+    } else { formEls.recentMedChangeInput.value=''; }
+    state.medicationsDraft = Array.isArray(patient.medications) ? [...patient.medications] : [];
+    refreshMedDraftPills();
+    el('pastePatient').value=''; el('pasteDiagnosis').value=''; el('pasteMeds').value='';
+    el('patientFormTitle').textContent = `환자 수정 — ${patient.patientName||''}`;
+    el('patientFormDialog').showModal();
+  }
+
+  function openNewPatientForm() {
+    state.editingId = null;
+    Object.values(formEls).forEach(inp => inp.value='');
+    el('pastePatient').value=''; el('pasteDiagnosis').value=''; el('pasteMeds').value='';
+    state.medicationsDraft=[];
+    refreshMedDraftPills();
+    el('patientFormTitle').textContent='환자 등록';
+    el('patientFormDialog').showModal();
+  }
+
+  function resetForm() {
+    state.editingId=null;
+    Object.values(formEls).forEach(inp => inp.value='');
+    el('pastePatient').value=''; el('pasteDiagnosis').value=''; el('pasteMeds').value='';
+    state.medicationsDraft=[];
+    refreshMedDraftPills();
+    el('patientFormTitle').textContent='환자 등록';
+  }
+
+  async function savePatient() {
+    const payload = buildPatientPayload();
+    if (!payload.patientName || !payload.patientNo) { alert('환자 이름과 환자 번호는 필수입니다.'); return; }
+
+    if (state.editingId) {
+      const idx = state.patients.findIndex(p => p.id===state.editingId);
+      if (idx >= 0) {
+        const original = state.patients[idx];
+        state.patients[idx] = { ...original, ...payload,
+          prescriptionNoteCheckedWeek: original.prescriptionNoteCheckedWeek||'' };
+        if (firebaseEnabled && db) {
+          try { await updateDoc(doc(db,'patients',state.editingId), {...payload, updatedAt:serverTimestamp()}); }
+          catch(err){ console.error(err); }
+        }
+      }
+    } else {
+      const id = crypto.randomUUID();
+      const created = { id, ...payload, prescriptionNoteCheckedWeek:'' };
+      state.patients.push(created);
+      if (firebaseEnabled && db) {
+        try {
+          const {id:_,...rest} = created;
+          await setDoc(doc(db,'patients',id), {...rest, createdAt:serverTimestamp(), updatedAt:serverTimestamp()});
+        } catch(err){ console.error(err); }
+      }
+    }
+    saveLocal();
+    el('patientFormDialog').close();
+    resetForm(); render();
+  }
+
+  async function softDeletePatient(id) {
+    const p = state.patients.find(p=>p.id===id); if (!p) return;
+    const deletedAt = new Date();
+    const expireAt  = new Date(deletedAt.getTime() + SOFT_DELETE_DAYS*86400000);
+    Object.assign(p, {deleted:true, deletedAt:deletedAt.toISOString(), expireAt:expireAt.toISOString()});
+    if (firebaseEnabled && db) {
+      try { await updateDoc(doc(db,'patients',id), {deleted:true,deletedAt:p.deletedAt,expireAt:p.expireAt,updatedAt:serverTimestamp()}); }
+      catch(err){ console.error(err); }
+    }
+    saveLocal(); render();
+  }
+
+  async function restorePatient(id) {
+    const p = state.patients.find(p=>p.id===id); if (!p) return;
+    Object.assign(p, {deleted:false, deletedAt:'', expireAt:''});
+    if (firebaseEnabled && db) {
+      try { await updateDoc(doc(db,'patients',id), {deleted:false,deletedAt:'',expireAt:'',updatedAt:serverTimestamp()}); }
+      catch(err){ console.error(err); }
+    }
+    saveLocal(); render();
+  }
+
+
+  /* ══════════════════════════════════════════
+     Render
+  ══════════════════════════════════════════ */
+  function sortPatients(list) {
+    const arr = [...list];
+    switch (state.sort) {
+      case 'roomAsc':  arr.sort((a,b) => String(a.roomSortKey||'').localeCompare(String(b.roomSortKey||''))); break;
+      case 'roomDesc': arr.sort((a,b) => String(b.roomSortKey||'').localeCompare(String(a.roomSortKey||''))); break;
+      case 'stayAsc':  arr.sort((a,b) => Number(calcStayDays(a.admissionDate)||0)-Number(calcStayDays(b.admissionDate)||0)); break;
+      case 'stayDesc': arr.sort((a,b) => Number(calcStayDays(b.admissionDate)||0)-Number(calcStayDays(a.admissionDate)||0)); break;
+    }
+    return arr;
+  }
+
+  function render() {
+    const tbody = el('patientTableBody');
+    let rows = state.patients.filter(p => state.showDeleted ? p.deleted : !p.deleted);
+    rows = sortPatients(rows);
+    tbody.innerHTML = '';
+
+    rows.forEach((patient, idx) => {
+      const tr = document.createElement('tr');
+      if (patient.deleted) tr.classList.add('deleted-row');
+
+      const age      = calcAge(patient.birthDate, patient.pastedAge);
+      const stayDays = calcStayDays(patient.admissionDate);
+      const medsText = Array.isArray(patient.medications)
+        ? patient.medications.map(m=>m.displayText).join(', ') : '';
+      let changeText = '';
+      if (typeof patient.recentMedChanges==='string') changeText=patient.recentMedChanges;
+      else if (Array.isArray(patient.recentMedChanges)) changeText=patient.recentMedChanges.map(m=>m.summary).join('\n');
+
+      tr.innerHTML = `
+        <td class="nowrap">${idx+1}</td>
+        <td class="nowrap">${patient.roomSortKey||''}${patient.bedNo?'-'+patient.bedNo:''}</td>
+        <td class="nowrap">${patient.patientNo||''}</td>
+        <td><div class="cell-stack">
+          <span class="main">${patient.patientName||''}</span>
+          <span class="sub">${patient.sex||''}${age!==''?'/'+age:''}</span>
+        </div></td>
+        <td><div class="cell-stack">
+          <span class="main">${fmtDate(patient.admissionDate)}${stayDays?' ('+stayDays+'일)':''}</span>
+          <span class="sub">→ ${fmtDate(patient.expectedDischargeDate)||'미정'}</span>
+        </div></td>
+        <td>${patient.primaryDiagnosis||''}${patient.primaryDiagnosisOnsetDate?'<div class="small">'+patient.primaryDiagnosisOnsetDate+'</div>':''}</td>
+        <td class="meds-cell">${medsText}</td>
+        <td class="change-cell">${changeText}</td>
+        <td class="nowrap">
+          ${fmtDate(patient.lastLabDate)}
+          ${patient.prevLabDate?'<div class="lab-prev">(이전: '+patient.prevLabDate+')</div>':''}
+        </td>
+        <td></td>
+        <td class="nowrap"></td>
+      `;
+
+      const cells = tr.querySelectorAll('td');
+
+      /* 처방 참고사항 + 체크박스 */
+      const noteTd   = cells[9];
+      const noteText = document.createElement('div');
+      noteText.textContent = patient.prescriptionNote||'';
+      noteText.style.cssText = 'font-size:9px;line-height:1.4;';
+      noteTd.appendChild(noteText);
+
+      const checkRow = document.createElement('div');
+      checkRow.className = 'note-check-row';
+      const chk = document.createElement('input');
+      chk.type='checkbox'; chk.id=`chk-${patient.id}`;
+      const checked = isCheckedThisWeek(patient);
+      chk.checked = checked;
+      const lbl = document.createElement('label');
+      lbl.htmlFor=`chk-${patient.id}`;
+      lbl.className='note-check-label'+(checked?' done':'');
+      lbl.textContent = checked ? '✓ 월 오더완료' : '월 오더확인';
+      chk.addEventListener('change', async () => {
+        patient.prescriptionNoteCheckedWeek = chk.checked ? getThisMonday() : '';
+        lbl.className='note-check-label'+(chk.checked?' done':'');
+        lbl.textContent = chk.checked ? '✓ 월 오더완료' : '월 오더확인';
+        saveLocal();
+        if (firebaseEnabled && db) {
+          try { await updateDoc(doc(db,'patients',patient.id),
+            {prescriptionNoteCheckedWeek:patient.prescriptionNoteCheckedWeek, updatedAt:serverTimestamp()}); }
+          catch(err){ console.error(err); }
+        }
+      });
+      checkRow.appendChild(chk); checkRow.appendChild(lbl);
+      noteTd.appendChild(checkRow);
+
+      /* 작업 버튼 */
+      const actionCell = cells[10];
+      const editBtn = document.createElement('button');
+      editBtn.className='btn btn-sm'; editBtn.type='button'; editBtn.textContent='수정';
+      editBtn.addEventListener('click', () => fillForm(patient));
+      actionCell.appendChild(editBtn);
+      actionCell.appendChild(document.createElement('br'));
+      actionCell.appendChild(document.createElement('br'));
+
+      if (patient.deleted) {
+        const rb = document.createElement('button');
+        rb.className='btn success btn-sm'; rb.type='button'; rb.textContent='복구';
+        rb.addEventListener('click', () => restorePatient(patient.id));
+        actionCell.appendChild(rb);
+      } else {
+        const db2 = document.createElement('button');
+        db2.className='btn danger btn-sm'; db2.type='button'; db2.textContent='삭제';
+        db2.addEventListener('click', () => softDeletePatient(patient.id));
+        actionCell.appendChild(db2);
+      }
+
+      tbody.appendChild(tr);
+    });
+
+    el('emptyState').style.display = rows.length ? 'none' : 'block';
+    const active  = state.patients.filter(p=>!p.deleted).length;
+    const deleted = state.patients.filter(p=> p.deleted).length;
+    el('patientCountMeta').textContent = `활성 ${active}명 · 삭제보관 ${deleted}명`;
+  }
+
+
+  /* ══════════════════════════════════════════
+     Med Editor
+  ══════════════════════════════════════════ */
+  function openMedEditor(index) {
+    state.medEditingIndex = index;
+    const med = state.medicationsDraft[index]; if (!med) return;
+    el('editMedName').value       = med.name||'';
+    el('editMedFrequency').value  = med.frequency||'';
+    el('editMedBaseUnit').value   = med.baseUnitText||'';
+    el('editMedMultiplier').value = med.multiplier||1;
+    el('editMedDoseText').value   = med.doseText||'';
+    el('medEditDialog').showModal();
+  }
+  function closeMedEditor() { el('medEditDialog').close(); state.medEditingIndex=null; }
+  function saveMedEdit() {
+    const idx = state.medEditingIndex;
+    if (idx===null||idx<0) return;
+    const med     = state.medicationsDraft[idx];
+    const updated = {
+      ...med,
+      name:         el('editMedName').value.trim(),
+      frequency:    el('editMedFrequency').value.trim(),
+      baseUnitText: el('editMedBaseUnit').value.trim(),
+      multiplier:   Number(el('editMedMultiplier').value||1),
+      doseText:     el('editMedDoseText').value.trim() ||
+                    buildDoseText(el('editMedBaseUnit').value.trim(), Number(el('editMedMultiplier').value||1))
+    };
+    updated.displayText = `${updated.name} ${updated.doseText} ${updated.frequency}`.trim();
+    state.medicationsDraft[idx] = updated;
+    refreshMedDraftPills(); closeMedEditor();
+  }
+  function deleteMedEdit() {
+    const idx = state.medEditingIndex;
+    if (idx===null||idx<0) return;
+    state.medicationsDraft.splice(idx,1);
+    refreshMedDraftPills(); closeMedEditor();
+  }
+
+
+  /* ══════════════════════════════════════════
+     Event Listeners
+  ══════════════════════════════════════════ */
+  el('moveToPreLabBtn').addEventListener('click', () => {
+    const cur = formEls.lastLabDate.value;
+    if (!cur) { alert('먼저 마지막 lab 날짜를 입력하세요.'); return; }
+    formEls.prevLabDate.value = cur;
+    formEls.lastLabDate.value = '';
+    formEls.lastLabDate.focus();
+  });
+
+  el('parsePatientBtn').addEventListener('click', () => {
+    const p = parsePatientLine(el('pastePatient').value);
+    if (!p) return alert('환자 복붙 형식을 확인해주세요.');
+    formEls.roomRaw.value=p.roomRaw||''; formEls.roomSortKey.value=p.roomSortKey||'';
+    formEls.bedNo.value=p.bedNo||''; formEls.patientNo.value=p.patientNo||'';
+    formEls.patientName.value=p.patientName||''; formEls.sex.value=p.sex||'';
+    formEls.pastedAge.value=p.pastedAge||''; formEls.admissionDate.value=p.admissionDate||'';
+  });
+
+  el('parseDiagnosisBtn').addEventListener('click', () => {
+    const p = parseDiagnosisLine(el('pasteDiagnosis').value);
+    if (!p) return alert('상병 복붙 형식을 확인해주세요.');
+    formEls.primaryDiagnosis.value=p.primaryDiagnosis||'';
+    formEls.primaryDiagnosisOnsetDate.value=p.primaryDiagnosisOnsetDate||'';
+  });
+
+  el('parseMedsBtn').addEventListener('click', () => {
+    const allLines = el('pasteMeds').value.split('\n').map(v=>v.trim()).filter(Boolean);
+    if (!allLines.length) return alert('약 복붙 내용을 입력해주세요.');
+    const filtered = filterDCPairs(allLines);
+    const removed  = allLines.length - filtered.length;
+    state.medicationsDraft.push(...filtered.map(parseMedicationLine).filter(Boolean));
+    refreshMedDraftPills();
+    if (removed > 0) {
+      const h = el('dcHintMsg');
+      h.textContent=`✓ DC 처리로 ${removed}개 줄 제외됨`;
+      h.style.display='block';
+      setTimeout(()=>{ h.style.display='none'; }, 3500);
+    }
+  });
+
+  el('clearMedsBtn').addEventListener('click', () => { state.medicationsDraft=[]; refreshMedDraftPills(); });
+  el('savePatientBtn').addEventListener('click', savePatient);
+  el('resetFormBtn').addEventListener('click', resetForm);
+  el('openNewPatientBtn').addEventListener('click', openNewPatientForm);
+  el('closePatientFormBtn').addEventListener('click', () => el('patientFormDialog').close());
+
+  el('openFirebaseBtn').addEventListener('click', () => {
+    el('allowedEmailsInput').value = localStorage.getItem(ALLOWED_EMAILS_KEY)||'';
+    el('fbStatusDisplay').value    = el('syncStatus').textContent;
+    el('firebaseDialog').showModal();
+  });
+  el('closeFirebaseBtn').addEventListener('click',  () => el('firebaseDialog').close());
+  el('closeFirebaseBtn2').addEventListener('click', () => el('firebaseDialog').close());
+  el('saveFirebaseSettingsBtn').addEventListener('click', () => {
+    localStorage.setItem(ALLOWED_EMAILS_KEY, el('allowedEmailsInput').value.trim());
+    el('firebaseDialog').close();
+    alert('✅ 저장되었습니다.');
+  });
+
+  el('toggleDeletedBtn').addEventListener('click', () => {
+    state.showDeleted = !state.showDeleted;
+    el('toggleDeletedBtn').textContent = state.showDeleted ? '활성 환자 보기' : '삭제 환자 보기';
+    render();
+  });
+
+  document.querySelectorAll('[data-sort]').forEach(btn => {
+    btn.addEventListener('click', () => { state.sort=btn.dataset.sort; render(); });
+  });
+
+  el('closeMedDialogBtn').addEventListener('click', closeMedEditor);
+  el('saveMedBtn').addEventListener('click', saveMedEdit);
+  el('deleteMedBtn').addEventListener('click', deleteMedEdit);
+
+  formEls.roomRaw.addEventListener('blur', () => {
+    const info = parseRoomRaw(formEls.roomRaw.value);
+    if (!formEls.roomSortKey.value) formEls.roomSortKey.value=info.roomSortKey;
+    if (!formEls.bedNo.value)       formEls.bedNo.value=info.bedNo;
+  });
+
+  /* ── 시작 ── */
+  initAuth();
+</script>
+</body>
+</html>
 

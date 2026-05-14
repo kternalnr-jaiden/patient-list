@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>환자 목록</title>
+  <title>주치의 환자명단</title>
   <style>
     :root {
       --bg:#f4f7fb; --panel:#fff; --panel-2:#f8fafc;
@@ -195,6 +195,14 @@
       font-weight:700;font-size:8px;
     }
 
+
+    /* ── 회진 체크박스 ── */
+    .visit-chk-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;}
+    .visit-chk{width:15px;height:15px;cursor:pointer;accent-color:var(--success);}
+    .visit-no{font-size:8px;color:var(--muted);text-align:center;}
+    tbody tr.visited{background:#f0fdf4!important;}
+    .floor-summary{font-size:12px;font-weight:500;color:var(--primary);margin-left:8px;}
+
     /* ── Notepad Dialog ── */
     #notepadDialog{
       width:96vw;max-width:1600px;
@@ -263,7 +271,7 @@
     @media print{
       body{min-width:auto;background:white;}
       .app{max-width:none;padding:0;}
-      .topbar,.toolbar,.footer-note,dialog,#lockScreen,.note-check-row{display:none!important;}
+      .topbar,.toolbar,.footer-note,dialog,#lockScreen,.note-check-row,.visit-chk-wrap{display:none!important;}
       .panel{border:none;box-shadow:none;border-radius:0;}
       .panel-header{padding:0 0 6px;background:white;border:none;display:flex;justify-content:space-between;align-items:baseline;}
       .panel-header h2{font-size:10pt;}
@@ -289,7 +297,7 @@
 <div id="lockScreen">
   <div class="lock-card">
     <div class="lock-logo">🏥</div>
-    <h2>처방 도우미</h2>
+    <h2>주치의 환자명단</h2>
     <p>환자 개인정보 보호를 위해<br>Google 계정으로 로그인하세요.</p>
     <button class="lock-btn-google" id="googleLoginBtn">
       <svg width="18" height="18" viewBox="0 0 48 48">
@@ -313,7 +321,7 @@
 
   <div class="topbar">
     <div class="title-wrap">
-      <h1>처방 도우미</h1>
+      <h1>주치의 환자명단</h1>
       <p>환자 기본정보 · 주상병 · 약물 복붙 입력 · soft delete(14일) · A4 가로 출력</p>
     </div>
     <div class="topbar-right">
@@ -342,7 +350,7 @@
   <section class="panel">
     <div class="panel-header">
       <div>
-        <h2>환자 목록</h2>
+        <h2>환자 목록 <span id="floorSummary" class="floor-summary"></span></h2>
         <div class="sub">입원일 · 재원일수 · 퇴원예정일 · 약 목록 · 최근 변경 · lab · 참고사항</div>
       </div>
       <div id="printDate" class="print-date"></div>
@@ -353,10 +361,10 @@
           <thead>
             <tr>
               <th class="nowrap" style="width:36px;">No.</th>
-              <th style="width:72px;">호실<br><span style="font-weight:400;font-size:8px;">환자번호</span></th>
-              <th style="width:50px;">이름<br><span style="font-weight:400;font-size:8px;">Sex/Age</span></th>
-              <th style="width:90px;">입원날짜<br><span style="font-weight:400;font-size:8px;">퇴원예정일</span></th>
-              <th style="width:140px;">주상병 / onset</th>
+              <th style="width:96px;">호실<br><span style="font-weight:400;font-size:8px;">환자번호</span></th>
+              <th style="width:62px;">이름<br><span style="font-weight:400;font-size:8px;">Sex/Age</span></th>
+              <th style="width:108px;">입원날짜<br><span style="font-weight:400;font-size:8px;">퇴원예정일</span></th>
+              <th style="width:158px;">주상병 / onset</th>
               <th style="width:360px;">약 처방 목록</th>
               <th style="width:190px;">최근 약 변경 내역</th>
               <th class="nowrap" style="width:88px;">마지막 lab</th>
@@ -730,6 +738,56 @@
     parts.forEach(p=>{if(/^\d{4}-\d{2}-\d{2}$/.test(p))onset=p;else names.push(p);});
     return {primaryDiagnosis:[...new Set(names)][0]||'',primaryDiagnosisOnsetDate:onset};
   }
+  /* ══════════════════════════════════════════
+     회진 체크박스 (KST 기준 날짜 변경 시 초기화)
+  ══════════════════════════════════════════ */
+  const VISIT_KEY = 'visit-checks-v1';
+
+  function getKSTDateOnly() {
+    const kst = new Date(Date.now() + 9 * 3600000);
+    return kst.toISOString().split('T')[0]; // YYYY-MM-DD
+  }
+
+  function getVisitChecks() {
+    try {
+      const raw = localStorage.getItem(VISIT_KEY);
+      if (!raw) return {};
+      const data = JSON.parse(raw);
+      // 날짜가 바뀌면 체크 전부 초기화
+      if (data.date !== getKSTDateOnly()) return {};
+      return data.checks || {};
+    } catch(e) { return {}; }
+  }
+
+  function saveVisitCheck(patientId, checked) {
+    const today = getKSTDateOnly();
+    const checks = getVisitChecks();
+    if (checked) checks[patientId] = true;
+    else delete checks[patientId];
+    localStorage.setItem(VISIT_KEY, JSON.stringify({ date: today, checks }));
+  }
+
+  function updateFloorSummary() {
+    const checks   = getVisitChecks();
+    const active   = state.patients.filter(p => !p.deleted);
+    const floorMap = {};
+    active.forEach(p => {
+      const rs = p.roomSortKey || '';
+      if (!rs) return;
+      // 4자리 기준: 앞 2자리 = 층 (06xx→6층, 10xx→10층)
+      const floorNum = parseInt(rs.slice(0, 2), 10);
+      if (!floorNum) return;
+      if (!floorMap[floorNum]) floorMap[floorNum] = { total:0, unchecked:0 };
+      floorMap[floorNum].total++;
+      if (!checks[p.id]) floorMap[floorNum].unchecked++;
+    });
+    const floors = Object.keys(floorMap).map(Number).sort((a,b)=>a-b);
+    const summaryEl = el('floorSummary');
+    if (!summaryEl) return;
+    if (!floors.length) { summaryEl.textContent=''; return; }
+    summaryEl.textContent = '(' + floors.map(f=>`${f}층: ${floorMap[f].unchecked}명`).join(' / ') + ')';
+  }
+
   /* 『참고:...』 처럼 약품 아래에 붙는 참고 행을 앞 줄 약품명과 병합 */
   function mergeNoteLines(lines) {
     const result = [];
@@ -956,7 +1014,7 @@
       if(typeof patient.recentMedChanges==='string')changeText=patient.recentMedChanges;
       else if(Array.isArray(patient.recentMedChanges))changeText=patient.recentMedChanges.map(m=>m.summary).join('\n');
       tr.innerHTML=`
-        <td class="nowrap">${idx+1}</td>
+        <td class="nowrap" style="text-align:center;padding:3px 2px;"></td>
         <td>
           <div class="cell-stack">
             <span class="main">${patient.roomSortKey||''}${patient.bedNo?'-'+patient.bedNo:''}</span>
@@ -979,6 +1037,24 @@
         <td class="nowrap"></td>
       `;
       const cells=tr.querySelectorAll('td');
+      /* 회진 체크박스 + No. (cells[0]) */
+      const noCell=cells[0];
+      const visitWrap=document.createElement('div');
+      visitWrap.className='visit-chk-wrap';
+      const vChk=document.createElement('input');
+      vChk.type='checkbox'; vChk.className='visit-chk';
+      const vChecks=getVisitChecks();
+      vChk.checked=!!vChecks[patient.id];
+      if(vChk.checked) tr.classList.add('visited');
+      vChk.addEventListener('change',()=>{
+        saveVisitCheck(patient.id, vChk.checked);
+        tr.classList.toggle('visited', vChk.checked);
+        updateFloorSummary();
+      });
+      const vNo=document.createElement('div');
+      vNo.className='visit-no'; vNo.textContent=idx+1;
+      visitWrap.appendChild(vChk); visitWrap.appendChild(vNo);
+      noCell.appendChild(visitWrap);
       /* 처방 참고사항 + 체크박스 */
       const noteTd=cells[8];
       const noteText=document.createElement('div');
@@ -1031,6 +1107,7 @@
     const active=state.patients.filter(p=>!p.deleted).length;
     const deleted=state.patients.filter(p=>p.deleted).length;
     el('patientCountMeta').textContent=`활성 ${active}명 · 삭제보관 ${deleted}명`;
+    updateFloorSummary();
   }
 
   /* ══════════════════════════════════════════

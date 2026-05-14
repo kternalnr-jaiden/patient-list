@@ -185,6 +185,70 @@
     #patientFormDialog .modal-body{overflow-y:auto;flex:1;}
     #medEditDialog{width:min(720px,calc(100vw - 32px));}
 
+
+    /* ── Notepad Dialog ── */
+    #notepadDialog{
+      width:96vw;max-width:1600px;
+      height:92vh;
+      display:none;flex-direction:column;
+    }
+    #notepadDialog[open]{display:flex;}
+    .notepad-toolbar{
+      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+      padding:10px 16px;background:#f0f9ff;border-bottom:1px solid var(--line);
+    }
+    .notepad-toolbar label{font-size:12px;color:var(--muted);font-weight:700;}
+    .np-tool-group{display:flex;align-items:center;gap:6px;}
+    #penColor{width:32px;height:32px;border:1px solid var(--line);border-radius:6px;cursor:pointer;padding:2px;}
+    #penSize{width:80px;cursor:pointer;}
+    #penSizeVal{font-size:12px;color:var(--muted);min-width:20px;}
+    .np-btn{
+      padding:6px 12px;border-radius:8px;border:1px solid var(--line);
+      background:white;cursor:pointer;font-size:12px;font-weight:700;
+      transition:.15s background;
+    }
+    .np-btn:hover{background:#f0f9ff;}
+    .np-btn.active{background:#dbeafe;border-color:#93c5fd;color:#1d4ed8;}
+    .np-btn.warn{background:#fff7ed;color:#c2410c;border-color:#fdba74;}
+    .np-btn.danger{background:#fef2f2;color:#dc2626;border-color:#fecaca;}
+    .notepad-body{
+      flex:1;overflow-y:auto;padding:0;
+      background:#f8fafc;
+    }
+    .notepad-row{
+      display:grid;
+      grid-template-columns:170px 1fr 60px;
+      align-items:stretch;
+      border-bottom:1px solid var(--line);
+      background:white;
+    }
+    .notepad-row:nth-child(even){background:#fbfdff;}
+    .notepad-info{
+      padding:8px 10px;border-right:2px solid var(--line);
+      display:flex;flex-direction:column;gap:3px;justify-content:center;
+    }
+    .np-room{font-size:15px;font-weight:900;color:#1d4ed8;}
+    .np-name{font-size:13px;font-weight:700;}
+    .np-meta{font-size:11px;color:var(--muted);}
+    .np-diag{font-size:10px;color:#374151;margin-top:2px;line-height:1.3;}
+    .notepad-canvas-wrap{position:relative;overflow:hidden;}
+    .notepad-canvas{
+      display:block;width:100%;height:130px;
+      cursor:crosshair;touch-action:none;
+      background:white;
+    }
+    .np-clear-btn{
+      border:none;background:#f8fafc;color:#9ca3af;
+      cursor:pointer;font-size:11px;font-weight:700;
+      border-left:1px solid var(--line);
+      transition:.15s background;writing-mode:vertical-rl;
+      letter-spacing:1px;
+    }
+    .np-clear-btn:hover{background:#fee2e2;color:#dc2626;}
+    .notepad-empty{
+      padding:40px;text-align:center;color:var(--muted);font-size:14px;
+    }
+
     /* ── Print ── */
     @page{size:A4 landscape;margin:6mm;}
     @media print{
@@ -258,6 +322,7 @@
       <button class="btn" data-sort="stayAsc">재원일수 ↑</button>
       <button class="btn" data-sort="stayDesc">재원일수 ↓</button>
       <button class="btn soft" id="toggleDeletedBtn">삭제 환자 보기</button>
+      <button class="btn" id="notepadBtn">✏ 필기 모드</button>
       <button class="btn success" id="printBtn">🖨 A4 가로 출력</button>
     </div>
     <div class="toolbar-right">
@@ -414,6 +479,35 @@
   </div>
 </dialog>
 
+
+
+<!-- Dialog: 필기 모드 -->
+<dialog id="notepadDialog">
+  <div class="modal-header" style="padding:12px 16px;">
+    <h3 style="margin:0;font-size:16px;">✏ 필기 모드</h3>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="btn" id="refreshNotepadBtn" style="font-size:12px;padding:6px 12px;background:#fff7ed;color:#c2410c;border-color:#fdba74;">🔄 환자정보 갱신 + 필기 초기화</button>
+      <button class="btn" id="closeNotepadBtn" style="font-size:12px;padding:6px 12px;">✕ 닫기</button>
+    </div>
+  </div>
+  <div class="notepad-toolbar">
+    <div class="np-tool-group">
+      <label>색상</label>
+      <input type="color" id="penColor" value="#1a1a1a" title="펜 색상">
+    </div>
+    <div class="np-tool-group">
+      <label>굵기</label>
+      <input type="range" id="penSize" min="1" max="24" value="3">
+      <span id="penSizeVal">3</span>
+    </div>
+    <button class="np-btn active" id="penModeBtn">🖊 펜</button>
+    <button class="np-btn" id="eraserModeBtn">🧹 지우개</button>
+    <div style="width:1px;height:24px;background:var(--line);margin:0 4px;"></div>
+    <button class="np-btn warn" id="clearAllCanvasBtn">전체 필기 지우기</button>
+    <span style="font-size:11px;color:var(--muted);margin-left:auto;">팝업을 닫아도 필기 내용이 유지됩니다</span>
+  </div>
+  <div class="notepad-body" id="notepadBody"></div>
+</dialog>
 
 <script type="module">
   import { initializeApp }    from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js';
@@ -968,6 +1062,184 @@
     if(!formEls.roomSortKey.value)formEls.roomSortKey.value=info.roomSortKey;
     if(!formEls.bedNo.value)formEls.bedNo.value=info.bedNo;
   });
+
+  /* ══════════════════════════════════════════
+     필기 모드 (Notepad)
+  ══════════════════════════════════════════ */
+  const NP_KEY = 'notepad-canvas-';
+  const npTool = { color: '#1a1a1a', size: 3, mode: 'pen' };
+
+  function openNotepad() {
+    renderNotepad();
+    el('notepadDialog').showModal();
+  }
+
+  function renderNotepad() {
+    const body = el('notepadBody');
+    body.innerHTML = '';
+
+    const rows = [...state.patients]
+      .filter(p => !p.deleted)
+      .sort((a, b) => String(a.roomSortKey||'').localeCompare(String(b.roomSortKey||'')));
+
+    if (!rows.length) {
+      body.innerHTML = '<div class="notepad-empty">등록된 환자가 없습니다.</div>';
+      return;
+    }
+
+    rows.forEach(patient => {
+      const age  = calcAge(patient.birthDate, patient.pastedAge);
+      const row  = document.createElement('div');
+      row.className = 'notepad-row';
+
+      // 환자 정보
+      const info = document.createElement('div');
+      info.className = 'notepad-info';
+      info.innerHTML = `
+        <div class="np-room">${patient.roomSortKey||''}${patient.bedNo?'-'+patient.bedNo:''}</div>
+        <div class="np-name">${patient.patientName||''}</div>
+        <div class="np-meta">${patient.sex||''}${age!==''?'/'+age:''}</div>
+        <div class="np-diag">${patient.primaryDiagnosis||''}</div>
+      `;
+
+      // 캔버스 영역
+      const wrap = document.createElement('div');
+      wrap.className = 'notepad-canvas-wrap';
+
+      const canvas = document.createElement('canvas');
+      canvas.className = 'notepad-canvas';
+      canvas.dataset.patientId = patient.id;
+      // 내부 해상도 (고해상도 필기용)
+      canvas.width  = 2400;
+      canvas.height = 260;
+      wrap.appendChild(canvas);
+
+      // 줄 지우기 버튼
+      const clearBtn = document.createElement('button');
+      clearBtn.className = 'np-clear-btn';
+      clearBtn.textContent = '지 우 기';
+      clearBtn.addEventListener('click', () => {
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+        localStorage.removeItem(NP_KEY + patient.id);
+      });
+
+      row.appendChild(info);
+      row.appendChild(wrap);
+      row.appendChild(clearBtn);
+      body.appendChild(row);
+
+      // 저장된 필기 복원
+      const saved = localStorage.getItem(NP_KEY + patient.id);
+      if (saved) {
+        const img = new Image();
+        img.onload = () => canvas.getContext('2d').drawImage(img, 0, 0);
+        img.src = saved;
+      }
+
+      // 드로잉 이벤트 등록
+      setupNotepadCanvas(canvas, patient.id);
+    });
+  }
+
+  function setupNotepadCanvas(canvas, patientId) {
+    let drawing = false;
+    let lx = 0, ly = 0;
+
+    function getPos(e) {
+      const rect   = canvas.getBoundingClientRect();
+      const scaleX = canvas.width  / rect.width;
+      const scaleY = canvas.height / rect.height;
+      // pointer 이벤트: clientX/Y 사용 (터치·마우스·스타일러스 모두 지원)
+      return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top)  * scaleY
+      };
+    }
+
+    function startDraw(e) {
+      e.preventDefault();
+      drawing = true;
+      const pos = getPos(e);
+      lx = pos.x; ly = pos.y;
+      // 점 찍기 (탭)
+      const ctx = canvas.getContext('2d');
+      ctx.beginPath();
+      if (npTool.mode === 'eraser') {
+        ctx.clearRect(pos.x - npTool.size * 3, pos.y - npTool.size * 3, npTool.size * 6, npTool.size * 6);
+      } else {
+        ctx.arc(lx, ly, npTool.size / 2, 0, Math.PI * 2);
+        ctx.fillStyle = npTool.color;
+        ctx.fill();
+      }
+    }
+
+    function draw(e) {
+      if (!drawing) return;
+      e.preventDefault();
+      const ctx = canvas.getContext('2d');
+      const pos = getPos(e);
+      if (npTool.mode === 'eraser') {
+        const s = npTool.size * 6;
+        ctx.clearRect(pos.x - s/2, pos.y - s/2, s, s);
+      } else {
+        ctx.beginPath();
+        ctx.moveTo(lx, ly);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.strokeStyle = npTool.color;
+        ctx.lineWidth   = npTool.size;
+        ctx.lineCap     = 'round';
+        ctx.lineJoin    = 'round';
+        ctx.stroke();
+      }
+      lx = pos.x; ly = pos.y;
+    }
+
+    function endDraw(e) {
+      if (!drawing) return;
+      drawing = false;
+      // 필기 저장 (localStorage)
+      try { localStorage.setItem(NP_KEY + patientId, canvas.toDataURL()); }
+      catch(e) { console.warn('필기 저장 실패 (저장공간 부족)'); }
+    }
+
+    canvas.addEventListener('pointerdown',   startDraw, { passive: false });
+    canvas.addEventListener('pointermove',   draw,      { passive: false });
+    canvas.addEventListener('pointerup',     endDraw);
+    canvas.addEventListener('pointercancel', endDraw);
+  }
+
+  // 도구 설정
+  el('penColor').addEventListener('input',  e => { npTool.color = e.target.value; });
+  el('penSize').addEventListener('input',   e => {
+    npTool.size = Number(e.target.value);
+    el('penSizeVal').textContent = e.target.value;
+  });
+  el('penModeBtn').addEventListener('click', () => {
+    npTool.mode = 'pen';
+    el('penModeBtn').classList.add('active');
+    el('eraserModeBtn').classList.remove('active');
+  });
+  el('eraserModeBtn').addEventListener('click', () => {
+    npTool.mode = 'eraser';
+    el('eraserModeBtn').classList.add('active');
+    el('penModeBtn').classList.remove('active');
+  });
+  el('clearAllCanvasBtn').addEventListener('click', () => {
+    if (!confirm('모든 필기를 지우겠습니까?')) return;
+    Object.keys(localStorage).filter(k => k.startsWith(NP_KEY))
+      .forEach(k => localStorage.removeItem(k));
+    renderNotepad();
+  });
+  el('refreshNotepadBtn').addEventListener('click', async () => {
+    if (!confirm('환자 목록을 Firestore에서 다시 불러오고 모든 필기를 초기화합니까?')) return;
+    Object.keys(localStorage).filter(k => k.startsWith(NP_KEY))
+      .forEach(k => localStorage.removeItem(k));
+    await loadPatients();   // Firestore 재로드 + render()
+    renderNotepad();
+  });
+  el('notepadBtn').addEventListener('click',       openNotepad);
+  el('closeNotepadBtn').addEventListener('click',  () => el('notepadDialog').close());
+
 </script>
 </body>
 </html>

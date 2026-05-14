@@ -186,6 +186,15 @@
     #medEditDialog{width:min(720px,calc(100vw - 32px));}
 
 
+
+    /* ── 퇴원예정일 하이라이트 ── */
+    .discharge-date {
+      display:inline-block;
+      background:#fef9c3;color:#854d0e;
+      padding:1px 5px;border-radius:4px;
+      font-weight:700;font-size:8px;
+    }
+
     /* ── Notepad Dialog ── */
     #notepadDialog{
       width:96vw;max-width:1600px;
@@ -344,8 +353,7 @@
           <thead>
             <tr>
               <th class="nowrap" style="width:36px;">No.</th>
-              <th class="nowrap" style="width:52px;">호실</th>
-              <th class="nowrap" style="width:88px;">환자번호</th>
+              <th style="width:120px;">호실<br><span style="font-weight:400;font-size:8px;">환자번호</span></th>
               <th style="width:76px;">이름<br><span style="font-weight:400;font-size:8px;">Sex/Age</span></th>
               <th style="width:108px;">입원날짜<br><span style="font-weight:400;font-size:8px;">퇴원예정일</span></th>
               <th style="width:158px;">주상병 / onset</th>
@@ -775,10 +783,30 @@
   function refreshMedDraftPills() {
     const root=el('medPills'); root.innerHTML='';
     state.medicationsDraft.forEach((med,i)=>{
-      const btn=document.createElement('button');
-      btn.className='pill';btn.type='button';btn.textContent=med.displayText;
-      btn.addEventListener('click',()=>openMedEditor(i));
-      root.appendChild(btn);
+      const wrap=document.createElement('span');
+      wrap.className='pill';
+      wrap.style.display='inline-flex';wrap.style.alignItems='center';wrap.style.gap='4px';
+
+      const nameSpan=document.createElement('span');
+      nameSpan.textContent=med.displayText;
+      nameSpan.style.cursor='pointer';
+      nameSpan.title='클릭하여 수정';
+      nameSpan.addEventListener('click',()=>openMedEditor(i));
+
+      const xBtn=document.createElement('button');
+      xBtn.type='button';
+      xBtn.textContent='✕';
+      xBtn.style.cssText='border:none;background:none;cursor:pointer;color:#9ca3af;font-size:11px;padding:0;line-height:1;font-weight:700;';
+      xBtn.title='삭제';
+      xBtn.addEventListener('click',(e)=>{
+        e.stopPropagation();
+        state.medicationsDraft.splice(i,1);
+        refreshMedDraftPills();
+      });
+
+      wrap.appendChild(nameSpan);
+      wrap.appendChild(xBtn);
+      root.appendChild(wrap);
     });
   }
 
@@ -919,15 +947,19 @@
       else if(Array.isArray(patient.recentMedChanges))changeText=patient.recentMedChanges.map(m=>m.summary).join('\n');
       tr.innerHTML=`
         <td class="nowrap">${idx+1}</td>
-        <td class="nowrap">${patient.roomSortKey||''}${patient.bedNo?'-'+patient.bedNo:''}</td>
-        <td class="nowrap">${patient.patientNo||''}</td>
+        <td>
+          <div class="cell-stack">
+            <span class="main">${patient.roomSortKey||''}${patient.bedNo?'-'+patient.bedNo:''}</span>
+            <span class="sub">${patient.patientNo||''}</span>
+          </div>
+        </td>
         <td><div class="cell-stack">
           <span class="main">${patient.patientName||''}</span>
           <span class="sub">${patient.sex||''}${age!==''?'/'+age:''}</span>
         </div></td>
         <td><div class="cell-stack">
           <span class="main">${fmtDate(patient.admissionDate)}${stayDays?' ('+stayDays+'일)':''}</span>
-          <span class="sub">→ ${fmtDate(patient.expectedDischargeDate)||'미정'}</span>
+          ${patient.expectedDischargeDate ? '<span class="discharge-date">→ '+fmtDate(patient.expectedDischargeDate)+'</span>' : '<span class="sub">→ 미정</span>'}
         </div></td>
         <td>${patient.primaryDiagnosis||''}${patient.primaryDiagnosisOnsetDate?'<div class="small">'+patient.primaryDiagnosisOnsetDate+'</div>':''}</td>
         <td class="meds-cell">${medsText}</td>

@@ -121,6 +121,7 @@
       margin-bottom:12px;
       background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
       padding:12px 14px;box-shadow:var(--shadow);
+      position:sticky;top:0;z-index:50;
     }
     .toolbar-left,.toolbar-right{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
     .toolbar .meta{font-size:12px;color:var(--muted);}
@@ -202,6 +203,25 @@
     .visit-no{font-size:8px;color:var(--muted);text-align:center;}
     tbody tr.visited{background:#f0fdf4!important;}
     .floor-summary{font-size:12px;font-weight:500;color:var(--primary);margin-left:8px;}
+
+
+    /* ── 필기모드 층 네비게이션 ── */
+    .np-floor-nav{
+      display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+      padding:10px 16px;background:#e0f2fe;border-bottom:1px solid #bae6fd;
+      position:sticky;top:0;z-index:10;
+    }
+    .np-floor-nav label{font-size:12px;font-weight:700;color:#0369a1;}
+    .np-floor-btn{
+      padding:6px 16px;border-radius:999px;
+      background:white;border:1.5px solid #7dd3fc;
+      color:#0369a1;font-size:13px;font-weight:700;cursor:pointer;
+      transition:.15s background,.15s color;
+    }
+    .np-floor-btn:hover{background:#0ea5e9;color:white;border-color:#0ea5e9;}
+    .np-floor-anchor{font-size:11px;color:#94a3b8;padding:4px 8px;
+      background:#f1f5f9;border-bottom:1px solid var(--line);
+      position:sticky;top:44px;z-index:5;}
 
     /* ── Notepad Dialog ── */
     #notepadDialog{
@@ -1227,8 +1247,44 @@
       return;
     }
 
+    // 층 목록 추출
+    const floors = [...new Set(rows.map(p => parseInt((p.roomSortKey||'').slice(0,2),10)).filter(Boolean))].sort((a,b)=>a-b);
+
+    // 층 네비게이션 바
+    const nav = document.createElement('div');
+    nav.className = 'np-floor-nav';
+    const navLabel = document.createElement('label');
+    navLabel.textContent = '층 이동:';
+    nav.appendChild(navLabel);
+    floors.forEach(f => {
+      const btn = document.createElement('button');
+      btn.className = 'np-floor-btn';
+      btn.textContent = `${f}층`;
+      btn.addEventListener('click', () => {
+        const anchor = body.querySelector(`[data-floor="${f}"]`);
+        if (anchor) anchor.scrollIntoView({ behavior:'smooth', block:'start' });
+      });
+      nav.appendChild(btn);
+    });
+    body.appendChild(nav);
+
+    // 이전 층 추적 (층 구분 앵커용)
+    let lastFloor = null;
+
     rows.forEach(patient => {
       const age  = calcAge(patient.birthDate, patient.pastedAge);
+      const currentFloor = parseInt((patient.roomSortKey||'').slice(0,2),10);
+
+      // 층이 바뀔 때 앵커(구분선) 삽입
+      if (currentFloor && currentFloor !== lastFloor) {
+        const anchor = document.createElement('div');
+        anchor.className = 'np-floor-anchor';
+        anchor.dataset.floor = currentFloor;
+        anchor.textContent = `── ${currentFloor}층 ──`;
+        body.appendChild(anchor);
+        lastFloor = currentFloor;
+      }
+
       const row  = document.createElement('div');
       row.className = 'notepad-row';
 

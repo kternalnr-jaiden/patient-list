@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>처방 도우미</title>
+  <title>환자 목록</title>
   <style>
     :root {
       --bg:#f4f7fb; --panel:#fff; --panel-2:#f8fafc;
@@ -353,8 +353,8 @@
           <thead>
             <tr>
               <th class="nowrap" style="width:36px;">No.</th>
-              <th style="width:120px;">호실<br><span style="font-weight:400;font-size:8px;">환자번호</span></th>
-              <th style="width:76px;">이름<br><span style="font-weight:400;font-size:8px;">Sex/Age</span></th>
+              <th style="width:96px;">호실<br><span style="font-weight:400;font-size:8px;">환자번호</span></th>
+              <th style="width:62px;">이름<br><span style="font-weight:400;font-size:8px;">Sex/Age</span></th>
               <th style="width:108px;">입원날짜<br><span style="font-weight:400;font-size:8px;">퇴원예정일</span></th>
               <th style="width:158px;">주상병 / onset</th>
               <th style="width:360px;">약 처방 목록</th>
@@ -688,7 +688,17 @@
     if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return t;
     const m = t.match(/^(\d{1,2})[./-](\d{1,2})$/);
     if (!m) return '';
-    return `${CURRENT_YEAR}-${String(m[1]).padStart(2,'0')}-${String(m[2]).padStart(2,'0')}`;
+    const mm = String(m[1]).padStart(2,'0');
+    const dd = String(m[2]).padStart(2,'0');
+    const candidate = `${CURRENT_YEAR}-${mm}-${dd}`;
+    // 해당 날짜가 오늘보다 미래면 작년으로 처리
+    // (예: 2027년에 04.29 입력 → 오늘이 2027-03-01이면 2026-04-29로)
+    const today = new Date(); today.setHours(0,0,0,0);
+    const parsed = new Date(candidate);
+    if (parsed > today) {
+      return `${CURRENT_YEAR - 1}-${mm}-${dd}`;
+    }
+    return candidate;
   }
   function calcAge(birthDate, pastedAge) {
     if (birthDate) {

@@ -970,7 +970,7 @@
       `;
       const cells=tr.querySelectorAll('td');
       /* 처방 참고사항 + 체크박스 */
-      const noteTd=cells[9];
+      const noteTd=cells[8];
       const noteText=document.createElement('div');
       noteText.textContent=patient.prescriptionNote||'';
       noteText.style.cssText='font-size:9px;line-height:1.4;';
@@ -997,7 +997,7 @@
       checkRow.appendChild(chk);checkRow.appendChild(lbl);
       noteTd.appendChild(checkRow);
       /* 작업 버튼 */
-      const actionCell=cells[10];
+      const actionCell=cells[9];
       const editBtn=document.createElement('button');
       editBtn.className='btn btn-sm';editBtn.type='button';editBtn.textContent='수정';
       editBtn.addEventListener('click',()=>fillForm(patient));

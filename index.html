@@ -712,6 +712,26 @@
     parts.forEach(p=>{if(/^\d{4}-\d{2}-\d{2}$/.test(p))onset=p;else names.push(p);});
     return {primaryDiagnosis:[...new Set(names)][0]||'',primaryDiagnosisOnsetDate:onset};
   }
+  /* 『참고:...』 처럼 약품 아래에 붙는 참고 행을 앞 줄 약품명과 병합 */
+  function mergeNoteLines(lines) {
+    const result = [];
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const next = (i + 1 < lines.length) ? lines[i + 1] : null;
+      // 다음 줄이 『 「 【 로 시작하는 참고 행이면 현재 줄과 병합
+      if (next && /^[『「【]/.test(next)) {
+        // 약품명은 현재 줄에서, 용량/용법 컬럼은 참고 행의 탭 이후에서 가져옴
+        const name     = line.split('\t')[0].trim();
+        const nextCols = next.split('\t').slice(1).join('\t');
+        result.push(name + '\t' + nextCols);
+        i++; // 참고 행 건너뜀
+      } else {
+        result.push(line);
+      }
+    }
+    return result;
+  }
+
   function filterDCPairs(lines) {
     const dcNames=new Set();
     lines.forEach(line=>{

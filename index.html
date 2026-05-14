@@ -1030,8 +1030,9 @@
   el('parseMedsBtn').addEventListener('click',()=>{
     const allLines=el('pasteMeds').value.split('\n').map(v=>v.trim()).filter(Boolean);
     if(!allLines.length)return alert('약 복붙 내용을 입력해주세요.');
-    const filtered=filterDCPairs(allLines);
-    const removed=allLines.length-filtered.length;
+    const merged=mergeNoteLines(allLines);
+    const filtered=filterDCPairs(merged);
+    const removed=merged.length-filtered.length;
     state.medicationsDraft.push(...filtered.map(parseMedicationLine).filter(Boolean));
     refreshMedDraftPills();
     if(removed>0){

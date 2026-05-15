@@ -21,7 +21,6 @@
     .app{max-width:1880px;margin:0 auto;padding:18px;}
 
 /* ---------lab 오늘날짜시 하이라이트 ----- */
-.lab-today{ ... }
 .lab-today{
   display:inline-block;
   background:#fee2e2;
@@ -828,26 +827,49 @@ function scrollNotepadToFloor(floor) {
     localStorage.setItem(VISIT_KEY, JSON.stringify({ date: today, checks }));
   }
 
-  function updateFloorSummary() {
-    const checks   = getVisitChecks();
-    const active   = state.patients.filter(p => !p.deleted);
-    const floorMap = {};
-    active.forEach(p => {
-      const rs = p.roomSortKey || '';
-      if (!rs) return;
-      // 4자리 기준: 앞 2자리 = 층 (06xx→6층, 10xx→10층)
+function updateFloorSummary() {
+  const checks = getVisitChecks();
+  const active = state.patients.filter(p => !p.deleted);
+  const floorMap = {};
+  const labTodayNames = []; // 금일 lab 결과가 있는 환자 이름을 담을 배열
+
+  active.forEach(p => {
+    // 기존 층별 인원 계산 로직
+    const rs = p.roomSortKey || '';
+    if (rs) {
       const floorNum = parseInt(rs.slice(0, 2), 10);
-      if (!floorNum) return;
-      if (!floorMap[floorNum]) floorMap[floorNum] = { total:0, unchecked:0 };
-      floorMap[floorNum].total++;
-      if (!checks[p.id]) floorMap[floorNum].unchecked++;
-    });
-    const floors = Object.keys(floorMap).map(Number).sort((a,b)=>a-b);
-    const summaryEl = el('floorSummary');
-    if (!summaryEl) return;
-    if (!floors.length) { summaryEl.textContent=''; return; }
-    summaryEl.textContent = '(' + floors.map(f=>`${f}층: ${floorMap[f].unchecked}명`).join(' / ') + ')';
+      if (floorNum) {
+        if (!floorMap[floorNum]) floorMap[floorNum] = { total: 0, checked: 0, unchecked: 0 };
+        floorMap[floorNum].total++;
+        if (checks[p.id]) floorMap[floorNum].checked++;
+        else floorMap[floorNum].unchecked++;
+      }
+    }
+
+    // 금일 lab 결과가 있는 환자(빨간색 하이라이트 대상) 명단 수집
+    if (isTodayKST(p.lastLabDate)) {
+      labTodayNames.push(p.patientName);
+    }
+  });
+
+  const floors = Object.keys(floorMap).sort((a, b) => a - b);
+  const summaryEl = el('floorSummary');
+  
+  if (!floors.length) {
+    summaryEl.textContent = '';
+    return;
   }
+
+  // 1) 층별 미회진 인원 요약 생성
+  let summaryText = '(' + floors.map(f => `${f}층: ${floorMap[f].unchecked}명`).join(' / ') + ')';
+
+  // 2) 금일 lab 결과 명단이 있다면 뒤에 추가
+  if (labTodayNames.length > 0) {
+    summaryText += ` | 금일 lab 결과: ${labTodayNames.join(', ')}`;
+  }
+
+  summaryEl.textContent = summaryText;
+}
 
   /* 『참고:...』 처럼 약품 아래에 붙는 참고 행을 앞 줄 약품명과 병합 */
   function mergeNoteLines(lines) {

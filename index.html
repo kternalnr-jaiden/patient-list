@@ -20,6 +20,17 @@
     button,input,select,textarea{font:inherit;}
     .app{max-width:1880px;margin:0 auto;padding:18px;}
 
+/---------lab 오늘날짜시 하이라이트 -----/
+.lab-today{
+  display:inline-block;
+  background:#fee2e2;
+  color:#b91c1c;
+  padding:2px 6px;
+  border-radius:6px;
+  font-weight:800;
+  box-shadow:inset 0 0 0 1px #fecaca;
+}
+
     /* ── Lock Screen ── */
     #lockScreen{
       position:fixed;inset:0;z-index:9999;
@@ -219,9 +230,14 @@
       transition:.15s background,.15s color;
     }
     .np-floor-btn:hover{background:#0ea5e9;color:white;border-color:#0ea5e9;}
-    .np-floor-anchor{font-size:11px;color:#94a3b8;padding:4px 8px;
-      background:#f1f5f9;border-bottom:1px solid var(--line);
-      position:sticky;top:44px;z-index:5;}
+.np-floor-anchor{
+  font-size:11px;color:#94a3b8;padding:4px 8px;
+  background:#f1f5f9;border-bottom:1px solid var(--line);
+  position:sticky;
+  top:var(--np-nav-height, 44px);
+  z-index:5;
+}
+
 
     /* ── Notepad Dialog ── */
     #notepadDialog{
@@ -768,6 +784,30 @@
     return kst.toISOString().split('T')[0]; // YYYY-MM-DD
   }
 
+function isTodayKST(dateStr) {
+  return !!dateStr && dateStr === getKSTDateOnly();
+}
+
+function scrollNotepadToFloor(floor) {
+  const body = el('notepadBody');
+  const anchor = body.querySelector(`.np-floor-anchor[data-floor="${floor}"]`);
+  const nav = body.querySelector('.np-floor-nav');
+  if (!body || !anchor) return;
+
+  const extraTop = (nav?.offsetHeight || 0) + 6;
+
+  const top =
+    body.scrollTop +
+    anchor.getBoundingClientRect().top -
+    body.getBoundingClientRect().top -
+    extraTop;
+
+  body.scrollTo({
+    top: Math.max(0, top),
+    behavior: 'smooth'
+  });
+}
+
   function getVisitChecks() {
     try {
       const raw = localStorage.getItem(VISIT_KEY);
@@ -1033,6 +1073,12 @@
       let changeText='';
       if(typeof patient.recentMedChanges==='string')changeText=patient.recentMedChanges;
       else if(Array.isArray(patient.recentMedChanges))changeText=patient.recentMedChanges.map(m=>m.summary).join('\n');
+
+const isLabToday = isTodayKST(patient.lastLabDate);
+const lastLabHtml = patient.lastLabDate
+  ? `<span class="${isLabToday ? 'lab-today' : ''}">${fmtDate(patient.lastLabDate)}</span>`
+  : '';
+
       tr.innerHTML=`
         <td class="nowrap" style="text-align:center;padding:3px 2px;"></td>
         <td>
@@ -1052,7 +1098,8 @@
         <td>${patient.primaryDiagnosis||''}${patient.primaryDiagnosisOnsetDate?'<div class="small">'+patient.primaryDiagnosisOnsetDate+'</div>':''}</td>
         <td class="meds-cell">${medsText}</td>
         <td class="change-cell">${changeText}</td>
-        <td class="nowrap">${fmtDate(patient.lastLabDate)}${patient.prevLabDate?'<div class="lab-prev">(이전: '+patient.prevLabDate+')</div>':''}</td>
+<td class="nowrap">${lastLabHtml}${patient.prevLabDate?'<div class="lab-prev">(이전: '+patient.prevLabDate+')</div>':''}</td>
+
         <td></td>
         <td class="nowrap"></td>
       `;
@@ -1260,13 +1307,15 @@
       const btn = document.createElement('button');
       btn.className = 'np-floor-btn';
       btn.textContent = `${f}층`;
-      btn.addEventListener('click', () => {
-        const anchor = body.querySelector(`[data-floor="${f}"]`);
-        if (anchor) anchor.scrollIntoView({ behavior:'smooth', block:'start' });
-      });
+ btn.addEventListener('click', () => {
+  scrollNotepadToFloor(f);
+});
+
       nav.appendChild(btn);
     });
     body.appendChild(nav);
+body.style.setProperty('--np-nav-height', `${nav.offsetHeight}px`);
+
 
     // 이전 층 추적 (층 구분 앵커용)
     let lastFloor = null;

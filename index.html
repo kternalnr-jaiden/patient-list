@@ -19,8 +19,6 @@
     body{min-width:1100px;}
     button,input,select,textarea{font:inherit;}
     .app{max-width:1880px;margin:0 auto;padding:18px;}
-
-/* ---------lab 오늘날짜시 하이라이트 ----- */
 .lab-today{
   display:inline-block;
   background:#fee2e2;
@@ -30,8 +28,6 @@
   font-weight:800;
   box-shadow:inset 0 0 0 1px #fecaca;
 }
-
-    /* ── Lock Screen ── */
     #lockScreen{
       position:fixed;inset:0;z-index:9999;
       background:linear-gradient(135deg,#0f2044 0%,#1d4ed8 100%);
@@ -58,8 +54,6 @@
     .lock-btn-google:hover{background:#f8fafc;box-shadow:0 2px 8px rgba(0,0,0,.1);}
     .lock-error{font-size:12px;color:var(--danger);min-height:16px;text-align:center;width:100%;}
     .lock-footer{font-size:11px;color:#94a3b8;text-align:center;}
-
-    /* ── Topbar ── */
     .topbar{
       display:flex;align-items:center;justify-content:space-between;gap:16px;
       background:linear-gradient(135deg,#1d4ed8,#3b82f6);
@@ -80,8 +74,6 @@
     .btn-ghost-white:hover{background:rgba(255,255,255,.28);}
     .btn-ghost-white.danger-ghost{background:rgba(220,38,38,.25);border-color:rgba(255,180,180,.4);}
     .btn-ghost-white.danger-ghost:hover{background:rgba(220,38,38,.4);}
-
-    /* ── Panels ── */
     .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
     .panel-header{
       padding:14px 16px;border-bottom:1px solid var(--line);background:var(--panel-2);
@@ -90,8 +82,6 @@
     .panel-header h2{margin:0;font-size:16px;}
     .panel-header .sub{font-size:12px;color:var(--muted);}
     .panel-body{padding:16px;}
-
-    /* ── Layout ── */
     .stack{display:grid;gap:12px;}
     .stack-lg{display:grid;gap:16px;}
     .two{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -109,8 +99,6 @@
     .field input[readonly]{background:#f8fafc;color:var(--muted);cursor:default;}
     textarea{resize:vertical;min-height:74px;}
     .hint{font-size:11px;color:var(--muted);line-height:1.5;}
-
-    /* ── Buttons ── */
     .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
     .btn{
       border:1px solid var(--line);background:white;color:var(--text);
@@ -125,8 +113,6 @@
     .btn-sm{padding:4px 8px!important;font-size:11px!important;}
     .btn-xs{padding:3px 7px;font-size:10px;border-radius:6px;border:1px solid var(--line);background:white;cursor:pointer;font-weight:600;}
     .btn-xs:hover{background:#f0f9ff;}
-
-    /* ── Toolbar ── */
     .toolbar{
       display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;
       margin-bottom:12px;
@@ -137,7 +123,18 @@
     .toolbar-left,.toolbar-right{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
     .toolbar .meta{font-size:12px;color:var(--muted);}
 
-    /* ── Table ── */
+    /* ── 바로가기 버튼 ── */
+    .shortcut-btn{
+      display:inline-flex;align-items:center;gap:5px;
+      padding:9px 13px;border-radius:10px;cursor:pointer;
+      font-weight:700;font-size:13px;text-decoration:none;
+      border:1.5px solid;
+      transition:.15s transform,.15s box-shadow;
+    }
+    .shortcut-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.12);}
+    .shortcut-btn.green{background:#f0fdf4;color:#065f46;border-color:#6ee7b7;}
+    .shortcut-btn.blue {background:#eff6ff;color:#1e40af;border-color:#93c5fd;}
+
     .table-wrap{overflow:auto;}
     table{width:100%;border-collapse:collapse;min-width:1380px;background:white;}
     th,td{border:1px solid var(--line);padding:6px 7px;vertical-align:top;font-size:10px;}
@@ -156,13 +153,9 @@
     .note-check-row input[type=checkbox]{width:13px;height:13px;cursor:pointer;accent-color:var(--success);}
     .note-check-label{font-size:8px;cursor:pointer;color:var(--muted);user-select:none;}
     .note-check-label.done{color:var(--success);font-weight:700;}
-
-    /* ── Pills ── */
     .pill-list{display:flex;flex-wrap:wrap;gap:6px;}
     .pill{background:#f3f4f6;border:1px solid #e5e7eb;border-radius:999px;padding:5px 8px;font-size:12px;cursor:pointer;}
     .pill:hover{background:#e0ecff;border-color:#bfdbfe;}
-
-    /* ── Misc ── */
     .section-title{font-size:13px;font-weight:800;margin-bottom:6px;}
     .divider{height:1px;background:var(--line);margin:4px 0;}
     .note-box{background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;padding:10px;font-size:12px;color:var(--muted);}
@@ -178,8 +171,6 @@
       display:flex;align-items:center;gap:6px;
     }
     .print-date{display:none;}
-
-    /* ── Dialogs ── */
     dialog{
       border:none;border-radius:18px;padding:0;
       box-shadow:0 30px 70px rgba(0,0,0,.22);
@@ -196,23 +187,17 @@
     #patientFormDialog[open]{display:flex;flex-direction:column;}
     #patientFormDialog .modal-body{overflow-y:auto;flex:1;}
     #medEditDialog{width:min(720px,calc(100vw - 32px));}
-
-    /* ── 퇴원예정일 하이라이트 ── */
     .discharge-date {
       display:inline-block;
       background:#fef9c3;color:#854d0e;
       padding:1px 5px;border-radius:4px;
       font-weight:700;font-size:8px;
     }
-
-    /* ── 회진 체크박스 ── */
     .visit-chk-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;}
     .visit-chk{width:15px;height:15px;cursor:pointer;accent-color:var(--success);}
     .visit-no{font-size:8px;color:var(--muted);text-align:center;}
     tbody tr.visited{background:#f0fdf4!important;}
     .floor-summary{font-size:12px;font-weight:500;color:var(--primary);margin-left:8px;}
-
-    /* ── 필기모드 층 네비게이션 ── */
     .np-floor-nav{
       display:flex;gap:8px;align-items:center;flex-wrap:wrap;
       padding:10px 16px;background:#e0f2fe;border-bottom:1px solid #bae6fd;
@@ -233,8 +218,6 @@
       top:var(--np-nav-height, 44px);
       z-index:5;
     }
-
-    /* ── Notepad Dialog ── */
     #notepadDialog{
       width:96vw;max-width:1600px;
       height:92vh;
@@ -250,7 +233,6 @@
     #penColor{width:32px;height:32px;border:1px solid var(--line);border-radius:6px;cursor:pointer;padding:2px;}
     #penSize{width:80px;cursor:pointer;}
     #penSizeVal{font-size:12px;color:var(--muted);min-width:20px;}
-    /* ── 텍스트 크기 슬라이더 ── */
     #textSizeGroup{display:none;}
     #textSizeSlider{width:70px;cursor:pointer;}
     #textSizeVal{font-size:12px;color:var(--muted);min-width:20px;}
@@ -263,7 +245,6 @@
     .np-btn.active{background:#dbeafe;border-color:#93c5fd;color:#1d4ed8;}
     .np-btn.warn{background:#fff7ed;color:#c2410c;border-color:#fdba74;}
     .np-btn.danger{background:#fef2f2;color:#dc2626;border-color:#fecaca;}
-    /* ── 텍스트 모드 버튼 ── */
     .np-btn.text-active{background:#fef9c3;border-color:#fbbf24;color:#92400e;}
     .notepad-body{
       flex:1;overflow-y:auto;padding:0;
@@ -291,7 +272,6 @@
       cursor:crosshair;touch-action:none;
       background:white;
     }
-    /* 텍스트 모드일 때 커서 변경 */
     .notepad-canvas.text-cursor{cursor:text;}
     .np-clear-btn{
       border:none;background:#f8fafc;color:#9ca3af;
@@ -304,8 +284,6 @@
     .notepad-empty{
       padding:40px;text-align:center;color:var(--muted);font-size:14px;
     }
-
-    /* ── 텍스트 입력 오버레이 ── */
     .np-text-overlay{
       position:absolute;
       background:rgba(255,255,220,0.92);
@@ -321,8 +299,6 @@
       caret-color:#2563eb;
     }
     .np-text-overlay::placeholder{color:#94a3b8;font-style:italic;}
-
-    /* ── Print ── */
     @page{size:A4 landscape;margin:6mm;}
     @media print{
       body{min-width:auto;background:white;}
@@ -347,9 +323,6 @@
 </head>
 <body>
 
-<!-- ════════════════════════════════════════
-     Lock Screen
-════════════════════════════════════════ -->
 <div id="lockScreen">
   <div class="lock-card">
     <div class="lock-logo">🏥</div>
@@ -369,16 +342,13 @@
   </div>
 </div>
 
-
-<!-- ════════════════════════════════════════
-     Main App
-════════════════════════════════════════ -->
 <div class="app" id="mainApp" style="display:none;">
 
   <div class="topbar">
     <div class="title-wrap">
       <h1>주치의 환자명단</h1>
       <p>환자 기본정보 · 주상병 · 약물 복붙 입력 · soft delete(14일) · A4 가로 출력</p>
+    </div>
     <div class="topbar-right">
       <div class="status-badge" id="syncStatus">연결 중…</div>
       <div class="auth-user-badge" id="authUserBadge"></div>
@@ -396,10 +366,8 @@
       <button class="btn soft" id="toggleDeletedBtn">삭제 환자 보기</button>
       <button class="btn" id="notepadBtn">✏ 필기 모드</button>
       <button class="btn success" id="printBtn">🖨 A4 가로 출력</button>
-      
-      <a href="https://aloha-neurology-v2.lovable.app/" target="_blank" class="btn" style="background:#f0fdf4;color:#065f46;border-color:#6ee7b7;text-decoration:none;">📋 판독 입력</a>
-<a href="https://kternalnr-jaiden.github.io/bobath-helper/index.html" target="_blank" class="btn" style="background:#eff6ff;color:#1e40af;border-color:#93c5fd;text-decoration:none;">💊 약처방 도우미</a>
-    </div>
+      <a href="https://aloha-neurology-v2.lovable.app/" target="_blank" rel="noopener" class="shortcut-btn green" title="판독 입력 페이지 열기">📋 판독 입력</a>
+      <a href="https://kternalnr-jaiden.github.io/bobath-helper/index.html" target="_blank" rel="noopener" class="shortcut-btn blue" title="약처방 도우미 열기">💊 약처방 도우미</a>
     </div>
     <div class="toolbar-right">
       <span class="meta" id="patientCountMeta">환자 0명</span>
@@ -442,7 +410,6 @@
 </div>
 
 
-<!-- Dialog: 환자 등록 / 수정 -->
 <dialog id="patientFormDialog">
   <div class="modal-header">
     <h3 id="patientFormTitle">환자 등록</h3>
@@ -534,7 +501,6 @@
   </div>
 </dialog>
 
-<!-- Dialog: 약 항목 수정 -->
 <dialog id="medEditDialog">
   <div class="modal-header"><h3>약 항목 수정</h3><button class="btn" id="closeMedDialogBtn">✕ 닫기</button></div>
   <div class="modal-body">
@@ -554,8 +520,6 @@
   </div>
 </dialog>
 
-
-<!-- Dialog: 필기 모드 -->
 <dialog id="notepadDialog">
   <div class="modal-header" style="padding:12px 16px;">
     <h3 style="margin:0;font-size:16px;">✏ 필기 모드</h3>
@@ -565,30 +529,25 @@
     </div>
   </div>
   <div class="notepad-toolbar">
-    <!-- 색상 -->
     <div class="np-tool-group">
       <label>색상</label>
       <input type="color" id="penColor" value="#1a1a1a" title="펜/텍스트 색상">
     </div>
-    <!-- 펜 굵기 -->
     <div class="np-tool-group" id="penSizeGroup">
       <label>굵기</label>
       <input type="range" id="penSize" min="1" max="24" value="3">
       <span id="penSizeVal">3</span>
     </div>
-    <!-- 텍스트 크기 -->
     <div class="np-tool-group" id="textSizeGroup">
       <label>글자크기</label>
       <input type="range" id="textSizeSlider" min="8" max="48" value="18">
       <span id="textSizeVal">18</span>px
     </div>
-    <!-- 모드 버튼 -->
     <button class="np-btn active" id="penModeBtn">🖊 펜</button>
     <button class="np-btn" id="eraserModeBtn">🧹 지우개</button>
     <button class="np-btn" id="textModeBtn">⌨ 텍스트</button>
     <div style="width:1px;height:24px;background:var(--line);margin:0 4px;"></div>
     <button class="np-btn warn" id="clearAllCanvasBtn">전체 필기 지우기</button>
-    <!-- 텍스트 모드 힌트 -->
     <span id="textModeHint" style="font-size:11px;color:#92400e;background:#fef9c3;padding:3px 8px;border-radius:6px;display:none;">
       캔버스 클릭 → 입력 → <kbd style="background:#fff;border:1px solid #d1d5db;border-radius:3px;padding:0 4px;">Enter</kbd> 확정 / <kbd style="background:#fff;border:1px solid #d1d5db;border-radius:3px;padding:0 4px;">Esc</kbd> 취소
     </span>
@@ -607,9 +566,6 @@
     serverTimestamp, query, orderBy
   } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js';
 
-  /* ══════════════════════════════════════════
-     ★ 허용 이메일
-  ══════════════════════════════════════════ */
   const ALLOWED_EMAILS = [
     'kternalnr@gmail.com'
   ];
@@ -632,9 +588,6 @@
 
   const el = id => document.getElementById(id);
 
-  /* ══════════════════════════════════════════
-     인증
-  ══════════════════════════════════════════ */
   function unlockApp(user) {
     sessionStorage.setItem('presc-auth', 'ok');
     el('lockScreen').classList.add('hidden');
@@ -677,9 +630,6 @@
 
   el('logoutBtn').addEventListener('click', doLogout);
 
-  /* ══════════════════════════════════════════
-     KST 날짜
-  ══════════════════════════════════════════ */
   function getKSTDateString() {
     const kst  = new Date(Date.now() + 9 * 3600000);
     const days = ['일','월','화','수','목','금','토'];
@@ -688,9 +638,6 @@
   function refreshPrintDate() { el('printDate').textContent = getKSTDateString(); }
   el('printBtn').addEventListener('click', () => { refreshPrintDate(); window.print(); });
 
-  /* ══════════════════════════════════════════
-     State
-  ══════════════════════════════════════════ */
   const state = {
     patients:[], medicationsDraft:[],
     sort:'roomAsc', showDeleted:false,
@@ -716,7 +663,6 @@
     prescriptionNote:          el('prescriptionNote')
   };
 
-  /* ── Firestore ── */
   function saveLocal() {
     localStorage.setItem('prescription-helper-patients', JSON.stringify(state.patients));
   }
@@ -736,9 +682,6 @@
     }
   }
 
-  /* ══════════════════════════════════════════
-     처방 오더 체크
-  ══════════════════════════════════════════ */
   function getThisMonday() {
     const kst  = new Date(Date.now() + 9 * 3600000);
     const day  = kst.getUTCDay();
@@ -750,9 +693,6 @@
     return !!(p.prescriptionNoteCheckedWeek && p.prescriptionNoteCheckedWeek === getThisMonday());
   }
 
-  /* ══════════════════════════════════════════
-     파싱 헬퍼
-  ══════════════════════════════════════════ */
   function padRoomSort(s) { return String(s||'').replace(/\D/g,'').padStart(4,'0').slice(-4); }
   function parseRoomRaw(r) {
     const t = String(r||'').trim();
@@ -806,9 +746,6 @@
     return {primaryDiagnosis:[...new Set(names)][0]||'',primaryDiagnosisOnsetDate:onset};
   }
 
-  /* ══════════════════════════════════════════
-     회진 체크박스
-  ══════════════════════════════════════════ */
   const VISIT_KEY = 'visit-checks-v1';
 
   function getKSTDateOnly() {
@@ -973,9 +910,6 @@
     });
   }
 
-  /* ══════════════════════════════════════════
-     CRUD
-  ══════════════════════════════════════════ */
   function buildPatientPayload() {
     return {
       roomRaw:formEls.roomRaw.value.trim(),
@@ -1081,9 +1015,6 @@
     saveLocal();render();
   }
 
-  /* ══════════════════════════════════════════
-     Render
-  ══════════════════════════════════════════ */
   function sortPatients(list) {
     const arr=[...list];
     switch(state.sort){
@@ -1138,7 +1069,6 @@
         <td class="nowrap"></td>
       `;
       const cells=tr.querySelectorAll('td');
-      /* 회진 체크박스 */
       const noCell=cells[0];
       const visitWrap=document.createElement('div');
       visitWrap.className='visit-chk-wrap';
@@ -1156,7 +1086,6 @@
       vNo.className='visit-no'; vNo.textContent=idx+1;
       visitWrap.appendChild(vChk); visitWrap.appendChild(vNo);
       noCell.appendChild(visitWrap);
-      /* 처방 참고사항 + 체크박스 */
       const noteTd=cells[8];
       const noteText=document.createElement('div');
       noteText.textContent=patient.prescriptionNote||'';
@@ -1183,7 +1112,6 @@
       });
       checkRow.appendChild(chk);checkRow.appendChild(lbl);
       noteTd.appendChild(checkRow);
-      /* 작업 버튼 */
       const actionCell=cells[9];
       const editBtn=document.createElement('button');
       editBtn.className='btn btn-sm';editBtn.type='button';editBtn.textContent='수정';
@@ -1211,9 +1139,6 @@
     updateFloorSummary();
   }
 
-  /* ══════════════════════════════════════════
-     Med Editor
-  ══════════════════════════════════════════ */
   function openMedEditor(index){
     state.medEditingIndex=index;
     const med=state.medicationsDraft[index];if(!med)return;
@@ -1245,9 +1170,6 @@
     refreshMedDraftPills();closeMedEditor();
   }
 
-  /* ══════════════════════════════════════════
-     Event Listeners
-  ══════════════════════════════════════════ */
   el('moveToPreLabBtn').addEventListener('click',()=>{
     const cur=formEls.lastLabDate.value;
     if(!cur){alert('먼저 마지막 lab 날짜를 입력하세요.');return;}
@@ -1304,26 +1226,18 @@
     if(!formEls.bedNo.value)formEls.bedNo.value=info.bedNo;
   });
 
-  /* ══════════════════════════════════════════
-     필기 모드 (Notepad)
-  ══════════════════════════════════════════ */
   const NP_KEY = 'notepad-canvas-';
-
-  /* ─── 도구 상태 (textSize 추가) ─── */
   const npTool = { color: '#1a1a1a', size: 3, mode: 'pen', textSize: 18 };
 
-  /* ─── 모드 전환 헬퍼 ─── */
   function setNpMode(mode) {
     npTool.mode = mode;
     el('penModeBtn').classList.toggle('active', mode === 'pen');
     el('eraserModeBtn').classList.toggle('active', mode === 'eraser');
     el('textModeBtn').classList.toggle('active', mode === 'text');
     el('textModeBtn').classList.toggle('text-active', mode === 'text');
-    // 굵기 슬라이더 / 글자크기 슬라이더 표시 전환
     el('penSizeGroup').style.display  = mode === 'eraser' ? '' : (mode === 'pen' ? '' : 'none');
     el('textSizeGroup').style.display = mode === 'text' ? '' : 'none';
     el('textModeHint').style.display  = mode === 'text' ? '' : 'none';
-    // 캔버스 커서 전환
     document.querySelectorAll('.notepad-canvas').forEach(c => {
       c.classList.toggle('text-cursor', mode === 'text');
     });
@@ -1347,10 +1261,8 @@
       return;
     }
 
-    // 층 목록 추출
     const floors = [...new Set(rows.map(p => parseInt((p.roomSortKey||'').slice(0,2),10)).filter(Boolean))].sort((a,b)=>a-b);
 
-    // 층 네비게이션 바
     const nav = document.createElement('div');
     nav.className = 'np-floor-nav';
     const navLabel = document.createElement('label');
@@ -1417,7 +1329,6 @@
       row.appendChild(clearBtn);
       body.appendChild(row);
 
-      // 저장된 필기 복원
       const saved = localStorage.getItem(NP_KEY + patient.id);
       if (saved) {
         const img = new Image();
@@ -1429,30 +1340,22 @@
     });
   }
 
-  /* ══════════════════════════════════════════
-     텍스트 입력 오버레이
-  ══════════════════════════════════════════ */
   function showTextInput(e, canvas, patientId) {
-    const wrap     = canvas.parentElement;   // .notepad-canvas-wrap (position:relative)
+    const wrap     = canvas.parentElement;
     const rect     = canvas.getBoundingClientRect();
     const wrapRect = wrap.getBoundingClientRect();
     const scaleX   = canvas.width  / rect.width;
     const scaleY   = canvas.height / rect.height;
 
-    // 클릭 위치 (wrap 기준 CSS px)
     const posLeft = e.clientX - wrapRect.left;
     const posTop  = e.clientY - wrapRect.top;
 
-    // 캔버스 내부 좌표 (텍스트 그릴 위치)
     const cx = (e.clientX - rect.left) * scaleX;
     const cy = (e.clientY - rect.top)  * scaleY;
 
-    // 화면에 보이는 글자 크기 (CSS px)
     const displayFontPx = npTool.textSize;
-    // 캔버스 내부 폰트 크기
     const canvasFontPx  = Math.round(displayFontPx * scaleY);
 
-    // 기존 오버레이 있으면 제거
     wrap.querySelectorAll('.np-text-overlay').forEach(n => n.remove());
 
     const input = document.createElement('input');
@@ -1489,16 +1392,12 @@
     input.addEventListener('keydown', ev => {
       if (ev.key === 'Enter') { ev.preventDefault(); commit(); }
       if (ev.key === 'Escape') { committed = true; input.remove(); }
-      ev.stopPropagation(); // 다이얼로그 단축키 방지
+      ev.stopPropagation();
     });
 
-    // 포커스를 잃으면 확정 (다른 캔버스 클릭 등)
     input.addEventListener('blur', () => { setTimeout(commit, 80); });
   }
 
-  /* ══════════════════════════════════════════
-     캔버스 드로잉 이벤트 설정
-  ══════════════════════════════════════════ */
   function setupNotepadCanvas(canvas, patientId) {
     let drawing = false;
     let lx = 0, ly = 0;
@@ -1516,7 +1415,6 @@
     function startDraw(e) {
       e.preventDefault();
 
-      // ── 텍스트 모드: 드로잉 없이 오버레이 표시 ──
       if (npTool.mode === 'text') {
         showTextInput(e, canvas, patientId);
         return;
@@ -1570,7 +1468,6 @@
     canvas.addEventListener('pointercancel', endDraw);
   }
 
-  /* ── 도구 버튼 이벤트 ── */
   el('penColor').addEventListener('input', e => { npTool.color = e.target.value; });
 
   el('penSize').addEventListener('input', e => {

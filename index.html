@@ -1,15 +1,15 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>주치의 환자명단</title>
   <style>
-    :root {
-      --bg:#f4f7fb; --panel:#fff; --panel-2:#f8fafc;
-      --text:#1f2937; --muted:#6b7280; --line:#dbe3ef;
-      --primary:#2563eb; --primary-soft:#dbeafe;
-      --danger:#dc2626; --success:#059669;
+    :root{
+      --bg:#f4f7fb;--panel:#fff;--panel-2:#f8fafc;
+      --text:#1f2937;--muted:#6b7280;--line:#dbe3ef;
+      --primary:#2563eb;--primary-soft:#dbeafe;
+      --danger:#dc2626;--success:#059669;
       --shadow:0 10px 30px rgba(15,23,42,.08);
       --radius:14px;
       --font:"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",Arial,sans-serif;
@@ -18,70 +18,41 @@
     html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--font);}
     body{min-width:1100px;}
     button,input,select,textarea{font:inherit;}
-    .app{max-width:1880px;margin:0 auto;padding:18px;}
-.lab-today{
-  display:inline-block;
-  background:#fee2e2;
-  color:#b91c1c;
-  padding:2px 6px;
-  border-radius:6px;
-  font-weight:800;
-  box-shadow:inset 0 0 0 1px #fecaca;
-}
-    #lockScreen{
-      position:fixed;inset:0;z-index:9999;
-      background:linear-gradient(135deg,#0f2044 0%,#1d4ed8 100%);
-      display:flex;align-items:center;justify-content:center;
-    }
+    .app{max-width:1920px;margin:0 auto;padding:18px;}
+
+    .lab-today{display:inline-block;background:#fee2e2;color:#b91c1c;padding:2px 6px;border-radius:6px;font-weight:800;box-shadow:inset 0 0 0 1px #fecaca;}
+
+    /* Lock */
+    #lockScreen{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0f2044 0%,#1d4ed8 100%);display:flex;align-items:center;justify-content:center;}
     #lockScreen.hidden{display:none!important;}
-    .lock-card{
-      background:#fff;border-radius:22px;padding:44px 40px;
-      width:min(400px,calc(100vw - 40px));
-      box-shadow:0 30px 80px rgba(0,0,0,.4);
-      display:flex;flex-direction:column;gap:18px;align-items:center;
-    }
+    .lock-card{background:#fff;border-radius:22px;padding:44px 40px;width:min(400px,calc(100vw - 40px));box-shadow:0 30px 80px rgba(0,0,0,.4);display:flex;flex-direction:column;gap:18px;align-items:center;}
     .lock-logo{font-size:40px;}
     .lock-card h2{margin:0;font-size:22px;color:#1d4ed8;text-align:center;}
     .lock-card p{margin:0;font-size:13px;color:var(--muted);text-align:center;line-height:1.7;}
-    .lock-btn-google{
-      width:100%;padding:13px 16px;
-      background:#fff;color:#374151;
-      border:1.5px solid #d1d5db;border-radius:12px;
-      font-size:15px;font-weight:600;cursor:pointer;
-      display:flex;align-items:center;justify-content:center;gap:10px;
-      transition:.15s background,.15s box-shadow;
-    }
+    .lock-btn-google{width:100%;padding:13px 16px;background:#fff;color:#374151;border:1.5px solid #d1d5db;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:.15s background,.15s box-shadow;}
     .lock-btn-google:hover{background:#f8fafc;box-shadow:0 2px 8px rgba(0,0,0,.1);}
     .lock-error{font-size:12px;color:var(--danger);min-height:16px;text-align:center;width:100%;}
     .lock-footer{font-size:11px;color:#94a3b8;text-align:center;}
-    .topbar{
-      display:flex;align-items:center;justify-content:space-between;gap:16px;
-      background:linear-gradient(135deg,#1d4ed8,#3b82f6);
-      color:white;padding:18px 22px;border-radius:18px;box-shadow:var(--shadow);margin-bottom:16px;
-    }
+
+    /* Topbar */
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:white;padding:18px 22px;border-radius:18px;box-shadow:var(--shadow);margin-bottom:16px;}
     .title-wrap h1{margin:0;font-size:24px;}
     .title-wrap p{margin:6px 0 0;font-size:13px;opacity:.9;}
     .topbar-right{display:flex;gap:10px;align-items:center;}
-    .status-badge{
-      background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);
-      padding:8px 12px;border-radius:999px;font-size:12px;white-space:nowrap;
-    }
-    .btn-ghost-white{
-      background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);
-      color:white;padding:8px 14px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;
-      transition:.15s background;
-    }
+    .status-badge{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);padding:8px 12px;border-radius:999px;font-size:12px;white-space:nowrap;}
+    .btn-ghost-white{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:white;padding:8px 14px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;transition:.15s background;}
     .btn-ghost-white:hover{background:rgba(255,255,255,.28);}
     .btn-ghost-white.danger-ghost{background:rgba(220,38,38,.25);border-color:rgba(255,180,180,.4);}
     .btn-ghost-white.danger-ghost:hover{background:rgba(220,38,38,.4);}
+
+    /* Panel */
     .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
-    .panel-header{
-      padding:14px 16px;border-bottom:1px solid var(--line);background:var(--panel-2);
-      display:flex;justify-content:space-between;align-items:center;gap:12px;
-    }
+    .panel-header{padding:14px 16px;border-bottom:1px solid var(--line);background:var(--panel-2);display:flex;justify-content:space-between;align-items:center;gap:12px;}
     .panel-header h2{margin:0;font-size:16px;}
     .panel-header .sub{font-size:12px;color:var(--muted);}
     .panel-body{padding:16px;}
+
+    /* Layout */
     .stack{display:grid;gap:12px;}
     .stack-lg{display:grid;gap:16px;}
     .two{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -89,58 +60,58 @@
     .four{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
     .field{display:grid;gap:6px;}
     .field label{font-size:12px;font-weight:700;color:var(--muted);}
-    .field input,.field textarea,.field select{
-      width:100%;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 11px;
-      outline:none;transition:.15s border,.15s box-shadow;
-    }
-    .field input:focus,.field textarea:focus,.field select:focus{
-      border-color:#93c5fd;box-shadow:0 0 0 4px rgba(59,130,246,.12);
-    }
+    .field input,.field textarea,.field select{width:100%;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 11px;outline:none;transition:.15s border,.15s box-shadow;}
+    .field input:focus,.field textarea:focus,.field select:focus{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(59,130,246,.12);}
     .field input[readonly]{background:#f8fafc;color:var(--muted);cursor:default;}
     textarea{resize:vertical;min-height:74px;}
-    .hint{font-size:11px;color:var(--muted);line-height:1.5;}
+
+    /* Buttons */
     .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
-    .btn{
-      border:1px solid var(--line);background:white;color:var(--text);
-      padding:9px 12px;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;
-      transition:.15s transform,.15s background,.15s border;
-    }
+    .btn{border:1px solid var(--line);background:white;color:var(--text);padding:9px 12px;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;transition:.15s transform,.15s background,.15s border;}
     .btn:hover{transform:translateY(-1px);}
     .btn.primary{background:var(--primary);color:#fff;border-color:var(--primary);}
     .btn.soft{background:var(--primary-soft);color:#1d4ed8;border-color:#bfdbfe;}
     .btn.danger{background:#fef2f2;color:var(--danger);border-color:#fecaca;}
     .btn.success{background:#ecfdf5;color:var(--success);border-color:#a7f3d0;}
+    .btn.warning{background:#fff7ed;color:#c2410c;border-color:#fdba74;}
     .btn-sm{padding:4px 8px!important;font-size:11px!important;}
     .btn-xs{padding:3px 7px;font-size:10px;border-radius:6px;border:1px solid var(--line);background:white;cursor:pointer;font-weight:600;}
     .btn-xs:hover{background:#f0f9ff;}
-    .toolbar{
-      display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;
-      margin-bottom:12px;
-      background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-      padding:12px 14px;box-shadow:var(--shadow);
-      position:sticky;top:0;z-index:50;
-    }
+
+    /* Toolbar */
+    .toolbar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;box-shadow:var(--shadow);position:sticky;top:0;z-index:50;}
     .toolbar-left,.toolbar-right{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
     .toolbar .meta{font-size:12px;color:var(--muted);}
 
-    /* ── 바로가기 버튼 ── */
-    .shortcut-btn{
-      display:inline-flex;align-items:center;gap:5px;
-      padding:9px 13px;border-radius:10px;cursor:pointer;
-      font-weight:700;font-size:13px;text-decoration:none;
-      border:1.5px solid;
-      transition:.15s transform,.15s box-shadow;
-    }
+    /* Shortcut */
+    .shortcut-btn{display:inline-flex;align-items:center;gap:5px;padding:9px 13px;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;text-decoration:none;border:1.5px solid;transition:.15s transform,.15s box-shadow;}
     .shortcut-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.12);}
     .shortcut-btn.green{background:#f0fdf4;color:#065f46;border-color:#6ee7b7;}
-    .shortcut-btn.blue {background:#eff6ff;color:#1e40af;border-color:#93c5fd;}
+    .shortcut-btn.blue{background:#eff6ff;color:#1e40af;border-color:#93c5fd;}
 
+    /* ── View Bar ── */
+    .view-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;box-shadow:var(--shadow);}
+    .view-tabs{display:flex;gap:6px;align-items:center;}
+    .view-tab{padding:7px 16px;border-radius:999px;border:1.5px solid var(--line);background:white;color:var(--text);font-weight:700;font-size:13px;cursor:pointer;transition:.15s background,.15s border-color,.15s color;}
+    .view-tab:hover:not(.active){background:#eff6ff;border-color:#93c5fd;color:#1d4ed8;}
+    .view-tab.active{background:#2563eb;color:white;border-color:#2563eb;}
+    .view-divider{width:1px;height:24px;background:var(--line);margin:0 4px;}
+    #viewSubBar{display:none;flex-wrap:wrap;gap:6px;align-items:center;}
+    .view-sub-btn{padding:5px 13px;border-radius:999px;border:1.5px solid #bfdbfe;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:700;cursor:pointer;transition:.15s background,.15s border-color;}
+    .view-sub-btn:hover:not(.active){background:#dbeafe;}
+    .view-sub-btn.active{background:#1d4ed8;color:white;border-color:#1d4ed8;}
+    .view-label{font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap;}
+
+    /* Table */
     .table-wrap{overflow:auto;}
-    table{width:100%;border-collapse:collapse;min-width:1380px;background:white;}
+    table{width:100%;border-collapse:collapse;min-width:1500px;background:white;}
     th,td{border:1px solid var(--line);padding:6px 7px;vertical-align:top;font-size:10px;}
     th{position:sticky;top:0;background:#eff6ff;z-index:1;text-align:left;font-size:10px;}
     tbody tr:nth-child(even){background:#fbfdff;}
     tbody tr.deleted-row{background:#fff7ed;}
+    tbody tr.visited{background:#f0fdf4!important;}
+    tbody tr.shared-patient-row{background:#faf5ff!important;}
+    tbody tr.shared-patient-row.visited{background:#f0e7ff!important;}
     .nowrap{white-space:nowrap;}
     .small{font-size:9px;color:var(--muted);}
     .meds-cell{font-size:10px;line-height:1.6;word-break:break-word;}
@@ -153,81 +124,71 @@
     .note-check-row input[type=checkbox]{width:13px;height:13px;cursor:pointer;accent-color:var(--success);}
     .note-check-label{font-size:8px;cursor:pointer;color:var(--muted);user-select:none;}
     .note-check-label.done{color:var(--success);font-weight:700;}
+
+    /* Doctor/Dept/Share tags */
+    .doctor-tag{display:inline-block;background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;padding:2px 5px;border-radius:4px;font-size:8px;font-weight:700;white-space:nowrap;}
+    .dept-tag{display:inline-block;background:#fef9c3;color:#713f12;border:1px solid #fde68a;padding:2px 5px;border-radius:4px;font-size:8px;font-weight:700;white-space:nowrap;}
+    .shared-badge{display:inline-block;background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd;padding:2px 5px;border-radius:4px;font-size:8px;font-weight:700;margin-top:2px;}
+    .own-badge{display:inline-block;background:#ecfdf5;color:#065f46;border:1px solid #6ee7b7;padding:2px 5px;border-radius:4px;font-size:8px;font-weight:700;margin-top:2px;}
+
+    /* Pills */
     .pill-list{display:flex;flex-wrap:wrap;gap:6px;}
     .pill{background:#f3f4f6;border:1px solid #e5e7eb;border-radius:999px;padding:5px 8px;font-size:12px;cursor:pointer;}
     .pill:hover{background:#e0ecff;border-color:#bfdbfe;}
+
+    /* Misc */
     .section-title{font-size:13px;font-weight:800;margin-bottom:6px;}
     .divider{height:1px;background:var(--line);margin:4px 0;}
-    .note-box{background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;padding:10px;font-size:12px;color:var(--muted);}
     .empty{padding:24px 10px;text-align:center;color:var(--muted);font-size:13px;border:1px dashed var(--line);border-radius:12px;background:#fcfdff;}
     .footer-note{font-size:12px;color:var(--muted);margin-top:10px;}
     .dc-hint{font-size:11px;color:var(--success);margin-top:4px;display:none;}
     .lab-row{display:flex;flex-direction:column;gap:6px;}
     .lab-prev-row{display:flex;align-items:center;gap:8px;}
     .lab-prev-row label{font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap;}
-    .auth-user-badge{
-      background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);
-      padding:6px 12px;border-radius:999px;font-size:12px;
-      display:flex;align-items:center;gap:6px;
-    }
+    .auth-user-badge{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);padding:6px 12px;border-radius:999px;font-size:12px;display:flex;align-items:center;gap:6px;}
     .print-date{display:none;}
-    dialog{
-      border:none;border-radius:18px;padding:0;
-      box-shadow:0 30px 70px rgba(0,0,0,.22);
-      position:fixed;top:50%;left:50%;
-      transform:translate(-50%,-50%);margin:0;
-    }
+    .discharge-date{display:inline-block;background:#fef9c3;color:#854d0e;padding:1px 5px;border-radius:4px;font-weight:700;font-size:8px;}
+    .floor-summary{font-size:12px;font-weight:500;color:var(--primary);margin-left:8px;}
+
+    /* Visit check */
+    .visit-chk-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;}
+    .visit-chk{width:15px;height:15px;cursor:pointer;accent-color:var(--success);}
+    .visit-no{font-size:8px;color:var(--muted);text-align:center;}
+
+    /* Dialog */
+    dialog{border:none;border-radius:18px;padding:0;box-shadow:0 30px 70px rgba(0,0,0,.22);position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);margin:0;}
     dialog:not([open]){display:none!important;}
     dialog::backdrop{background:rgba(15,23,42,.42);}
     .modal-header{padding:14px 18px;background:#eff6ff;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
     .modal-header h3{margin:0;font-size:16px;}
     .modal-body{padding:16px 18px;display:grid;gap:14px;}
     .modal-footer{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;background:var(--panel-2);}
-    #patientFormDialog{width:min(900px,calc(100vw - 32px));max-height:calc(100vh - 48px);}
+    #patientFormDialog{width:min(920px,calc(100vw - 32px));max-height:calc(100vh - 48px);}
     #patientFormDialog[open]{display:flex;flex-direction:column;}
     #patientFormDialog .modal-body{overflow-y:auto;flex:1;}
     #medEditDialog{width:min(720px,calc(100vw - 32px));}
-    .discharge-date {
-      display:inline-block;
-      background:#fef9c3;color:#854d0e;
-      padding:1px 5px;border-radius:4px;
-      font-weight:700;font-size:8px;
-    }
-    .visit-chk-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;}
-    .visit-chk{width:15px;height:15px;cursor:pointer;accent-color:var(--success);}
-    .visit-no{font-size:8px;color:var(--muted);text-align:center;}
-    tbody tr.visited{background:#f0fdf4!important;}
-    .floor-summary{font-size:12px;font-weight:500;color:var(--primary);margin-left:8px;}
-    .np-floor-nav{
-      display:flex;gap:8px;align-items:center;flex-wrap:wrap;
-      padding:10px 16px;background:#e0f2fe;border-bottom:1px solid #bae6fd;
-      position:sticky;top:0;z-index:10;
-    }
+    #shareDialog{width:min(520px,calc(100vw - 32px));max-height:80vh;}
+    #shareDialog[open]{display:flex;flex-direction:column;}
+    #shareDialog .modal-body{overflow-y:auto;flex:1;}
+    #transferDialog{width:min(520px,calc(100vw - 32px));}
+
+    /* Share dialog doctor rows */
+    .share-doctor-row{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#f8fafc;border-radius:8px;margin-bottom:6px;border:1px solid var(--line);}
+    .share-doctor-name{font-size:13px;font-weight:600;}
+    .share-doctor-sub{font-size:11px;color:var(--muted);}
+    .transfer-doctor-btn{width:100%;text-align:left;padding:10px 14px;border-radius:10px;border:1.5px solid var(--line);background:white;cursor:pointer;font-size:13px;font-weight:600;transition:.15s background,.15s border-color;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;}
+    .transfer-doctor-btn:hover{background:#eff6ff;border-color:#93c5fd;}
+    .transfer-doctor-dept{font-size:11px;color:var(--muted);}
+
+    /* Notepad */
+    .np-floor-nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 16px;background:#e0f2fe;border-bottom:1px solid #bae6fd;position:sticky;top:0;z-index:10;}
     .np-floor-nav label{font-size:12px;font-weight:700;color:#0369a1;}
-    .np-floor-btn{
-      padding:6px 16px;border-radius:999px;
-      background:white;border:1.5px solid #7dd3fc;
-      color:#0369a1;font-size:13px;font-weight:700;cursor:pointer;
-      transition:.15s background,.15s color;
-    }
+    .np-floor-btn{padding:6px 16px;border-radius:999px;background:white;border:1.5px solid #7dd3fc;color:#0369a1;font-size:13px;font-weight:700;cursor:pointer;transition:.15s background,.15s color;}
     .np-floor-btn:hover{background:#0ea5e9;color:white;border-color:#0ea5e9;}
-    .np-floor-anchor{
-      font-size:11px;color:#94a3b8;padding:4px 8px;
-      background:#f1f5f9;border-bottom:1px solid var(--line);
-      position:sticky;
-      top:var(--np-nav-height, 44px);
-      z-index:5;
-    }
-    #notepadDialog{
-      width:96vw;max-width:1600px;
-      height:92vh;
-      display:none;flex-direction:column;
-    }
+    .np-floor-anchor{font-size:11px;color:#94a3b8;padding:4px 8px;background:#f1f5f9;border-bottom:1px solid var(--line);position:sticky;top:var(--np-nav-height,44px);z-index:5;}
+    #notepadDialog{width:96vw;max-width:1600px;height:92vh;display:none;flex-direction:column;}
     #notepadDialog[open]{display:flex;}
-    .notepad-toolbar{
-      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-      padding:10px 16px;background:#f0f9ff;border-bottom:1px solid var(--line);
-    }
+    .notepad-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;background:#f0f9ff;border-bottom:1px solid var(--line);}
     .notepad-toolbar label{font-size:12px;color:var(--muted);font-weight:700;}
     .np-tool-group{display:flex;align-items:center;gap:6px;}
     #penColor{width:32px;height:32px;border:1px solid var(--line);border-radius:6px;cursor:pointer;padding:2px;}
@@ -236,74 +197,33 @@
     #textSizeGroup{display:none;}
     #textSizeSlider{width:70px;cursor:pointer;}
     #textSizeVal{font-size:12px;color:var(--muted);min-width:20px;}
-    .np-btn{
-      padding:6px 12px;border-radius:8px;border:1px solid var(--line);
-      background:white;cursor:pointer;font-size:12px;font-weight:700;
-      transition:.15s background;
-    }
+    .np-btn{padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:white;cursor:pointer;font-size:12px;font-weight:700;transition:.15s background;}
     .np-btn:hover{background:#f0f9ff;}
     .np-btn.active{background:#dbeafe;border-color:#93c5fd;color:#1d4ed8;}
     .np-btn.warn{background:#fff7ed;color:#c2410c;border-color:#fdba74;}
-    .np-btn.danger{background:#fef2f2;color:#dc2626;border-color:#fecaca;}
     .np-btn.text-active{background:#fef9c3;border-color:#fbbf24;color:#92400e;}
-    .notepad-body{
-      flex:1;overflow-y:auto;padding:0;
-      background:#f8fafc;
-    }
-    .notepad-row{
-      display:grid;
-      grid-template-columns:170px 1fr 60px;
-      align-items:stretch;
-      border-bottom:1px solid var(--line);
-      background:white;
-    }
+    .notepad-body{flex:1;overflow-y:auto;padding:0;background:#f8fafc;}
+    .notepad-row{display:grid;grid-template-columns:170px 1fr 60px;align-items:stretch;border-bottom:1px solid var(--line);background:white;}
     .notepad-row:nth-child(even){background:#fbfdff;}
-    .notepad-info{
-      padding:8px 10px;border-right:2px solid var(--line);
-      display:flex;flex-direction:column;gap:3px;justify-content:center;
-    }
+    .notepad-info{padding:8px 10px;border-right:2px solid var(--line);display:flex;flex-direction:column;gap:3px;justify-content:center;}
     .np-room{font-size:15px;font-weight:900;color:#1d4ed8;}
     .np-name{font-size:13px;font-weight:700;}
     .np-meta{font-size:11px;color:var(--muted);}
     .np-diag{font-size:10px;color:#374151;margin-top:2px;line-height:1.3;}
     .notepad-canvas-wrap{position:relative;overflow:hidden;}
-    .notepad-canvas{
-      display:block;width:100%;height:130px;
-      cursor:crosshair;touch-action:none;
-      background:white;
-    }
+    .notepad-canvas{display:block;width:100%;height:130px;cursor:crosshair;touch-action:none;background:white;}
     .notepad-canvas.text-cursor{cursor:text;}
-    .np-clear-btn{
-      border:none;background:#f8fafc;color:#9ca3af;
-      cursor:pointer;font-size:11px;font-weight:700;
-      border-left:1px solid var(--line);
-      transition:.15s background;writing-mode:vertical-rl;
-      letter-spacing:1px;
-    }
+    .np-clear-btn{border:none;background:#f8fafc;color:#9ca3af;cursor:pointer;font-size:11px;font-weight:700;border-left:1px solid var(--line);transition:.15s background;writing-mode:vertical-rl;letter-spacing:1px;}
     .np-clear-btn:hover{background:#fee2e2;color:#dc2626;}
-    .notepad-empty{
-      padding:40px;text-align:center;color:var(--muted);font-size:14px;
-    }
-    .np-text-overlay{
-      position:absolute;
-      background:rgba(255,255,220,0.92);
-      border:1.5px dashed #2563eb;
-      border-radius:4px;
-      padding:2px 6px;
-      outline:none;
-      z-index:100;
-      font-family:"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",Arial,sans-serif;
-      min-width:80px;
-      max-width:calc(100% - 8px);
-      white-space:nowrap;
-      caret-color:#2563eb;
-    }
+    .notepad-empty{padding:40px;text-align:center;color:var(--muted);font-size:14px;}
+    .np-text-overlay{position:absolute;background:rgba(255,255,220,0.92);border:1.5px dashed #2563eb;border-radius:4px;padding:2px 6px;outline:none;z-index:100;font-family:"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",Arial,sans-serif;min-width:80px;max-width:calc(100% - 8px);white-space:nowrap;caret-color:#2563eb;}
     .np-text-overlay::placeholder{color:#94a3b8;font-style:italic;}
+
     @page{size:A4 landscape;margin:6mm;}
     @media print{
       body{min-width:auto;background:white;}
       .app{max-width:none;padding:0;}
-      .topbar,.toolbar,.footer-note,dialog,#lockScreen,.note-check-row,.visit-chk-wrap{display:none!important;}
+      .topbar,.toolbar,.view-bar,.footer-note,dialog,#lockScreen,.note-check-row,.visit-chk-wrap{display:none!important;}
       .panel{border:none;box-shadow:none;border-radius:0;}
       .panel-header{padding:0 0 6px;background:white;border:none;display:flex;justify-content:space-between;align-items:baseline;}
       .panel-header h2{font-size:10pt;}
@@ -318,11 +238,12 @@
       .cell-stack .sub{color:#374151;font-size:8pt;}
       .panel-header .sub{display:none;}
       .print-date{display:block!important;font-size:9pt;color:#374151;white-space:nowrap;}
+      .doctor-tag,.dept-tag,.shared-badge,.own-badge{font-size:7pt;}
     }
   </style>
 </head>
 <body>
-
+<!-- Lock Screen -->
 <div id="lockScreen">
   <div class="lock-card">
     <div class="lock-logo">🏥</div>
@@ -342,12 +263,13 @@
   </div>
 </div>
 
+<!-- Main App -->
 <div class="app" id="mainApp" style="display:none;">
 
   <div class="topbar">
     <div class="title-wrap">
       <h1>주치의 환자명단</h1>
-      <p>환자 기본정보 · 주상병 · 약물 복붙 입력 · soft delete(14일) · A4 가로 출력</p>
+      <p>진료과 · 주치의별 관리 · 공유 · 전과 · A4 가로 출력</p>
     </div>
     <div class="topbar-right">
       <div class="status-badge" id="syncStatus">연결 중…</div>
@@ -366,19 +288,31 @@
       <button class="btn soft" id="toggleDeletedBtn">삭제 환자 보기</button>
       <button class="btn" id="notepadBtn">✏ 필기 모드</button>
       <button class="btn success" id="printBtn">🖨 A4 가로 출력</button>
-      <a href="https://aloha-neurology-v2.lovable.app/" target="_blank" rel="noopener" class="shortcut-btn green" title="판독 입력 페이지 열기">📋 판독 입력</a>
-      <a href="https://kternalnr-jaiden.github.io/bobath-helper/index.html" target="_blank" rel="noopener" class="shortcut-btn blue" title="약처방 도우미 열기">💊 약처방 도우미</a>
+      <a href="https://aloha-neurology-v2.lovable.app/" target="_blank" rel="noopener" class="shortcut-btn green">📋 판독 입력</a>
+      <a href="https://kternalnr-jaiden.github.io/bobath-helper/index.html" target="_blank" rel="noopener" class="shortcut-btn blue">💊 약처방 도우미</a>
     </div>
     <div class="toolbar-right">
       <span class="meta" id="patientCountMeta">환자 0명</span>
     </div>
   </div>
 
+  <!-- View Bar -->
+  <div class="view-bar">
+    <div class="view-tabs">
+      <button class="view-tab active" data-view="all">👥 전체 환자</button>
+      <button class="view-tab" data-view="mine">👤 나의 환자</button>
+      <button class="view-tab" data-view="other">🔍 타 주치의</button>
+      <button class="view-tab" data-view="dept">🏥 과별</button>
+    </div>
+    <div class="view-divider"></div>
+    <div id="viewSubBar"></div>
+  </div>
+
   <section class="panel">
     <div class="panel-header">
       <div>
         <h2>환자 목록 <span id="floorSummary" class="floor-summary"></span></h2>
-        <div class="sub">입원일 · 재원일수 · 퇴원예정일 · 약 목록 · 최근 변경 · lab · 참고사항</div>
+        <div class="sub">진료과 · 주치의 · 입원일 · 재원일수 · 약 목록 · lab · 참고사항</div>
       </div>
       <div id="printDate" class="print-date"></div>
     </div>
@@ -390,13 +324,14 @@
               <th class="nowrap" style="width:36px;">No.</th>
               <th style="width:96px;">호실<br><span style="font-weight:400;font-size:8px;">환자번호</span></th>
               <th style="width:62px;">이름<br><span style="font-weight:400;font-size:8px;">Sex/Age</span></th>
+              <th style="width:90px;">진료과<br><span style="font-weight:400;font-size:8px;">주치의</span></th>
               <th style="width:108px;">입원날짜<br><span style="font-weight:400;font-size:8px;">퇴원예정일</span></th>
-              <th style="width:158px;">주상병 / onset</th>
-              <th style="width:360px;">약 처방 목록</th>
-              <th style="width:190px;">최근 약 변경 내역</th>
+              <th style="width:150px;">주상병 / onset</th>
+              <th style="width:340px;">약 처방 목록</th>
+              <th style="width:175px;">최근 약 변경 내역</th>
               <th class="nowrap" style="width:88px;">마지막 lab</th>
-              <th style="width:210px;">처방 참고사항 / 오더확인</th>
-              <th class="nowrap" style="width:76px;">작업</th>
+              <th style="width:195px;">처방 참고사항 / 오더확인</th>
+              <th class="nowrap" style="width:90px;">작업</th>
             </tr>
           </thead>
           <tbody id="patientTableBody"></tbody>
@@ -406,10 +341,8 @@
       <div class="footer-note">인쇄 시 A4 가로 — 약 처방목록 6.5pt, 나머지 9pt · 처방확인 체크박스 인쇄 제외</div>
     </div>
   </section>
-
 </div>
-
-
+<!-- 환자 등록/수정 Dialog -->
 <dialog id="patientFormDialog">
   <div class="modal-header">
     <h3 id="patientFormTitle">환자 등록</h3>
@@ -418,8 +351,7 @@
   <div class="modal-body stack-lg">
     <div class="stack">
       <div class="section-title">1) 환자 한 줄 복붙</div>
-      <div class="field">
-        <label>복붙 입력</label>
+      <div class="field"><label>복붙 입력</label>
         <textarea id="pastePatient" rows="2" placeholder="예: 1019-01&#9;0000015840&#9;김금자&#9;F&#9;82&#9;04.29"></textarea>
       </div>
       <div class="actions"><button class="btn soft" id="parsePatientBtn">환자 복붙 파싱</button></div>
@@ -427,8 +359,7 @@
     <div class="divider"></div>
     <div class="stack">
       <div class="section-title">2) 주상병 복붙</div>
-      <div class="field">
-        <label>상병 입력</label>
+      <div class="field"><label>상병 입력</label>
         <textarea id="pasteDiagnosis" rows="2" placeholder="예: 상세불명의 뇌내출혈&#9;상세불명의 뇌내출혈&#9;2026-03-24"></textarea>
       </div>
       <div class="actions"><button class="btn soft" id="parseDiagnosisBtn">상병 복붙 파싱</button></div>
@@ -458,12 +389,24 @@
         <div class="field"><label>주상병</label><input id="primaryDiagnosis" placeholder="상세불명의 뇌내출혈"/></div>
         <div class="field"><label>onset 날짜</label><input id="primaryDiagnosisOnsetDate" type="date"/></div>
       </div>
+      <div class="two">
+        <div class="field"><label>진료과</label>
+          <select id="patientDept">
+            <option value="">선택</option>
+            <option value="재활의학과">재활의학과</option>
+            <option value="신경과">신경과</option>
+            <option value="내과">내과</option>
+          </select>
+        </div>
+        <div class="field"><label>담당 주치의 (자동 설정)</label>
+          <input id="patientDoctorDisplay" readonly placeholder="로그인 의사로 자동 설정"/>
+        </div>
+      </div>
     </div>
     <div class="divider"></div>
     <div class="stack">
       <div class="section-title">4) 약물 / 참고사항</div>
-      <div class="field">
-        <label>약 복붙 입력</label>
+      <div class="field"><label>약 복붙 입력</label>
         <textarea id="pasteMeds" rows="5" placeholder="케프라 액 150ml&#9;&#9;1ml&#9;145&#9;5&#9;*&#9;2&#9;1&#9;BID&#10;▶ DC 아트로벤트 흡입액…  ← DC쌍 자동제외"></textarea>
       </div>
       <div class="actions">
@@ -473,8 +416,7 @@
       <div id="dcHintMsg" class="dc-hint"></div>
       <div class="pill-list" id="medPills"></div>
       <div class="two">
-        <div class="field">
-          <label>마지막 lab 날짜</label>
+        <div class="field"><label>마지막 lab 날짜</label>
           <div class="lab-row">
             <input id="lastLabDate" type="date"/>
             <div class="lab-prev-row">
@@ -484,13 +426,11 @@
             </div>
           </div>
         </div>
-        <div class="field">
-          <label>최근 약 변경 내역 (자유 입력)</label>
+        <div class="field"><label>최근 약 변경 내역 (자유 입력)</label>
           <textarea id="recentMedChangeInput" rows="3" placeholder="2026-05-12 케프라 용량 증량&#10;2026-05-10 아트로벤트 추가"></textarea>
         </div>
       </div>
-      <div class="field">
-        <label>처방 참고 사항</label>
+      <div class="field"><label>처방 참고 사항</label>
         <textarea id="prescriptionNote" placeholder="자유 입력"></textarea>
       </div>
     </div>
@@ -501,6 +441,7 @@
   </div>
 </dialog>
 
+<!-- 약 항목 수정 Dialog -->
 <dialog id="medEditDialog">
   <div class="modal-header"><h3>약 항목 수정</h3><button class="btn" id="closeMedDialogBtn">✕ 닫기</button></div>
   <div class="modal-body">
@@ -520,6 +461,34 @@
   </div>
 </dialog>
 
+<!-- 공유하기 Dialog -->
+<dialog id="shareDialog">
+  <div class="modal-header">
+    <h3 id="shareDialogTitle">공유하기</h3>
+    <button class="btn" id="closeShareDialogBtn">✕ 닫기</button>
+  </div>
+  <div class="modal-body" style="gap:0;">
+    <div id="shareCurrentList"></div>
+    <div class="divider" style="margin:10px 0;"></div>
+    <div class="section-title" style="margin-bottom:8px;">공유할 주치의 선택</div>
+    <div id="shareDoctorList" style="display:flex;flex-direction:column;gap:6px;"></div>
+  </div>
+</dialog>
+
+<!-- 전과하기 Dialog -->
+<dialog id="transferDialog">
+  <div class="modal-header">
+    <h3>전과하기</h3>
+    <button class="btn" id="closeTransferDialogBtn">✕ 닫기</button>
+  </div>
+  <div class="modal-body">
+    <div id="transferCurrentInfo" style="padding:10px 12px;background:#f8fafc;border-radius:10px;font-size:13px;border:1px solid var(--line);"></div>
+    <div class="section-title" style="margin-top:4px;">새 주치의 선택</div>
+    <div id="transferDoctorList"></div>
+  </div>
+</dialog>
+
+<!-- 필기 모드 Dialog -->
 <dialog id="notepadDialog">
   <div class="modal-header" style="padding:12px 16px;">
     <h3 style="margin:0;font-size:16px;">✏ 필기 모드</h3>
@@ -529,20 +498,9 @@
     </div>
   </div>
   <div class="notepad-toolbar">
-    <div class="np-tool-group">
-      <label>색상</label>
-      <input type="color" id="penColor" value="#1a1a1a" title="펜/텍스트 색상">
-    </div>
-    <div class="np-tool-group" id="penSizeGroup">
-      <label>굵기</label>
-      <input type="range" id="penSize" min="1" max="24" value="3">
-      <span id="penSizeVal">3</span>
-    </div>
-    <div class="np-tool-group" id="textSizeGroup">
-      <label>글자크기</label>
-      <input type="range" id="textSizeSlider" min="8" max="48" value="18">
-      <span id="textSizeVal">18</span>px
-    </div>
+    <div class="np-tool-group"><label>색상</label><input type="color" id="penColor" value="#1a1a1a"></div>
+    <div class="np-tool-group" id="penSizeGroup"><label>굵기</label><input type="range" id="penSize" min="1" max="24" value="3"><span id="penSizeVal">3</span></div>
+    <div class="np-tool-group" id="textSizeGroup"><label>글자크기</label><input type="range" id="textSizeSlider" min="8" max="48" value="18"><span id="textSizeVal">18</span>px</div>
     <button class="np-btn active" id="penModeBtn">🖊 펜</button>
     <button class="np-btn" id="eraserModeBtn">🧹 지우개</button>
     <button class="np-btn" id="textModeBtn">⌨ 텍스트</button>
@@ -555,7 +513,6 @@
   </div>
   <div class="notepad-body" id="notepadBody"></div>
 </dialog>
-
 <script type="module">
   import { initializeApp }    from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js';
   import {
@@ -566,9 +523,23 @@
     serverTimestamp, query, orderBy
   } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js';
 
-  const ALLOWED_EMAILS = [
-    'kternalnr@gmail.com'
+  /* ══ 주치의 목록 ══ */
+  const DOCTORS = [
+    { name:'강유진', email:'123@gmail.com',          dept:'재활의학과' },
+    { name:'김성훈', email:'kimsh.rehab@gmail.com',  dept:'재활의학과' },
+    { name:'이승환', email:'lsh.rehab@gmail.com',    dept:'재활의학과' },
+    { name:'이현아', email:'lha.rehab@gmail.com',    dept:'재활의학과' },
+    { name:'김기태', email:'kternalnr@gmail.com',    dept:'신경과'    },
+    { name:'박기홍', email:'pkh.neuro@gmail.com',    dept:'신경과'    },
+    { name:'고명범', email:'kmb.internal@gmail.com', dept:'내과'      },
   ];
+  const DEPARTMENTS = [...new Set(DOCTORS.map(d => d.dept))];
+  const ALLOWED_EMAILS = DOCTORS.map(d => d.email);
+  let currentDoctor = null;
+
+  function getDoctorByEmail(email) {
+    return DOCTORS.find(d => d.email === email) || null;
+  }
 
   const firebaseConfig = {
     apiKey:            'AIzaSyDjT1nOr92qMQrwSq7fyWoe8Dkj0zf5Pcs',
@@ -579,21 +550,25 @@
     appId:             '1:1002723577041:web:2afff99e05fc1a92a389f0'
   };
 
-  const app  = initializeApp(firebaseConfig);
-  const db   = getFirestore(app);
-  const auth = getAuth(app);
+  const fbApp = initializeApp(firebaseConfig);
+  const db    = getFirestore(fbApp);
+  const auth  = getAuth(fbApp);
 
   const CURRENT_YEAR     = new Date().getFullYear();
   const SOFT_DELETE_DAYS = 14;
 
   const el = id => document.getElementById(id);
 
+  /* ══ 인증 ══ */
   function unlockApp(user) {
-    sessionStorage.setItem('presc-auth', 'ok');
+    currentDoctor = getDoctorByEmail(user.email);
+    sessionStorage.setItem('presc-auth','ok');
     el('lockScreen').classList.add('hidden');
     el('mainApp').style.display = '';
-    el('authUserBadge').textContent = '👤 ' + (user.displayName || user.email);
+    const deptInfo = currentDoctor ? ` · ${currentDoctor.dept}` : '';
+    el('authUserBadge').textContent = '👤 ' + (user.displayName || user.email) + deptInfo;
     refreshPrintDate();
+    renderViewSubBar();
     loadPatients();
   }
 
@@ -608,7 +583,6 @@
     if (!ALLOWED_EMAILS.includes(user.email)) {
       signOut(auth);
       el('loginError').textContent = `접근 권한이 없는 계정입니다: ${user.email}`;
-      el('lockFooter').textContent = '';
       return;
     }
     unlockApp(user);
@@ -618,55 +592,52 @@
     el('loginError').textContent = '';
     el('lockFooter').textContent = '로그인 중…';
     try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      await signInWithPopup(auth, new GoogleAuthProvider());
     } catch(err) {
       el('lockFooter').textContent = '';
-      if (err.code !== 'auth/popup-closed-by-user') {
+      if (err.code !== 'auth/popup-closed-by-user')
         el('loginError').textContent = '로그인 실패: ' + err.message;
-      }
     }
   });
-
   el('logoutBtn').addEventListener('click', doLogout);
 
+  /* ══ KST ══ */
   function getKSTDateString() {
-    const kst  = new Date(Date.now() + 9 * 3600000);
+    const kst = new Date(Date.now() + 9*3600000);
     const days = ['일','월','화','수','목','금','토'];
     return `${kst.getUTCFullYear()}.${kst.getUTCMonth()+1}.${kst.getUTCDate()}(${days[kst.getUTCDay()]})`;
   }
+  function getKSTDateOnly() {
+    return new Date(Date.now()+9*3600000).toISOString().split('T')[0];
+  }
+  function isTodayKST(d) { return !!d && d === getKSTDateOnly(); }
   function refreshPrintDate() { el('printDate').textContent = getKSTDateString(); }
   el('printBtn').addEventListener('click', () => { refreshPrintDate(); window.print(); });
 
+  /* ══ State ══ */
   const state = {
     patients:[], medicationsDraft:[],
     sort:'roomAsc', showDeleted:false,
-    editingId:null, medEditingIndex:null
+    editingId:null, medEditingIndex:null,
+    viewMode:'all', viewDoctorFilter:null, viewDeptFilter:null,
+    sharePatientId:null, transferPatientId:null
   };
 
   const formEls = {
-    roomRaw:                   el('roomRaw'),
-    roomSortKey:               el('roomSortKey'),
-    bedNo:                     el('bedNo'),
-    patientNo:                 el('patientNo'),
-    patientName:               el('patientName'),
-    sex:                       el('sex'),
-    birthDate:                 el('birthDate'),
-    pastedAge:                 el('pastedAge'),
-    admissionDate:             el('admissionDate'),
-    expectedDischargeDate:     el('expectedDischargeDate'),
-    primaryDiagnosis:          el('primaryDiagnosis'),
-    primaryDiagnosisOnsetDate: el('primaryDiagnosisOnsetDate'),
-    lastLabDate:               el('lastLabDate'),
-    prevLabDate:               el('prevLabDate'),
-    recentMedChangeInput:      el('recentMedChangeInput'),
-    prescriptionNote:          el('prescriptionNote')
+    roomRaw:el('roomRaw'), roomSortKey:el('roomSortKey'), bedNo:el('bedNo'),
+    patientNo:el('patientNo'), patientName:el('patientName'), sex:el('sex'),
+    birthDate:el('birthDate'), pastedAge:el('pastedAge'),
+    admissionDate:el('admissionDate'), expectedDischargeDate:el('expectedDischargeDate'),
+    primaryDiagnosis:el('primaryDiagnosis'), primaryDiagnosisOnsetDate:el('primaryDiagnosisOnsetDate'),
+    lastLabDate:el('lastLabDate'), prevLabDate:el('prevLabDate'),
+    recentMedChangeInput:el('recentMedChangeInput'), prescriptionNote:el('prescriptionNote'),
+    patientDept:el('patientDept'), patientDoctorDisplay:el('patientDoctorDisplay')
   };
 
+  /* ══ Firestore ══ */
   function saveLocal() {
     localStorage.setItem('prescription-helper-patients', JSON.stringify(state.patients));
   }
-
   async function loadPatients() {
     try {
       const snap = await getDocs(query(collection(db,'patients'), orderBy('roomSortKey','asc')));
@@ -682,187 +653,162 @@
     }
   }
 
+  /* ══ View Bar ══ */
+  function renderViewSubBar() {
+    const bar = el('viewSubBar');
+    bar.innerHTML = '';
+    if (state.viewMode === 'other') {
+      bar.style.display = 'flex';
+      const lbl = document.createElement('span');
+      lbl.className = 'view-label'; lbl.textContent = '주치의:';
+      bar.appendChild(lbl);
+      DOCTORS.forEach(doc => {
+        const btn = document.createElement('button');
+        btn.className = 'view-sub-btn' + (state.viewDoctorFilter === doc.email ? ' active' : '');
+        btn.textContent = `${doc.name} (${doc.dept.slice(0,2)})`;
+        btn.title = doc.dept + ' · ' + doc.email;
+        btn.addEventListener('click', () => {
+          state.viewDoctorFilter = (state.viewDoctorFilter === doc.email) ? null : doc.email;
+          renderViewSubBar(); render();
+        });
+        bar.appendChild(btn);
+      });
+    } else if (state.viewMode === 'dept') {
+      bar.style.display = 'flex';
+      const lbl = document.createElement('span');
+      lbl.className = 'view-label'; lbl.textContent = '진료과:';
+      bar.appendChild(lbl);
+      DEPARTMENTS.forEach(dept => {
+        const btn = document.createElement('button');
+        btn.className = 'view-sub-btn' + (state.viewDeptFilter === dept ? ' active' : '');
+        btn.textContent = dept;
+        btn.addEventListener('click', () => {
+          state.viewDeptFilter = (state.viewDeptFilter === dept) ? null : dept;
+          renderViewSubBar(); render();
+        });
+        bar.appendChild(btn);
+      });
+    } else {
+      bar.style.display = 'none';
+    }
+  }
+
+  document.querySelectorAll('.view-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      state.viewMode = tab.dataset.view;
+      state.viewDoctorFilter = null;
+      state.viewDeptFilter = null;
+      document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      renderViewSubBar(); render();
+    });
+  });
+
+  function filterByView(list) {
+    if (!currentDoctor) return list;
+    switch (state.viewMode) {
+      case 'mine':
+        return list.filter(p =>
+          !p.attendingDoctorEmail ||
+          p.attendingDoctorEmail === currentDoctor.email ||
+          (Array.isArray(p.sharedWith) && p.sharedWith.includes(currentDoctor.email))
+        );
+      case 'other':
+        return state.viewDoctorFilter
+          ? list.filter(p => p.attendingDoctorEmail === state.viewDoctorFilter)
+          : list;
+      case 'dept':
+        return state.viewDeptFilter
+          ? list.filter(p => p.department === state.viewDeptFilter)
+          : list;
+      default:
+        return list;
+    }
+  }
+
+  /* ══ 처방 오더 체크 ══ */
   function getThisMonday() {
-    const kst  = new Date(Date.now() + 9 * 3600000);
-    const day  = kst.getUTCDay();
-    const diff = day === 0 ? -6 : 1 - day;
-    kst.setUTCDate(kst.getUTCDate() + diff);
+    const kst = new Date(Date.now()+9*3600000);
+    const day = kst.getUTCDay();
+    const diff = day===0?-6:1-day;
+    kst.setUTCDate(kst.getUTCDate()+diff);
     return kst.toISOString().split('T')[0];
   }
   function isCheckedThisWeek(p) {
-    return !!(p.prescriptionNoteCheckedWeek && p.prescriptionNoteCheckedWeek === getThisMonday());
+    return !!(p.prescriptionNoteCheckedWeek && p.prescriptionNoteCheckedWeek===getThisMonday());
   }
 
+  /* ══ 파싱 헬퍼 ══ */
   function padRoomSort(s) { return String(s||'').replace(/\D/g,'').padStart(4,'0').slice(-4); }
   function parseRoomRaw(r) {
-    const t = String(r||'').trim();
-    const [rp='',bp=''] = t.split('-');
+    const t=String(r||'').trim(); const [rp='',bp='']=t.split('-');
     return { roomRaw:t, roomSortKey:padRoomSort(rp), bedNo:bp };
   }
   function parseKoreanShortDate(text) {
-    const t = String(text||'').trim();
-    if (!t) return '';
-    if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return t;
-    const m = t.match(/^(\d{1,2})[./-](\d{1,2})$/);
-    if (!m) return '';
-    const mm = String(m[1]).padStart(2,'0');
-    const dd = String(m[2]).padStart(2,'0');
-    const candidate = `${CURRENT_YEAR}-${mm}-${dd}`;
-    const today = new Date(); today.setHours(0,0,0,0);
-    const parsed = new Date(candidate);
-    if (parsed > today) {
-      return `${CURRENT_YEAR - 1}-${mm}-${dd}`;
-    }
-    return candidate;
+    const t=String(text||'').trim(); if(!t)return'';
+    if(/^\d{4}-\d{2}-\d{2}$/.test(t))return t;
+    const m=t.match(/^(\d{1,2})[./-](\d{1,2})$/); if(!m)return'';
+    const mm=String(m[1]).padStart(2,'0'), dd=String(m[2]).padStart(2,'0');
+    const candidate=`${CURRENT_YEAR}-${mm}-${dd}`;
+    const today=new Date(); today.setHours(0,0,0,0);
+    return new Date(candidate)>today ? `${CURRENT_YEAR-1}-${mm}-${dd}` : candidate;
   }
-  function calcAge(birthDate, pastedAge) {
-    if (birthDate) {
+  function calcAge(birthDate,pastedAge) {
+    if(birthDate){
       const today=new Date(), birth=new Date(birthDate);
       let age=today.getFullYear()-birth.getFullYear();
       const mo=today.getMonth()-birth.getMonth();
-      if (mo<0||(mo===0&&today.getDate()<birth.getDate())) age--;
+      if(mo<0||(mo===0&&today.getDate()<birth.getDate()))age--;
       return age>=0?age:'';
     }
     return pastedAge||'';
   }
   function calcStayDays(ad) {
-    if (!ad) return '';
+    if(!ad)return'';
     const diff=Math.floor((Date.now()-new Date(ad+'T00:00:00').getTime())/86400000);
     return diff>=0?diff+1:0;
   }
-  function fmtDate(d) { return d||''; }
-  function parsePatientLine(line) {
+  function fmtDate(d){return d||'';}
+  function parsePatientLine(line){
     const parts=String(line||'').split('\t').map(v=>v.trim()).filter(Boolean);
-    if (parts.length<6) return null;
+    if(parts.length<6)return null;
     const [roomRaw,patientNo,patientName,sex,ageText,admissionText]=parts;
-    return {...parseRoomRaw(roomRaw),patientNo,patientName,sex,
+    return{...parseRoomRaw(roomRaw),patientNo,patientName,sex,
       pastedAge:Number(ageText)||'',admissionDate:parseKoreanShortDate(admissionText)};
   }
-  function parseDiagnosisLine(line) {
-    const parts=String(line||'').split('\t').map(v=>v.trim()).filter(Boolean);
-    if (!parts.length) return null;
+  function parseDiagnosisLine(line){
+    const parts=String(line||'').split('\t').map(v=>v.trim()).filter(Boolean); if(!parts.length)return null;
     let onset=''; const names=[];
     parts.forEach(p=>{if(/^\d{4}-\d{2}-\d{2}$/.test(p))onset=p;else names.push(p);});
-    return {primaryDiagnosis:[...new Set(names)][0]||'',primaryDiagnosisOnsetDate:onset};
+    return{primaryDiagnosis:[...new Set(names)][0]||'',primaryDiagnosisOnsetDate:onset};
   }
-
-  const VISIT_KEY = 'visit-checks-v1';
-
-  function getKSTDateOnly() {
-    const kst = new Date(Date.now() + 9 * 3600000);
-    return kst.toISOString().split('T')[0];
-  }
-
-  function isTodayKST(dateStr) {
-    return !!dateStr && dateStr === getKSTDateOnly();
-  }
-
-  function scrollNotepadToFloor(floor) {
-    const body = el('notepadBody');
-    const anchor = body.querySelector(`.np-floor-anchor[data-floor="${floor}"]`);
-    const nav = body.querySelector('.np-floor-nav');
-    if (!body || !anchor) return;
-    const extraTop = (nav?.offsetHeight || 0) + 6;
-    const top =
-      body.scrollTop +
-      anchor.getBoundingClientRect().top -
-      body.getBoundingClientRect().top -
-      extraTop;
-    body.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-  }
-
-  function getVisitChecks() {
-    try {
-      const raw = localStorage.getItem(VISIT_KEY);
-      if (!raw) return {};
-      const data = JSON.parse(raw);
-      if (data.date !== getKSTDateOnly()) return {};
-      return data.checks || {};
-    } catch(e) { return {}; }
-  }
-
-  function saveVisitCheck(patientId, checked) {
-    const today = getKSTDateOnly();
-    const checks = getVisitChecks();
-    if (checked) checks[patientId] = true;
-    else delete checks[patientId];
-    localStorage.setItem(VISIT_KEY, JSON.stringify({ date: today, checks }));
-  }
-
-  function updateFloorSummary() {
-    const checks = getVisitChecks();
-    const active = state.patients.filter(p => !p.deleted);
-    const floorMap = {};
-    const labTodayNames = [];
-
-    active.forEach(p => {
-      const rs = p.roomSortKey || '';
-      if (rs) {
-        const floorNum = parseInt(rs.slice(0, 2), 10);
-        if (floorNum) {
-          if (!floorMap[floorNum]) floorMap[floorNum] = { total: 0, checked: 0, unchecked: 0 };
-          floorMap[floorNum].total++;
-          if (checks[p.id]) floorMap[floorNum].checked++;
-          else floorMap[floorNum].unchecked++;
-        }
-      }
-      if (isTodayKST(p.lastLabDate)) {
-        labTodayNames.push(p.patientName);
-      }
-    });
-
-    const floors = Object.keys(floorMap).sort((a, b) => a - b);
-    const summaryEl = el('floorSummary');
-
-    if (!floors.length) { summaryEl.textContent = ''; return; }
-
-    let summaryText = '(' + floors.map(f => `${f}층: ${floorMap[f].unchecked}명`).join(' / ') + ')';
-    if (labTodayNames.length > 0) {
-      summaryText += ` | 금일 lab 결과: ${labTodayNames.join(', ')}`;
-    }
-    summaryEl.textContent = summaryText;
-  }
-
-  function mergeNoteLines(lines) {
-    const result = [];
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const next = (i + 1 < lines.length) ? lines[i + 1] : null;
-      if (next && /^[『「【]/.test(next)) {
-        const name     = line.split('\t')[0].trim();
-        const nextCols = next.split('\t').slice(1).join('\t');
-        result.push(name + '\t' + nextCols);
-        i++;
-      } else {
-        result.push(line);
-      }
+  function mergeNoteLines(lines){
+    const result=[];
+    for(let i=0;i<lines.length;i++){
+      const line=lines[i], next=(i+1<lines.length)?lines[i+1]:null;
+      if(next&&/^[『「【]/.test(next)){
+        result.push(line.split('\t')[0].trim()+'\t'+next.split('\t').slice(1).join('\t')); i++;
+      } else result.push(line);
     }
     return result;
   }
-
-  function filterDCPairs(lines) {
+  function filterDCPairs(lines){
     const dcNames=new Set();
-    lines.forEach(line=>{
-      const m=line.match(/^▶?\s*DC\s+(.*)/i);
-      if(m){const n=m[1].split('\t')[0].trim().toLowerCase();if(n)dcNames.add(n);}
-    });
-    return lines.filter(line=>{
-      if(/^▶?\s*DC\s+/i.test(line))return false;
-      return !dcNames.has(line.split('\t')[0].trim().toLowerCase());
-    });
+    lines.forEach(line=>{const m=line.match(/^▶?\s*DC\s+(.*)/i);if(m){const n=m[1].split('\t')[0].trim().toLowerCase();if(n)dcNames.add(n);}});
+    return lines.filter(line=>{if(/^▶?\s*DC\s+/i.test(line))return false;return!dcNames.has(line.split('\t')[0].trim().toLowerCase());});
   }
-  function splitUnit(text) {
+  function splitUnit(text){
     const m=String(text||'').trim().match(/^([0-9]*\.?[0-9]+)\s*(.*)$/);
     if(!m)return{num:1,unit:String(text||'').trim()};
     return{num:Number(m[1]),unit:(m[2]||'').trim()};
   }
-  function buildDoseText(baseUnitText,multiplier) {
+  function buildDoseText(baseUnitText,multiplier){
     const{num,unit}=splitUnit(baseUnitText);
     const result=(num||0)*Number(multiplier||0);
     const safe=Number.isInteger(result)?String(result):String(Number(result.toFixed(2)));
     return unit?`${safe}${unit}`:safe;
   }
-  function parseMedicationLine(line) {
+  function parseMedicationLine(line){
     const trimmed=String(line||'').split('\t').map(v=>v.trim());
     const name=trimmed[0]||''; if(!name)return null;
     const starIdx=trimmed.findIndex(v=>v==='*');
@@ -871,110 +817,123 @@
     let baseUnitText='';
     for(let i=1;i<trimmed.length;i++){
       if(/^[0-9]*\.?[0-9]+\s*[가-힣a-zA-Z]+$/.test(trimmed[i])||
-         /^[0-9]*\.?[0-9]+(ml|정|캡슐|포|앰플|병|IU|mg|g)$/i.test(trimmed[i])){
-        baseUnitText=trimmed[i];break;
-      }
+         /^[0-9]*\.?[0-9]+(ml|정|캡슐|포|앰플|병|IU|mg|g)$/i.test(trimmed[i])){baseUnitText=trimmed[i];break;}
     }
     if(!baseUnitText)baseUnitText='1회';
     const doseText=buildDoseText(baseUnitText,multiplier);
     return{id:crypto.randomUUID(),name,baseUnitText,multiplier,doseText,frequency,
       displayText:`${name} ${doseText} ${frequency}`.trim(),rawLine:line};
   }
-  function refreshMedDraftPills() {
+  function refreshMedDraftPills(){
     const root=el('medPills'); root.innerHTML='';
     state.medicationsDraft.forEach((med,i)=>{
-      const wrap=document.createElement('span');
-      wrap.className='pill';
-      wrap.style.display='inline-flex';wrap.style.alignItems='center';wrap.style.gap='4px';
-
-      const nameSpan=document.createElement('span');
-      nameSpan.textContent=med.displayText;
-      nameSpan.style.cursor='pointer';
-      nameSpan.title='클릭하여 수정';
+      const wrap=document.createElement('span'); wrap.className='pill';
+      wrap.style.cssText='display:inline-flex;align-items:center;gap:4px;';
+      const nameSpan=document.createElement('span'); nameSpan.textContent=med.displayText;
+      nameSpan.style.cursor='pointer'; nameSpan.title='클릭하여 수정';
       nameSpan.addEventListener('click',()=>openMedEditor(i));
-
-      const xBtn=document.createElement('button');
-      xBtn.type='button';
-      xBtn.textContent='✕';
+      const xBtn=document.createElement('button'); xBtn.type='button'; xBtn.textContent='✕';
       xBtn.style.cssText='border:none;background:none;cursor:pointer;color:#9ca3af;font-size:11px;padding:0;line-height:1;font-weight:700;';
-      xBtn.title='삭제';
-      xBtn.addEventListener('click',(e)=>{
-        e.stopPropagation();
-        state.medicationsDraft.splice(i,1);
-        refreshMedDraftPills();
-      });
-
-      wrap.appendChild(nameSpan);
-      wrap.appendChild(xBtn);
-      root.appendChild(wrap);
+      xBtn.addEventListener('click',(e)=>{e.stopPropagation();state.medicationsDraft.splice(i,1);refreshMedDraftPills();});
+      wrap.appendChild(nameSpan); wrap.appendChild(xBtn); root.appendChild(wrap);
     });
   }
 
-  function buildPatientPayload() {
+  /* ══ Visit Checks ══ */
+  const VISIT_KEY='visit-checks-v1';
+  function getVisitChecks(){
+    try{const raw=localStorage.getItem(VISIT_KEY);if(!raw)return{};
+      const data=JSON.parse(raw);if(data.date!==getKSTDateOnly())return{};return data.checks||{};}
+    catch(e){return{};}
+  }
+  function saveVisitCheck(patientId,checked){
+    const checks=getVisitChecks(); if(checked)checks[patientId]=true; else delete checks[patientId];
+    localStorage.setItem(VISIT_KEY,JSON.stringify({date:getKSTDateOnly(),checks}));
+  }
+  function updateFloorSummary(){
+    const checks=getVisitChecks(), active=state.patients.filter(p=>!p.deleted);
+    const floorMap={}, labTodayNames=[];
+    active.forEach(p=>{
+      const rs=p.roomSortKey||''; if(rs){
+        const f=parseInt(rs.slice(0,2),10); if(f){
+          if(!floorMap[f])floorMap[f]={total:0,unchecked:0};
+          floorMap[f].total++; if(!checks[p.id])floorMap[f].unchecked++;
+        }
+      }
+      if(isTodayKST(p.lastLabDate))labTodayNames.push(p.patientName);
+    });
+    const floors=Object.keys(floorMap).sort((a,b)=>a-b);
+    const summaryEl=el('floorSummary'); if(!floors.length){summaryEl.textContent='';return;}
+    let txt='('+floors.map(f=>`${f}층: ${floorMap[f].unchecked}명`).join(' / ')+')';
+    if(labTodayNames.length)txt+=` | 금일 lab: ${labTodayNames.join(', ')}`;
+    summaryEl.textContent=txt;
+  }
+
+  /* ══ CRUD ══ */
+  function buildPatientPayload(){
+    const existing = state.editingId ? state.patients.find(p=>p.id===state.editingId) : null;
+    const dept = formEls.patientDept.value || (currentDoctor?.dept||'');
+    const attEmail = existing?.attendingDoctorEmail || currentDoctor?.email || '';
+    const attName  = getDoctorByEmail(attEmail)?.name || existing?.attendingDoctorName || '';
     return {
       roomRaw:formEls.roomRaw.value.trim(),
       roomSortKey:formEls.roomSortKey.value.trim()||padRoomSort(formEls.roomRaw.value.split('-')[0]||''),
-      bedNo:formEls.bedNo.value.trim(),
-      patientNo:formEls.patientNo.value.trim(),
-      patientName:formEls.patientName.value.trim(),
-      sex:formEls.sex.value,
-      birthDate:formEls.birthDate.value||'',
-      pastedAge:formEls.pastedAge.value?Number(formEls.pastedAge.value):'',
-      admissionDate:formEls.admissionDate.value||'',
-      expectedDischargeDate:formEls.expectedDischargeDate.value||'',
-      primaryDiagnosis:formEls.primaryDiagnosis.value.trim(),
-      primaryDiagnosisOnsetDate:formEls.primaryDiagnosisOnsetDate.value||'',
-      medications:state.medicationsDraft,
-      recentMedChanges:formEls.recentMedChangeInput.value.trim(),
-      lastLabDate:formEls.lastLabDate.value||'',
-      prevLabDate:formEls.prevLabDate.value||'',
+      bedNo:formEls.bedNo.value.trim(), patientNo:formEls.patientNo.value.trim(),
+      patientName:formEls.patientName.value.trim(), sex:formEls.sex.value,
+      birthDate:formEls.birthDate.value||'', pastedAge:formEls.pastedAge.value?Number(formEls.pastedAge.value):'',
+      admissionDate:formEls.admissionDate.value||'', expectedDischargeDate:formEls.expectedDischargeDate.value||'',
+      primaryDiagnosis:formEls.primaryDiagnosis.value.trim(), primaryDiagnosisOnsetDate:formEls.primaryDiagnosisOnsetDate.value||'',
+      department:dept, attendingDoctorEmail:attEmail, attendingDoctorName:attName,
+      sharedWith: existing?.sharedWith || [],
+      medications:state.medicationsDraft, recentMedChanges:formEls.recentMedChangeInput.value.trim(),
+      lastLabDate:formEls.lastLabDate.value||'', prevLabDate:formEls.prevLabDate.value||'',
       prescriptionNote:formEls.prescriptionNote.value.trim(),
-      deleted:false,deletedAt:'',expireAt:'',
-      updatedAt:new Date().toISOString()
+      deleted:false,deletedAt:'',expireAt:'', updatedAt:new Date().toISOString()
     };
   }
-  function fillForm(patient) {
+  function fillForm(patient){
     state.editingId=patient.id;
-    formEls.roomRaw.value=patient.roomRaw||'';
-    formEls.roomSortKey.value=patient.roomSortKey||'';
-    formEls.bedNo.value=patient.bedNo||'';
-    formEls.patientNo.value=patient.patientNo||'';
-    formEls.patientName.value=patient.patientName||'';
-    formEls.sex.value=patient.sex||'';
-    formEls.birthDate.value=patient.birthDate||'';
-    formEls.pastedAge.value=patient.pastedAge||'';
-    formEls.admissionDate.value=patient.admissionDate||'';
-    formEls.expectedDischargeDate.value=patient.expectedDischargeDate||'';
-    formEls.primaryDiagnosis.value=patient.primaryDiagnosis||'';
-    formEls.primaryDiagnosisOnsetDate.value=patient.primaryDiagnosisOnsetDate||'';
-    formEls.lastLabDate.value=patient.lastLabDate||'';
-    formEls.prevLabDate.value=patient.prevLabDate||'';
+    formEls.roomRaw.value=patient.roomRaw||''; formEls.roomSortKey.value=patient.roomSortKey||'';
+    formEls.bedNo.value=patient.bedNo||''; formEls.patientNo.value=patient.patientNo||'';
+    formEls.patientName.value=patient.patientName||''; formEls.sex.value=patient.sex||'';
+    formEls.birthDate.value=patient.birthDate||''; formEls.pastedAge.value=patient.pastedAge||'';
+    formEls.admissionDate.value=patient.admissionDate||''; formEls.expectedDischargeDate.value=patient.expectedDischargeDate||'';
+    formEls.primaryDiagnosis.value=patient.primaryDiagnosis||''; formEls.primaryDiagnosisOnsetDate.value=patient.primaryDiagnosisOnsetDate||'';
+    formEls.lastLabDate.value=patient.lastLabDate||''; formEls.prevLabDate.value=patient.prevLabDate||'';
     formEls.prescriptionNote.value=patient.prescriptionNote||'';
+    formEls.patientDept.value=patient.department||'';
+    const docName=patient.attendingDoctorName||getDoctorByEmail(patient.attendingDoctorEmail)?.name||'미지정';
+    formEls.patientDoctorDisplay.value=docName;
     if(typeof patient.recentMedChanges==='string')formEls.recentMedChangeInput.value=patient.recentMedChanges;
     else if(Array.isArray(patient.recentMedChanges))formEls.recentMedChangeInput.value=patient.recentMedChanges.map(m=>m.summary).join('\n');
     else formEls.recentMedChangeInput.value='';
     state.medicationsDraft=Array.isArray(patient.medications)?[...patient.medications]:[];
     refreshMedDraftPills();
-    el('pastePatient').value='';el('pasteDiagnosis').value='';el('pasteMeds').value='';
+    el('pastePatient').value=''; el('pasteDiagnosis').value=''; el('pasteMeds').value='';
     el('patientFormTitle').textContent=`환자 수정 — ${patient.patientName||''}`;
     el('patientFormDialog').showModal();
   }
-  function openNewPatientForm() {
+  function openNewPatientForm(){
     state.editingId=null;
     Object.values(formEls).forEach(inp=>inp.value='');
-    el('pastePatient').value='';el('pasteDiagnosis').value='';el('pasteMeds').value='';
-    state.medicationsDraft=[];refreshMedDraftPills();
+    if(currentDoctor){
+      formEls.patientDept.value=currentDoctor.dept;
+      formEls.patientDoctorDisplay.value=currentDoctor.name;
+    }
+    el('pastePatient').value=''; el('pasteDiagnosis').value=''; el('pasteMeds').value='';
+    state.medicationsDraft=[]; refreshMedDraftPills();
     el('patientFormTitle').textContent='환자 등록';
     el('patientFormDialog').showModal();
   }
-  function resetForm() {
+  function resetForm(){
     state.editingId=null;
     Object.values(formEls).forEach(inp=>inp.value='');
-    el('pastePatient').value='';el('pasteDiagnosis').value='';el('pasteMeds').value='';
-    state.medicationsDraft=[];refreshMedDraftPills();
+    if(currentDoctor){formEls.patientDept.value=currentDoctor.dept;formEls.patientDoctorDisplay.value=currentDoctor.name;}
+    el('pastePatient').value=''; el('pasteDiagnosis').value=''; el('pasteMeds').value='';
+    state.medicationsDraft=[]; refreshMedDraftPills();
     el('patientFormTitle').textContent='환자 등록';
   }
-  async function savePatient() {
+  async function savePatient(){
     const payload=buildPatientPayload();
     if(!payload.patientName||!payload.patientNo){alert('환자 이름과 환자 번호는 필수입니다.');return;}
     if(state.editingId){
@@ -989,33 +948,125 @@
       const id=crypto.randomUUID();
       const created={id,...payload,prescriptionNoteCheckedWeek:''};
       state.patients.push(created);
-      try{
-        const{id:_,...rest}=created;
-        await setDoc(doc(db,'patients',id),{...rest,createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
-      }catch(err){console.error(err);}
+      try{const{id:_,...rest}=created;
+        await setDoc(doc(db,'patients',id),{...rest,createdAt:serverTimestamp(),updatedAt:serverTimestamp()});}
+      catch(err){console.error(err);}
     }
-    saveLocal();
-    el('patientFormDialog').close();
-    resetForm();render();
+    saveLocal(); el('patientFormDialog').close(); resetForm(); render();
   }
-  async function softDeletePatient(id) {
-    const p=state.patients.find(p=>p.id===id);if(!p)return;
-    const deletedAt=new Date();
-    const expireAt=new Date(deletedAt.getTime()+SOFT_DELETE_DAYS*86400000);
+  async function softDeletePatient(id){
+    const p=state.patients.find(p=>p.id===id); if(!p)return;
+    const deletedAt=new Date(), expireAt=new Date(deletedAt.getTime()+SOFT_DELETE_DAYS*86400000);
     Object.assign(p,{deleted:true,deletedAt:deletedAt.toISOString(),expireAt:expireAt.toISOString()});
     try{await updateDoc(doc(db,'patients',id),{deleted:true,deletedAt:p.deletedAt,expireAt:p.expireAt,updatedAt:serverTimestamp()});}
     catch(err){console.error(err);}
-    saveLocal();render();
+    saveLocal(); render();
   }
-  async function restorePatient(id) {
-    const p=state.patients.find(p=>p.id===id);if(!p)return;
+  async function restorePatient(id){
+    const p=state.patients.find(p=>p.id===id); if(!p)return;
     Object.assign(p,{deleted:false,deletedAt:'',expireAt:''});
     try{await updateDoc(doc(db,'patients',id),{deleted:false,deletedAt:'',expireAt:'',updatedAt:serverTimestamp()});}
     catch(err){console.error(err);}
-    saveLocal();render();
+    saveLocal(); render();
   }
 
-  function sortPatients(list) {
+  /* ══ 공유하기 ══ */
+  function openShareDialog(patientId){
+    state.sharePatientId=patientId;
+    const p=state.patients.find(p=>p.id===patientId); if(!p)return;
+    el('shareDialogTitle').textContent=`공유하기 — ${p.patientName}`;
+    renderShareDialogContent(p);
+    el('shareDialog').showModal();
+  }
+  function renderShareDialogContent(p){
+    const sharedWith=Array.isArray(p.sharedWith)?p.sharedWith:[];
+    // 현재 공유 목록
+    const curList=el('shareCurrentList'); curList.innerHTML='';
+    const secTitle=document.createElement('div');
+    secTitle.className='section-title'; secTitle.style.marginBottom='8px';
+    secTitle.textContent=sharedWith.length?'현재 공유 중인 주치의':'현재 공유 중인 주치의 없음';
+    curList.appendChild(secTitle);
+    sharedWith.forEach(email=>{
+      const d=getDoctorByEmail(email); if(!d)return;
+      const row=document.createElement('div'); row.className='share-doctor-row';
+      const info=document.createElement('div');
+      info.innerHTML=`<div class="share-doctor-name">${d.name}</div><div class="share-doctor-sub">${d.dept}</div>`;
+      const stopBtn=document.createElement('button'); stopBtn.className='btn danger btn-sm'; stopBtn.textContent='공유 중지';
+      stopBtn.addEventListener('click',()=>unsharePatient(p.id,email));
+      row.appendChild(info); row.appendChild(stopBtn); curList.appendChild(row);
+    });
+    // 공유 추가 목록
+    const listEl=el('shareDoctorList'); listEl.innerHTML='';
+    const attEmail=p.attendingDoctorEmail;
+    DOCTORS.forEach(d=>{
+      if(d.email===attEmail)return; // 주치의 본인 제외
+      const isShared=sharedWith.includes(d.email);
+      const row=document.createElement('div'); row.className='share-doctor-row';
+      const info=document.createElement('div');
+      info.innerHTML=`<div class="share-doctor-name">${d.name} ${isShared?'<span class="shared-badge">공유중</span>':''}</div><div class="share-doctor-sub">${d.dept}</div>`;
+      const btn=document.createElement('button');
+      btn.className=isShared?'btn success btn-sm':'btn soft btn-sm';
+      btn.textContent=isShared?'✓ 공유중':'공유하기';
+      btn.addEventListener('click',()=>isShared?unsharePatient(p.id,d.email):sharePatient(p.id,d.email));
+      row.appendChild(info); row.appendChild(btn); listEl.appendChild(row);
+    });
+  }
+  async function sharePatient(patientId,doctorEmail){
+    const p=state.patients.find(p=>p.id===patientId); if(!p)return;
+    const sw=[...(Array.isArray(p.sharedWith)?p.sharedWith:[])];
+    if(sw.includes(doctorEmail))return;
+    sw.push(doctorEmail); p.sharedWith=sw; saveLocal();
+    try{await updateDoc(doc(db,'patients',patientId),{sharedWith:sw,updatedAt:serverTimestamp()});}
+    catch(err){console.error(err);}
+    renderShareDialogContent(p); render();
+  }
+  async function unsharePatient(patientId,doctorEmail){
+    const p=state.patients.find(p=>p.id===patientId); if(!p)return;
+    const sw=(Array.isArray(p.sharedWith)?p.sharedWith:[]).filter(e=>e!==doctorEmail);
+    p.sharedWith=sw; saveLocal();
+    try{await updateDoc(doc(db,'patients',patientId),{sharedWith:sw,updatedAt:serverTimestamp()});}
+    catch(err){console.error(err);}
+    renderShareDialogContent(p); render();
+  }
+  el('closeShareDialogBtn').addEventListener('click',()=>el('shareDialog').close());
+
+  /* ══ 전과하기 ══ */
+  function openTransferDialog(patientId){
+    state.transferPatientId=patientId;
+    const p=state.patients.find(p=>p.id===patientId); if(!p)return;
+    const curDoc=getDoctorByEmail(p.attendingDoctorEmail);
+    el('transferCurrentInfo').innerHTML=
+      `<strong>환자:</strong> ${p.patientName}&nbsp;&nbsp;|&nbsp;&nbsp;<strong>현재 주치의:</strong> ${curDoc?`${curDoc.name} (${curDoc.dept})`:'미지정'}`;
+    const listEl=el('transferDoctorList'); listEl.innerHTML='';
+    DOCTORS.forEach(d=>{
+      if(d.email===p.attendingDoctorEmail)return;
+      const btn=document.createElement('button'); btn.className='transfer-doctor-btn';
+      btn.innerHTML=`<span>${d.name}</span><span class="transfer-doctor-dept">${d.dept}</span>`;
+      btn.addEventListener('click',()=>{
+        if(confirm(`${p.patientName}의 주치의를 [${d.name}/${d.dept}]으로 변경하시겠습니까?`))
+          transferPatient(patientId,d.email);
+      });
+      listEl.appendChild(btn);
+    });
+    el('transferDialog').showModal();
+  }
+  async function transferPatient(patientId,newDoctorEmail){
+    const p=state.patients.find(p=>p.id===patientId); if(!p)return;
+    const newDoc=getDoctorByEmail(newDoctorEmail); if(!newDoc)return;
+    p.attendingDoctorEmail=newDoc.email; p.attendingDoctorName=newDoc.name; p.department=newDoc.dept;
+    // 새 주치의는 sharedWith에서 제거
+    if(Array.isArray(p.sharedWith)) p.sharedWith=p.sharedWith.filter(e=>e!==newDoctorEmail);
+    saveLocal();
+    try{await updateDoc(doc(db,'patients',patientId),{
+      attendingDoctorEmail:newDoc.email, attendingDoctorName:newDoc.name, department:newDoc.dept,
+      sharedWith:p.sharedWith||[], updatedAt:serverTimestamp()});}
+    catch(err){console.error(err);}
+    el('transferDialog').close(); render();
+  }
+  el('closeTransferDialogBtn').addEventListener('click',()=>el('transferDialog').close());
+
+  /* ══ Render ══ */
+  function sortPatients(list){
     const arr=[...list];
     switch(state.sort){
       case 'roomAsc':  arr.sort((a,b)=>String(a.roomSortKey||'').localeCompare(String(b.roomSortKey||'')));break;
@@ -1025,41 +1076,39 @@
     }
     return arr;
   }
-  function render() {
+  function render(){
     const tbody=el('patientTableBody');
     let rows=state.patients.filter(p=>state.showDeleted?p.deleted:!p.deleted);
+    rows=filterByView(rows);
     rows=sortPatients(rows);
     tbody.innerHTML='';
     rows.forEach((patient,idx)=>{
       const tr=document.createElement('tr');
       if(patient.deleted)tr.classList.add('deleted-row');
+      const isSharedToMe = currentDoctor &&
+        Array.isArray(patient.sharedWith) && patient.sharedWith.includes(currentDoctor.email);
+      if(isSharedToMe && state.viewMode==='mine') tr.classList.add('shared-patient-row');
       const age=calcAge(patient.birthDate,patient.pastedAge);
       const stayDays=calcStayDays(patient.admissionDate);
       const medsText=Array.isArray(patient.medications)?patient.medications.map(m=>m.displayText).join(', '):'';
       let changeText='';
       if(typeof patient.recentMedChanges==='string')changeText=patient.recentMedChanges;
       else if(Array.isArray(patient.recentMedChanges))changeText=patient.recentMedChanges.map(m=>m.summary).join('\n');
-
-      const isLabToday = isTodayKST(patient.lastLabDate);
-      const lastLabHtml = patient.lastLabDate
-        ? `<span class="${isLabToday ? 'lab-today' : ''}">${fmtDate(patient.lastLabDate)}</span>`
-        : '';
-
+      const isLabToday=isTodayKST(patient.lastLabDate);
+      const lastLabHtml=patient.lastLabDate?`<span class="${isLabToday?'lab-today':''}">${fmtDate(patient.lastLabDate)}</span>`:'';
+      const docTag=patient.attendingDoctorName?`<span class="doctor-tag">${patient.attendingDoctorName}</span>`:'';
+      const deptTag=patient.department?`<span class="dept-tag">${patient.department}</span>`:'';
+      const sharedBadge=isSharedToMe?'<div class="shared-badge">📤 공유됨</div>':'';
+      const isMyPatient=currentDoctor&&patient.attendingDoctorEmail===currentDoctor.email;
+      const ownBadge=isMyPatient?'<div class="own-badge">👤 나의 환자</div>':'';
       tr.innerHTML=`
         <td class="nowrap" style="text-align:center;padding:3px 2px;"></td>
-        <td>
-          <div class="cell-stack">
-            <span class="main">${patient.roomSortKey||''}${patient.bedNo?'-'+patient.bedNo:''}</span>
-            <span class="sub">${patient.patientNo||''}</span>
-          </div>
-        </td>
-        <td><div class="cell-stack">
-          <span class="main">${patient.patientName||''}</span>
-          <span class="sub">${patient.sex||''}${age!==''?'/'+age:''}</span>
-        </div></td>
+        <td><div class="cell-stack"><span class="main">${patient.roomSortKey||''}${patient.bedNo?'-'+patient.bedNo:''}</span><span class="sub">${patient.patientNo||''}</span></div></td>
+        <td><div class="cell-stack"><span class="main">${patient.patientName||''}</span><span class="sub">${patient.sex||''}${age!==''?'/'+age:''}</span></div></td>
+        <td><div class="cell-stack">${deptTag}${docTag}${sharedBadge}${ownBadge}</div></td>
         <td><div class="cell-stack">
           <span class="main">${fmtDate(patient.admissionDate)}${stayDays?' ('+stayDays+'일)':''}</span>
-          ${patient.expectedDischargeDate ? '<span class="discharge-date">→ '+fmtDate(patient.expectedDischargeDate)+'</span>' : '<span class="sub">→ 미정</span>'}
+          ${patient.expectedDischargeDate?'<span class="discharge-date">→ '+fmtDate(patient.expectedDischargeDate)+'</span>':'<span class="sub">→ 미정</span>'}
         </div></td>
         <td>${patient.primaryDiagnosis||''}${patient.primaryDiagnosisOnsetDate?'<div class="small">'+patient.primaryDiagnosisOnsetDate+'</div>':''}</td>
         <td class="meds-cell">${medsText}</td>
@@ -1069,36 +1118,23 @@
         <td class="nowrap"></td>
       `;
       const cells=tr.querySelectorAll('td');
+      // 회진 체크박스
       const noCell=cells[0];
-      const visitWrap=document.createElement('div');
-      visitWrap.className='visit-chk-wrap';
-      const vChk=document.createElement('input');
-      vChk.type='checkbox'; vChk.className='visit-chk';
-      const vChecks=getVisitChecks();
-      vChk.checked=!!vChecks[patient.id];
-      if(vChk.checked) tr.classList.add('visited');
-      vChk.addEventListener('change',()=>{
-        saveVisitCheck(patient.id, vChk.checked);
-        tr.classList.toggle('visited', vChk.checked);
-        updateFloorSummary();
-      });
-      const vNo=document.createElement('div');
-      vNo.className='visit-no'; vNo.textContent=idx+1;
-      visitWrap.appendChild(vChk); visitWrap.appendChild(vNo);
-      noCell.appendChild(visitWrap);
-      const noteTd=cells[8];
-      const noteText=document.createElement('div');
-      noteText.textContent=patient.prescriptionNote||'';
-      noteText.style.cssText='font-size:9px;line-height:1.4;';
-      noteTd.appendChild(noteText);
-      const checkRow=document.createElement('div');
-      checkRow.className='note-check-row';
-      const chk=document.createElement('input');
-      chk.type='checkbox';chk.id=`chk-${patient.id}`;
-      const checked=isCheckedThisWeek(patient);
-      chk.checked=checked;
-      const lbl=document.createElement('label');
-      lbl.htmlFor=`chk-${patient.id}`;
+      const visitWrap=document.createElement('div'); visitWrap.className='visit-chk-wrap';
+      const vChk=document.createElement('input'); vChk.type='checkbox'; vChk.className='visit-chk';
+      const vChecks=getVisitChecks(); vChk.checked=!!vChecks[patient.id];
+      if(vChk.checked)tr.classList.add('visited');
+      vChk.addEventListener('change',()=>{saveVisitCheck(patient.id,vChk.checked);tr.classList.toggle('visited',vChk.checked);updateFloorSummary();});
+      const vNo=document.createElement('div'); vNo.className='visit-no'; vNo.textContent=idx+1;
+      visitWrap.appendChild(vChk); visitWrap.appendChild(vNo); noCell.appendChild(visitWrap);
+      // 처방 참고사항
+      const noteTd=cells[9];
+      const noteText=document.createElement('div'); noteText.textContent=patient.prescriptionNote||'';
+      noteText.style.cssText='font-size:9px;line-height:1.4;'; noteTd.appendChild(noteText);
+      const checkRow=document.createElement('div'); checkRow.className='note-check-row';
+      const chk=document.createElement('input'); chk.type='checkbox'; chk.id=`chk-${patient.id}`;
+      const checked=isCheckedThisWeek(patient); chk.checked=checked;
+      const lbl=document.createElement('label'); lbl.htmlFor=`chk-${patient.id}`;
       lbl.className='note-check-label'+(checked?' done':'');
       lbl.textContent=checked?'✓ 월 오더완료':'월 오더확인';
       chk.addEventListener('change',async()=>{
@@ -1106,29 +1142,20 @@
         lbl.className='note-check-label'+(chk.checked?' done':'');
         lbl.textContent=chk.checked?'✓ 월 오더완료':'월 오더확인';
         saveLocal();
-        try{await updateDoc(doc(db,'patients',patient.id),
-          {prescriptionNoteCheckedWeek:patient.prescriptionNoteCheckedWeek,updatedAt:serverTimestamp()});}
+        try{await updateDoc(doc(db,'patients',patient.id),{prescriptionNoteCheckedWeek:patient.prescriptionNoteCheckedWeek,updatedAt:serverTimestamp()});}
         catch(err){console.error(err);}
       });
-      checkRow.appendChild(chk);checkRow.appendChild(lbl);
-      noteTd.appendChild(checkRow);
-      const actionCell=cells[9];
-      const editBtn=document.createElement('button');
-      editBtn.className='btn btn-sm';editBtn.type='button';editBtn.textContent='수정';
-      editBtn.addEventListener('click',()=>fillForm(patient));
-      actionCell.appendChild(editBtn);
-      actionCell.appendChild(document.createElement('br'));
-      actionCell.appendChild(document.createElement('br'));
+      checkRow.appendChild(chk); checkRow.appendChild(lbl); noteTd.appendChild(checkRow);
+      // 작업 버튼
+      const actionCell=cells[10];
+      const makeBtn=(txt,cls,fn)=>{const b=document.createElement('button');b.className=`btn ${cls} btn-sm`;b.type='button';b.textContent=txt;b.style.marginBottom='2px';b.addEventListener('click',fn);return b;};
+      actionCell.appendChild(makeBtn('수정','',()=>fillForm(patient)));
+      actionCell.appendChild(makeBtn('공유','soft',()=>openShareDialog(patient.id)));
+      actionCell.appendChild(makeBtn('전과','warning',()=>openTransferDialog(patient.id)));
       if(patient.deleted){
-        const rb=document.createElement('button');
-        rb.className='btn success btn-sm';rb.type='button';rb.textContent='복구';
-        rb.addEventListener('click',()=>restorePatient(patient.id));
-        actionCell.appendChild(rb);
+        actionCell.appendChild(makeBtn('복구','success',()=>restorePatient(patient.id)));
       } else {
-        const db2=document.createElement('button');
-        db2.className='btn danger btn-sm';db2.type='button';db2.textContent='삭제';
-        db2.addEventListener('click',()=>softDeletePatient(patient.id));
-        actionCell.appendChild(db2);
+        actionCell.appendChild(makeBtn('삭제','danger',()=>softDeletePatient(patient.id)));
       }
       tbody.appendChild(tr);
     });
@@ -1139,70 +1166,50 @@
     updateFloorSummary();
   }
 
+  /* ══ Med Editor ══ */
   function openMedEditor(index){
     state.medEditingIndex=index;
-    const med=state.medicationsDraft[index];if(!med)return;
-    el('editMedName').value=med.name||'';
-    el('editMedFrequency').value=med.frequency||'';
-    el('editMedBaseUnit').value=med.baseUnitText||'';
-    el('editMedMultiplier').value=med.multiplier||1;
-    el('editMedDoseText').value=med.doseText||'';
-    el('medEditDialog').showModal();
+    const med=state.medicationsDraft[index]; if(!med)return;
+    el('editMedName').value=med.name||''; el('editMedFrequency').value=med.frequency||'';
+    el('editMedBaseUnit').value=med.baseUnitText||''; el('editMedMultiplier').value=med.multiplier||1;
+    el('editMedDoseText').value=med.doseText||''; el('medEditDialog').showModal();
   }
   function closeMedEditor(){el('medEditDialog').close();state.medEditingIndex=null;}
   function saveMedEdit(){
-    const idx=state.medEditingIndex;if(idx===null||idx<0)return;
+    const idx=state.medEditingIndex; if(idx===null||idx<0)return;
     const med=state.medicationsDraft[idx];
-    const updated={...med,
-      name:el('editMedName').value.trim(),
-      frequency:el('editMedFrequency').value.trim(),
-      baseUnitText:el('editMedBaseUnit').value.trim(),
-      multiplier:Number(el('editMedMultiplier').value||1),
-      doseText:el('editMedDoseText').value.trim()||buildDoseText(el('editMedBaseUnit').value.trim(),Number(el('editMedMultiplier').value||1))
-    };
+    const updated={...med,name:el('editMedName').value.trim(),frequency:el('editMedFrequency').value.trim(),
+      baseUnitText:el('editMedBaseUnit').value.trim(),multiplier:Number(el('editMedMultiplier').value||1),
+      doseText:el('editMedDoseText').value.trim()||buildDoseText(el('editMedBaseUnit').value.trim(),Number(el('editMedMultiplier').value||1))};
     updated.displayText=`${updated.name} ${updated.doseText} ${updated.frequency}`.trim();
-    state.medicationsDraft[idx]=updated;
-    refreshMedDraftPills();closeMedEditor();
+    state.medicationsDraft[idx]=updated; refreshMedDraftPills(); closeMedEditor();
   }
   function deleteMedEdit(){
-    const idx=state.medEditingIndex;if(idx===null||idx<0)return;
-    state.medicationsDraft.splice(idx,1);
-    refreshMedDraftPills();closeMedEditor();
+    const idx=state.medEditingIndex; if(idx===null||idx<0)return;
+    state.medicationsDraft.splice(idx,1); refreshMedDraftPills(); closeMedEditor();
   }
 
+  /* ══ Event Listeners ══ */
   el('moveToPreLabBtn').addEventListener('click',()=>{
-    const cur=formEls.lastLabDate.value;
-    if(!cur){alert('먼저 마지막 lab 날짜를 입력하세요.');return;}
-    formEls.prevLabDate.value=cur;formEls.lastLabDate.value='';formEls.lastLabDate.focus();
+    const cur=formEls.lastLabDate.value; if(!cur){alert('먼저 마지막 lab 날짜를 입력하세요.');return;}
+    formEls.prevLabDate.value=cur; formEls.lastLabDate.value=''; formEls.lastLabDate.focus();
   });
   el('parsePatientBtn').addEventListener('click',()=>{
-    const p=parsePatientLine(el('pastePatient').value);
-    if(!p)return alert('환자 복붙 형식을 확인해주세요.');
-    formEls.roomRaw.value=p.roomRaw||'';formEls.roomSortKey.value=p.roomSortKey||'';
-    formEls.bedNo.value=p.bedNo||'';formEls.patientNo.value=p.patientNo||'';
-    formEls.patientName.value=p.patientName||'';formEls.sex.value=p.sex||'';
-    formEls.pastedAge.value=p.pastedAge||'';formEls.admissionDate.value=p.admissionDate||'';
+    const p=parsePatientLine(el('pastePatient').value); if(!p)return alert('환자 복붙 형식을 확인해주세요.');
+    formEls.roomRaw.value=p.roomRaw||''; formEls.roomSortKey.value=p.roomSortKey||'';
+    formEls.bedNo.value=p.bedNo||''; formEls.patientNo.value=p.patientNo||'';
+    formEls.patientName.value=p.patientName||''; formEls.sex.value=p.sex||'';
+    formEls.pastedAge.value=p.pastedAge||''; formEls.admissionDate.value=p.admissionDate||'';
   });
   el('parseDiagnosisBtn').addEventListener('click',()=>{
-    const p=parseDiagnosisLine(el('pasteDiagnosis').value);
-    if(!p)return alert('상병 복붙 형식을 확인해주세요.');
-    formEls.primaryDiagnosis.value=p.primaryDiagnosis||'';
-    formEls.primaryDiagnosisOnsetDate.value=p.primaryDiagnosisOnsetDate||'';
+    const p=parseDiagnosisLine(el('pasteDiagnosis').value); if(!p)return alert('상병 복붙 형식을 확인해주세요.');
+    formEls.primaryDiagnosis.value=p.primaryDiagnosis||''; formEls.primaryDiagnosisOnsetDate.value=p.primaryDiagnosisOnsetDate||'';
   });
   el('parseMedsBtn').addEventListener('click',()=>{
-    const allLines=el('pasteMeds').value.split('\n').map(v=>v.trim()).filter(Boolean);
-    if(!allLines.length)return alert('약 복붙 내용을 입력해주세요.');
-    const merged=mergeNoteLines(allLines);
-    const filtered=filterDCPairs(merged);
-    const removed=merged.length-filtered.length;
-    state.medicationsDraft.push(...filtered.map(parseMedicationLine).filter(Boolean));
-    refreshMedDraftPills();
-    if(removed>0){
-      const h=el('dcHintMsg');
-      h.textContent=`✓ DC 처리로 ${removed}개 줄 제외됨`;
-      h.style.display='block';
-      setTimeout(()=>{h.style.display='none';},3500);
-    }
+    const allLines=el('pasteMeds').value.split('\n').map(v=>v.trim()).filter(Boolean); if(!allLines.length)return alert('약 복붙 내용을 입력해주세요.');
+    const merged=mergeNoteLines(allLines), filtered=filterDCPairs(merged), removed=merged.length-filtered.length;
+    state.medicationsDraft.push(...filtered.map(parseMedicationLine).filter(Boolean)); refreshMedDraftPills();
+    if(removed>0){const h=el('dcHintMsg');h.textContent=`✓ DC 처리로 ${removed}개 줄 제외됨`;h.style.display='block';setTimeout(()=>{h.style.display='none';},3500);}
   });
   el('clearMedsBtn').addEventListener('click',()=>{state.medicationsDraft=[];refreshMedDraftPills();});
   el('savePatientBtn').addEventListener('click',savePatient);
@@ -1211,12 +1218,9 @@
   el('closePatientFormBtn').addEventListener('click',()=>el('patientFormDialog').close());
   el('toggleDeletedBtn').addEventListener('click',()=>{
     state.showDeleted=!state.showDeleted;
-    el('toggleDeletedBtn').textContent=state.showDeleted?'활성 환자 보기':'삭제 환자 보기';
-    render();
+    el('toggleDeletedBtn').textContent=state.showDeleted?'활성 환자 보기':'삭제 환자 보기'; render();
   });
-  document.querySelectorAll('[data-sort]').forEach(btn=>{
-    btn.addEventListener('click',()=>{state.sort=btn.dataset.sort;render();});
-  });
+  document.querySelectorAll('[data-sort]').forEach(btn=>{btn.addEventListener('click',()=>{state.sort=btn.dataset.sort;render();});});
   el('closeMedDialogBtn').addEventListener('click',closeMedEditor);
   el('saveMedBtn').addEventListener('click',saveMedEdit);
   el('deleteMedBtn').addEventListener('click',deleteMedEdit);
@@ -1226,281 +1230,121 @@
     if(!formEls.bedNo.value)formEls.bedNo.value=info.bedNo;
   });
 
-  const NP_KEY = 'notepad-canvas-';
-  const npTool = { color: '#1a1a1a', size: 3, mode: 'pen', textSize: 18 };
-
-  function setNpMode(mode) {
-    npTool.mode = mode;
-    el('penModeBtn').classList.toggle('active', mode === 'pen');
-    el('eraserModeBtn').classList.toggle('active', mode === 'eraser');
-    el('textModeBtn').classList.toggle('active', mode === 'text');
-    el('textModeBtn').classList.toggle('text-active', mode === 'text');
-    el('penSizeGroup').style.display  = mode === 'eraser' ? '' : (mode === 'pen' ? '' : 'none');
-    el('textSizeGroup').style.display = mode === 'text' ? '' : 'none';
-    el('textModeHint').style.display  = mode === 'text' ? '' : 'none';
-    document.querySelectorAll('.notepad-canvas').forEach(c => {
-      c.classList.toggle('text-cursor', mode === 'text');
-    });
+  /* ══ 필기 모드 ══ */
+  const NP_KEY='notepad-canvas-';
+  const npTool={color:'#1a1a1a',size:3,mode:'pen',textSize:18};
+  function setNpMode(mode){
+    npTool.mode=mode;
+    el('penModeBtn').classList.toggle('active',mode==='pen');
+    el('eraserModeBtn').classList.toggle('active',mode==='eraser');
+    el('textModeBtn').classList.toggle('active',mode==='text');
+    el('textModeBtn').classList.toggle('text-active',mode==='text');
+    el('penSizeGroup').style.display=mode==='text'?'none':'';
+    el('textSizeGroup').style.display=mode==='text'?'':'none';
+    el('textModeHint').style.display=mode==='text'?'':'none';
+    document.querySelectorAll('.notepad-canvas').forEach(c=>c.classList.toggle('text-cursor',mode==='text'));
   }
-
-  function openNotepad() {
-    renderNotepad();
-    el('notepadDialog').showModal();
-  }
-
-  function renderNotepad() {
-    const body = el('notepadBody');
-    body.innerHTML = '';
-
-    const rows = [...state.patients]
-      .filter(p => !p.deleted)
-      .sort((a, b) => String(a.roomSortKey||'').localeCompare(String(b.roomSortKey||'')));
-
-    if (!rows.length) {
-      body.innerHTML = '<div class="notepad-empty">등록된 환자가 없습니다.</div>';
-      return;
-    }
-
-    const floors = [...new Set(rows.map(p => parseInt((p.roomSortKey||'').slice(0,2),10)).filter(Boolean))].sort((a,b)=>a-b);
-
-    const nav = document.createElement('div');
-    nav.className = 'np-floor-nav';
-    const navLabel = document.createElement('label');
-    navLabel.textContent = '층 이동:';
-    nav.appendChild(navLabel);
-    floors.forEach(f => {
-      const btn = document.createElement('button');
-      btn.className = 'np-floor-btn';
-      btn.textContent = `${f}층`;
-      btn.addEventListener('click', () => { scrollNotepadToFloor(f); });
-      nav.appendChild(btn);
-    });
-    body.appendChild(nav);
-    body.style.setProperty('--np-nav-height', `${nav.offsetHeight}px`);
-
-    let lastFloor = null;
-
-    rows.forEach(patient => {
-      const age  = calcAge(patient.birthDate, patient.pastedAge);
-      const currentFloor = parseInt((patient.roomSortKey||'').slice(0,2),10);
-
-      if (currentFloor && currentFloor !== lastFloor) {
-        const anchor = document.createElement('div');
-        anchor.className = 'np-floor-anchor';
-        anchor.dataset.floor = currentFloor;
-        anchor.textContent = `── ${currentFloor}층 ──`;
-        body.appendChild(anchor);
-        lastFloor = currentFloor;
+  function openNotepad(){renderNotepad();el('notepadDialog').showModal();}
+  function renderNotepad(){
+    const body=el('notepadBody'); body.innerHTML='';
+    const rows=[...state.patients].filter(p=>!p.deleted).sort((a,b)=>String(a.roomSortKey||'').localeCompare(String(b.roomSortKey||'')));
+    if(!rows.length){body.innerHTML='<div class="notepad-empty">등록된 환자가 없습니다.</div>';return;}
+    const floors=[...new Set(rows.map(p=>parseInt((p.roomSortKey||'').slice(0,2),10)).filter(Boolean))].sort((a,b)=>a-b);
+    const nav=document.createElement('div'); nav.className='np-floor-nav';
+    const navLabel=document.createElement('label'); navLabel.textContent='층 이동:'; nav.appendChild(navLabel);
+    floors.forEach(f=>{const btn=document.createElement('button');btn.className='np-floor-btn';btn.textContent=`${f}층`;btn.addEventListener('click',()=>scrollNotepadToFloor(f));nav.appendChild(btn);});
+    body.appendChild(nav); body.style.setProperty('--np-nav-height',`${nav.offsetHeight}px`);
+    let lastFloor=null;
+    rows.forEach(patient=>{
+      const age=calcAge(patient.birthDate,patient.pastedAge);
+      const currentFloor=parseInt((patient.roomSortKey||'').slice(0,2),10);
+      if(currentFloor&&currentFloor!==lastFloor){
+        const anchor=document.createElement('div'); anchor.className='np-floor-anchor';
+        anchor.dataset.floor=currentFloor; anchor.textContent=`── ${currentFloor}층 ──`;
+        body.appendChild(anchor); lastFloor=currentFloor;
       }
-
-      const row  = document.createElement('div');
-      row.className = 'notepad-row';
-
-      const info = document.createElement('div');
-      info.className = 'notepad-info';
-      info.innerHTML = `
-        <div class="np-room">${patient.roomSortKey||''}${patient.bedNo?'-'+patient.bedNo:''}</div>
+      const row=document.createElement('div'); row.className='notepad-row';
+      const info=document.createElement('div'); info.className='notepad-info';
+      info.innerHTML=`<div class="np-room">${patient.roomSortKey||''}${patient.bedNo?'-'+patient.bedNo:''}</div>
         <div class="np-name">${patient.patientName||''}</div>
         <div class="np-meta">${patient.sex||''}${age!==''?'/'+age:''}</div>
-        <div class="np-diag">${patient.primaryDiagnosis||''}</div>
-      `;
-
-      const wrap = document.createElement('div');
-      wrap.className = 'notepad-canvas-wrap';
-
-      const canvas = document.createElement('canvas');
-      canvas.className = 'notepad-canvas';
-      if (npTool.mode === 'text') canvas.classList.add('text-cursor');
-      canvas.dataset.patientId = patient.id;
-      canvas.width  = 2400;
-      canvas.height = 260;
+        <div class="np-diag">${patient.primaryDiagnosis||''}</div>`;
+      const wrap=document.createElement('div'); wrap.className='notepad-canvas-wrap';
+      const canvas=document.createElement('canvas'); canvas.className='notepad-canvas';
+      if(npTool.mode==='text')canvas.classList.add('text-cursor');
+      canvas.dataset.patientId=patient.id; canvas.width=2400; canvas.height=260;
       wrap.appendChild(canvas);
-
-      const clearBtn = document.createElement('button');
-      clearBtn.className = 'np-clear-btn';
-      clearBtn.textContent = '지 우 기';
-      clearBtn.addEventListener('click', () => {
-        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-        localStorage.removeItem(NP_KEY + patient.id);
-      });
-
-      row.appendChild(info);
-      row.appendChild(wrap);
-      row.appendChild(clearBtn);
-      body.appendChild(row);
-
-      const saved = localStorage.getItem(NP_KEY + patient.id);
-      if (saved) {
-        const img = new Image();
-        img.onload = () => canvas.getContext('2d').drawImage(img, 0, 0);
-        img.src = saved;
-      }
-
-      setupNotepadCanvas(canvas, patient.id);
+      const clearBtn=document.createElement('button'); clearBtn.className='np-clear-btn'; clearBtn.textContent='지 우 기';
+      clearBtn.addEventListener('click',()=>{canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);localStorage.removeItem(NP_KEY+patient.id);});
+      row.appendChild(info); row.appendChild(wrap); row.appendChild(clearBtn); body.appendChild(row);
+      const saved=localStorage.getItem(NP_KEY+patient.id);
+      if(saved){const img=new Image();img.onload=()=>canvas.getContext('2d').drawImage(img,0,0);img.src=saved;}
+      setupNotepadCanvas(canvas,patient.id);
     });
   }
-
-  function showTextInput(e, canvas, patientId) {
-    const wrap     = canvas.parentElement;
-    const rect     = canvas.getBoundingClientRect();
-    const wrapRect = wrap.getBoundingClientRect();
-    const scaleX   = canvas.width  / rect.width;
-    const scaleY   = canvas.height / rect.height;
-
-    const posLeft = e.clientX - wrapRect.left;
-    const posTop  = e.clientY - wrapRect.top;
-
-    const cx = (e.clientX - rect.left) * scaleX;
-    const cy = (e.clientY - rect.top)  * scaleY;
-
-    const displayFontPx = npTool.textSize;
-    const canvasFontPx  = Math.round(displayFontPx * scaleY);
-
-    wrap.querySelectorAll('.np-text-overlay').forEach(n => n.remove());
-
-    const input = document.createElement('input');
-    input.type  = 'text';
-    input.className = 'np-text-overlay';
-    input.placeholder = '입력 후 Enter';
-    input.style.left     = `${Math.max(0, posLeft)}px`;
-    input.style.top      = `${Math.max(0, posTop - displayFontPx / 2)}px`;
-    input.style.fontSize = `${displayFontPx}px`;
-    input.style.color    = npTool.color;
-    input.style.maxWidth = `calc(100% - ${Math.max(0, posLeft)}px - 4px)`;
-
-    wrap.appendChild(input);
-    input.focus();
-
-    let committed = false;
-
-    function commit() {
-      if (committed) return;
-      committed = true;
-      const text = input.value.trim();
-      if (text) {
-        const ctx = canvas.getContext('2d');
-        ctx.font         = `${canvasFontPx}px "Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",Arial,sans-serif`;
-        ctx.fillStyle    = npTool.color;
-        ctx.textBaseline = 'middle';
-        ctx.fillText(text, cx, cy);
-        try { localStorage.setItem(NP_KEY + patientId, canvas.toDataURL()); }
-        catch(err) { console.warn('필기 저장 실패'); }
+  function scrollNotepadToFloor(floor){
+    const body=el('notepadBody'), anchor=body.querySelector(`.np-floor-anchor[data-floor="${floor}"]`), nav=body.querySelector('.np-floor-nav');
+    if(!body||!anchor)return;
+    const top=body.scrollTop+anchor.getBoundingClientRect().top-body.getBoundingClientRect().top-(nav?.offsetHeight||0)-6;
+    body.scrollTo({top:Math.max(0,top),behavior:'smooth'});
+  }
+  function showTextInput(e,canvas,patientId){
+    const wrap=canvas.parentElement, rect=canvas.getBoundingClientRect(), wrapRect=wrap.getBoundingClientRect();
+    const scaleX=canvas.width/rect.width, scaleY=canvas.height/rect.height;
+    const posLeft=e.clientX-wrapRect.left, posTop=e.clientY-wrapRect.top;
+    const cx=(e.clientX-rect.left)*scaleX, cy=(e.clientY-rect.top)*scaleY;
+    const displayFontPx=npTool.textSize, canvasFontPx=Math.round(displayFontPx*scaleY);
+    wrap.querySelectorAll('.np-text-overlay').forEach(n=>n.remove());
+    const input=document.createElement('input'); input.type='text'; input.className='np-text-overlay';
+    input.placeholder='입력 후 Enter';
+    input.style.left=`${Math.max(0,posLeft)}px`; input.style.top=`${Math.max(0,posTop-displayFontPx/2)}px`;
+    input.style.fontSize=`${displayFontPx}px`; input.style.color=npTool.color;
+    input.style.maxWidth=`calc(100% - ${Math.max(0,posLeft)}px - 4px)`;
+    wrap.appendChild(input); input.focus();
+    let committed=false;
+    function commit(){
+      if(committed)return; committed=true;
+      const text=input.value.trim();
+      if(text){
+        const ctx=canvas.getContext('2d');
+        ctx.font=`${canvasFontPx}px "Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",Arial,sans-serif`;
+        ctx.fillStyle=npTool.color; ctx.textBaseline='middle'; ctx.fillText(text,cx,cy);
+        try{localStorage.setItem(NP_KEY+patientId,canvas.toDataURL());}catch(err){console.warn('필기 저장 실패');}
       }
       input.remove();
     }
-
-    input.addEventListener('keydown', ev => {
-      if (ev.key === 'Enter') { ev.preventDefault(); commit(); }
-      if (ev.key === 'Escape') { committed = true; input.remove(); }
-      ev.stopPropagation();
-    });
-
-    input.addEventListener('blur', () => { setTimeout(commit, 80); });
+    input.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();commit();}if(ev.key==='Escape'){committed=true;input.remove();}ev.stopPropagation();});
+    input.addEventListener('blur',()=>{setTimeout(commit,80);});
   }
-
-  function setupNotepadCanvas(canvas, patientId) {
-    let drawing = false;
-    let lx = 0, ly = 0;
-
-    function getPos(e) {
-      const rect   = canvas.getBoundingClientRect();
-      const scaleX = canvas.width  / rect.width;
-      const scaleY = canvas.height / rect.height;
-      return {
-        x: (e.clientX - rect.left) * scaleX,
-        y: (e.clientY - rect.top)  * scaleY
-      };
-    }
-
-    function startDraw(e) {
-      e.preventDefault();
-
-      if (npTool.mode === 'text') {
-        showTextInput(e, canvas, patientId);
-        return;
-      }
-
-      drawing = true;
-      const pos = getPos(e);
-      lx = pos.x; ly = pos.y;
-      const ctx = canvas.getContext('2d');
-      ctx.beginPath();
-      if (npTool.mode === 'eraser') {
-        ctx.clearRect(pos.x - npTool.size * 3, pos.y - npTool.size * 3, npTool.size * 6, npTool.size * 6);
-      } else {
-        ctx.arc(lx, ly, npTool.size / 2, 0, Math.PI * 2);
-        ctx.fillStyle = npTool.color;
-        ctx.fill();
-      }
-    }
-
-    function draw(e) {
-      if (!drawing) return;
-      e.preventDefault();
-      const ctx = canvas.getContext('2d');
-      const pos = getPos(e);
-      if (npTool.mode === 'eraser') {
-        const s = npTool.size * 6;
-        ctx.clearRect(pos.x - s/2, pos.y - s/2, s, s);
-      } else {
-        ctx.beginPath();
-        ctx.moveTo(lx, ly);
-        ctx.lineTo(pos.x, pos.y);
-        ctx.strokeStyle = npTool.color;
-        ctx.lineWidth   = npTool.size;
-        ctx.lineCap     = 'round';
-        ctx.lineJoin    = 'round';
-        ctx.stroke();
-      }
-      lx = pos.x; ly = pos.y;
-    }
-
-    function endDraw(e) {
-      if (!drawing) return;
-      drawing = false;
-      try { localStorage.setItem(NP_KEY + patientId, canvas.toDataURL()); }
-      catch(e) { console.warn('필기 저장 실패 (저장공간 부족)'); }
-    }
-
-    canvas.addEventListener('pointerdown',   startDraw, { passive: false });
-    canvas.addEventListener('pointermove',   draw,      { passive: false });
-    canvas.addEventListener('pointerup',     endDraw);
-    canvas.addEventListener('pointercancel', endDraw);
+  function setupNotepadCanvas(canvas,patientId){
+    let drawing=false, lx=0, ly=0;
+    function getPos(e){const rect=canvas.getBoundingClientRect(),scaleX=canvas.width/rect.width,scaleY=canvas.height/rect.height;return{x:(e.clientX-rect.left)*scaleX,y:(e.clientY-rect.top)*scaleY};}
+    function startDraw(e){e.preventDefault();if(npTool.mode==='text'){showTextInput(e,canvas,patientId);return;}drawing=true;const pos=getPos(e);lx=pos.x;ly=pos.y;const ctx=canvas.getContext('2d');ctx.beginPath();if(npTool.mode==='eraser'){ctx.clearRect(pos.x-npTool.size*3,pos.y-npTool.size*3,npTool.size*6,npTool.size*6);}else{ctx.arc(lx,ly,npTool.size/2,0,Math.PI*2);ctx.fillStyle=npTool.color;ctx.fill();}}
+    function draw(e){if(!drawing)return;e.preventDefault();const ctx=canvas.getContext('2d'),pos=getPos(e);if(npTool.mode==='eraser'){const s=npTool.size*6;ctx.clearRect(pos.x-s/2,pos.y-s/2,s,s);}else{ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(pos.x,pos.y);ctx.strokeStyle=npTool.color;ctx.lineWidth=npTool.size;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();}lx=pos.x;ly=pos.y;}
+    function endDraw(){if(!drawing)return;drawing=false;try{localStorage.setItem(NP_KEY+patientId,canvas.toDataURL());}catch(e){console.warn('필기 저장 실패');}}
+    canvas.addEventListener('pointerdown',startDraw,{passive:false});
+    canvas.addEventListener('pointermove',draw,{passive:false});
+    canvas.addEventListener('pointerup',endDraw);
+    canvas.addEventListener('pointercancel',endDraw);
   }
-
-  el('penColor').addEventListener('input', e => { npTool.color = e.target.value; });
-
-  el('penSize').addEventListener('input', e => {
-    npTool.size = Number(e.target.value);
-    el('penSizeVal').textContent = e.target.value;
-  });
-
-  el('textSizeSlider').addEventListener('input', e => {
-    npTool.textSize = Number(e.target.value);
-    el('textSizeVal').textContent = e.target.value;
-  });
-
-  el('penModeBtn').addEventListener('click',    () => setNpMode('pen'));
-  el('eraserModeBtn').addEventListener('click', () => setNpMode('eraser'));
-  el('textModeBtn').addEventListener('click',   () => setNpMode('text'));
-
-  el('clearAllCanvasBtn').addEventListener('click', () => {
-    if (!confirm('모든 필기를 지우겠습니까?')) return;
-    Object.keys(localStorage).filter(k => k.startsWith(NP_KEY))
-      .forEach(k => localStorage.removeItem(k));
+  el('penColor').addEventListener('input',e=>{npTool.color=e.target.value;});
+  el('penSize').addEventListener('input',e=>{npTool.size=Number(e.target.value);el('penSizeVal').textContent=e.target.value;});
+  el('textSizeSlider').addEventListener('input',e=>{npTool.textSize=Number(e.target.value);el('textSizeVal').textContent=e.target.value;});
+  el('penModeBtn').addEventListener('click',()=>setNpMode('pen'));
+  el('eraserModeBtn').addEventListener('click',()=>setNpMode('eraser'));
+  el('textModeBtn').addEventListener('click',()=>setNpMode('text'));
+  el('clearAllCanvasBtn').addEventListener('click',()=>{
+    if(!confirm('모든 필기를 지우겠습니까?'))return;
+    Object.keys(localStorage).filter(k=>k.startsWith(NP_KEY)).forEach(k=>localStorage.removeItem(k));
     renderNotepad();
   });
-
-  el('refreshNotepadBtn').addEventListener('click', async () => {
-    if (!confirm('환자 목록을 Firestore에서 다시 불러오고 모든 필기를 초기화합니까?')) return;
-    Object.keys(localStorage).filter(k => k.startsWith(NP_KEY))
-      .forEach(k => localStorage.removeItem(k));
-    await loadPatients();
-    renderNotepad();
+  el('refreshNotepadBtn').addEventListener('click',async()=>{
+    if(!confirm('환자 목록을 다시 불러오고 모든 필기를 초기화합니까?'))return;
+    Object.keys(localStorage).filter(k=>k.startsWith(NP_KEY)).forEach(k=>localStorage.removeItem(k));
+    await loadPatients(); renderNotepad();
   });
-
-  el('notepadBtn').addEventListener('click',      openNotepad);
-  el('closeNotepadBtn').addEventListener('click', () => el('notepadDialog').close());
+  el('notepadBtn').addEventListener('click',openNotepad);
+  el('closeNotepadBtn').addEventListener('click',()=>el('notepadDialog').close());
 
 </script>
 </body>

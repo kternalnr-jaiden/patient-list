@@ -219,6 +219,22 @@
     .np-text-overlay{position:absolute;background:rgba(255,255,220,0.92);border:1.5px dashed #2563eb;border-radius:4px;padding:2px 6px;outline:none;z-index:100;font-family:"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",Arial,sans-serif;min-width:80px;max-width:calc(100% - 8px);white-space:nowrap;caret-color:#2563eb;}
     .np-text-overlay::placeholder{color:#94a3b8;font-style:italic;}
 
+    /* shared doctor tag */
+    .shared-doctor-tag{display:inline-block;font-size:9px;color:#7c3aed;font-weight:700;
+      background:#ede9fe;border:1px solid #c4b5fd;padding:1px 5px;border-radius:4px;margin-top:2px;}
+    /* daily tasks */
+    #dailyCheckSection{border-top:1px solid var(--line);padding:8px 0 10px;margin-top:4px;}
+    .daily-task-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 9px 4px 10px;
+      background:#f0f9ff;border:1.5px solid #7dd3fc;border-radius:999px;font-size:12px;font-weight:500;
+      transition:.15s background;}
+    .daily-task-pill.done{background:#f0fdf4;border-color:#6ee7b7;}
+    .daily-task-pill.done .task-text{text-decoration:line-through;color:var(--muted);}
+    .task-check-btn{border:none;background:none;cursor:pointer;font-size:12px;font-weight:900;
+      padding:0 2px;line-height:1;color:#059669;}
+    .task-check-btn.undo{color:#9ca3af;}
+    .task-del-btn{border:none;background:none;cursor:pointer;font-size:11px;font-weight:700;
+      padding:0 2px;line-height:1;color:#d1d5db;}
+    .task-del-btn:hover{color:#dc2626;}
     @page{size:A4 landscape;margin:6mm;}
     @media print{
       body{min-width:auto;background:white;}
@@ -309,12 +325,15 @@
   </div>
 
   <section class="panel">
-    <div class="panel-header">
-      <div>
-        <h2>환자 목록 <span id="floorSummary" class="floor-summary"></span></h2>
-        <div class="sub">진료과 · 주치의 · 입원일 · 재원일수 · 약 목록 · lab · 참고사항</div>
+    <div class="panel-header" style="flex-direction:column;align-items:stretch;gap:0;padding-bottom:0;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:12px;">
+        <div>
+          <h2>환자 목록 <span id="floorSummary" class="floor-summary"></span></h2>
+          <div class="sub">입원일 · 재원일수 · 약 목록 · lab · 참고사항</div>
+        </div>
+        <div id="printDate" class="print-date"></div>
       </div>
-      <div id="printDate" class="print-date"></div>
+      <div id="dailyCheckSection" style="display:none;"></div>
     </div>
     <div class="panel-body">
       <div class="table-wrap">
@@ -324,7 +343,6 @@
               <th class="nowrap" style="width:36px;">No.</th>
               <th style="width:96px;">호실<br><span style="font-weight:400;font-size:8px;">환자번호</span></th>
               <th style="width:62px;">이름<br><span style="font-weight:400;font-size:8px;">Sex/Age</span></th>
-              <th style="width:90px;">진료과<br><span style="font-weight:400;font-size:8px;">주치의</span></th>
               <th style="width:108px;">입원날짜<br><span style="font-weight:400;font-size:8px;">퇴원예정일</span></th>
               <th style="width:150px;">주상병 / onset</th>
               <th style="width:340px;">약 처방 목록</th>
@@ -513,6 +531,23 @@
   </div>
   <div class="notepad-body" id="notepadBody"></div>
 </dialog>
+<!-- 금일 확인사항 추가 Dialog -->
+<dialog id="taskAddDialog" style="width:min(420px,calc(100vw - 32px));">
+  <div class="modal-header">
+    <h3 id="taskDialogTitle">금일 확인사항 추가</h3>
+    <button class="btn" id="closeTaskDialogBtn">✕ 닫기</button>
+  </div>
+  <div class="modal-body">
+    <div class="field">
+      <label>확인사항 내용</label>
+      <input id="taskInputText" placeholder="예: 금일 MRI 촬영 확인, 재활치료 스케줄 확인"/>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn primary" id="saveTaskBtn">✚ 추가</button>
+  </div>
+</dialog>
+
 <script type="module">
   import { initializeApp }    from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js';
   import {
@@ -1065,6 +1100,106 @@
   }
   el('closeTransferDialogBtn').addEventListener('click',()=>el('transferDialog').close());
 
+
+  /* ══ 금일 확인사항 ══ */
+  const TASKS_KEY = 'daily-tasks-v1';
+  let taskTargetPatientId = null;
+
+  function getDailyTasks() {
+    try {
+      const raw = localStorage.getItem(TASKS_KEY);
+      if (!raw) return {};
+      const data = JSON.parse(raw);
+      if (data.date !== getKSTDateOnly()) return {};
+      return data.tasks || {};
+    } catch(e) { return {}; }
+  }
+  function saveDailyTasks(tasks) {
+    localStorage.setItem(TASKS_KEY, JSON.stringify({ date: getKSTDateOnly(), tasks }));
+  }
+  function addDailyTask(patientId, text) {
+    const tasks = getDailyTasks();
+    if (!tasks[patientId]) tasks[patientId] = [];
+    tasks[patientId].push({ id: crypto.randomUUID(), text: text.trim(), checked: false });
+    saveDailyTasks(tasks);
+    renderDailyCheckSection();
+  }
+  function toggleDailyTask(patientId, taskId) {
+    const tasks = getDailyTasks();
+    const item = (tasks[patientId] || []).find(t => t.id === taskId);
+    if (item) { item.checked = !item.checked; saveDailyTasks(tasks); renderDailyCheckSection(); }
+  }
+  function deleteDailyTask(patientId, taskId) {
+    const tasks = getDailyTasks();
+    if (tasks[patientId]) {
+      tasks[patientId] = tasks[patientId].filter(t => t.id !== taskId);
+      if (!tasks[patientId].length) delete tasks[patientId];
+    }
+    saveDailyTasks(tasks);
+    renderDailyCheckSection();
+  }
+  function renderDailyCheckSection() {
+    const sec = el('dailyCheckSection');
+    const tasks = getDailyTasks();
+    const allItems = [];
+    Object.entries(tasks).forEach(([pid, items]) => {
+      const p = state.patients.find(p => p.id === pid);
+      const name = p?.patientName || '?';
+      items.forEach(item => allItems.push({ ...item, patientId: pid, patientName: name }));
+    });
+    if (!allItems.length) { sec.style.display = 'none'; return; }
+    sec.style.display = '';
+    sec.innerHTML = '';
+    const header = document.createElement('div');
+    header.style.cssText = 'font-size:12px;font-weight:800;color:var(--muted);margin-bottom:7px;';
+    header.textContent = '📋 금일 확인사항';
+    sec.appendChild(header);
+    const list = document.createElement('div');
+    list.style.cssText = 'display:flex;flex-wrap:wrap;gap:5px;';
+    allItems.forEach(item => {
+      const pill = document.createElement('span');
+      pill.className = 'daily-task-pill' + (item.checked ? ' done' : '');
+      const txt = document.createElement('span');
+      txt.className = 'task-text';
+      txt.textContent = `${item.patientName} - ${item.text}`;
+      const chkBtn = document.createElement('button');
+      chkBtn.className = 'task-check-btn' + (item.checked ? ' undo' : '');
+      chkBtn.title = item.checked ? '미완료로 되돌리기' : '완료 체크';
+      chkBtn.textContent = item.checked ? '↩' : '✓';
+      chkBtn.addEventListener('click', () => toggleDailyTask(item.patientId, item.id));
+      const delBtn = document.createElement('button');
+      delBtn.className = 'task-del-btn';
+      delBtn.title = '삭제';
+      delBtn.textContent = '✕';
+      delBtn.addEventListener('click', () => deleteDailyTask(item.patientId, item.id));
+      pill.appendChild(txt);
+      pill.appendChild(chkBtn);
+      pill.appendChild(delBtn);
+      list.appendChild(pill);
+    });
+    sec.appendChild(list);
+  }
+  function openTaskDialog(patientId) {
+    taskTargetPatientId = patientId;
+    const p = state.patients.find(p => p.id === patientId);
+    el('taskDialogTitle').textContent = `금일 확인사항 — ${p?.patientName || ''}`;
+    el('taskInputText').value = '';
+    el('taskAddDialog').showModal();
+    setTimeout(() => el('taskInputText').focus(), 80);
+  }
+  function saveTask() {
+    const text = el('taskInputText').value.trim();
+    if (!text || !taskTargetPatientId) return;
+    addDailyTask(taskTargetPatientId, text);
+    el('taskAddDialog').close();
+    taskTargetPatientId = null;
+  }
+  el('closeTaskDialogBtn').addEventListener('click', () => el('taskAddDialog').close());
+  el('saveTaskBtn').addEventListener('click', saveTask);
+  el('taskInputText').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); saveTask(); }
+  });
+
   /* ══ Render ══ */
   function sortPatients(list){
     const arr=[...list];
@@ -1096,16 +1231,10 @@
       else if(Array.isArray(patient.recentMedChanges))changeText=patient.recentMedChanges.map(m=>m.summary).join('\n');
       const isLabToday=isTodayKST(patient.lastLabDate);
       const lastLabHtml=patient.lastLabDate?`<span class="${isLabToday?'lab-today':''}">${fmtDate(patient.lastLabDate)}</span>`:'';
-      const docTag=patient.attendingDoctorName?`<span class="doctor-tag">${patient.attendingDoctorName}</span>`:'';
-      const deptTag=patient.department?`<span class="dept-tag">${patient.department}</span>`:'';
-      const sharedBadge=isSharedToMe?'<div class="shared-badge">📤 공유됨</div>':'';
-      const isMyPatient=currentDoctor&&patient.attendingDoctorEmail===currentDoctor.email;
-      const ownBadge=isMyPatient?'<div class="own-badge">👤 나의 환자</div>':'';
       tr.innerHTML=`
         <td class="nowrap" style="text-align:center;padding:3px 2px;"></td>
-        <td><div class="cell-stack"><span class="main">${patient.roomSortKey||''}${patient.bedNo?'-'+patient.bedNo:''}</span><span class="sub">${patient.patientNo||''}</span></div></td>
+        <td><div class="cell-stack"><span class="main">${patient.roomSortKey||''}${patient.bedNo?'-'+patient.bedNo:''}</span><span class="sub">${patient.patientNo||''}</span>${isSharedToMe&&patient.attendingDoctorName?`<span class="shared-doctor-tag">${patient.attendingDoctorName}</span>`:''}</div></td>
         <td><div class="cell-stack"><span class="main">${patient.patientName||''}</span><span class="sub">${patient.sex||''}${age!==''?'/'+age:''}</span></div></td>
-        <td><div class="cell-stack">${deptTag}${docTag}${sharedBadge}${ownBadge}</div></td>
         <td><div class="cell-stack">
           <span class="main">${fmtDate(patient.admissionDate)}${stayDays?' ('+stayDays+'일)':''}</span>
           ${patient.expectedDischargeDate?'<span class="discharge-date">→ '+fmtDate(patient.expectedDischargeDate)+'</span>':'<span class="sub">→ 미정</span>'}
@@ -1128,7 +1257,7 @@
       const vNo=document.createElement('div'); vNo.className='visit-no'; vNo.textContent=idx+1;
       visitWrap.appendChild(vChk); visitWrap.appendChild(vNo); noCell.appendChild(visitWrap);
       // 처방 참고사항
-      const noteTd=cells[9];
+      const noteTd=cells[8];
       const noteText=document.createElement('div'); noteText.textContent=patient.prescriptionNote||'';
       noteText.style.cssText='font-size:9px;line-height:1.4;'; noteTd.appendChild(noteText);
       const checkRow=document.createElement('div'); checkRow.className='note-check-row';
@@ -1147,9 +1276,10 @@
       });
       checkRow.appendChild(chk); checkRow.appendChild(lbl); noteTd.appendChild(checkRow);
       // 작업 버튼
-      const actionCell=cells[10];
+      const actionCell=cells[9];
       const makeBtn=(txt,cls,fn)=>{const b=document.createElement('button');b.className=`btn ${cls} btn-sm`;b.type='button';b.textContent=txt;b.style.marginBottom='2px';b.addEventListener('click',fn);return b;};
       actionCell.appendChild(makeBtn('수정','',()=>fillForm(patient)));
+      actionCell.appendChild(makeBtn('📝','',()=>openTaskDialog(patient.id)));
       actionCell.appendChild(makeBtn('공유','soft',()=>openShareDialog(patient.id)));
       actionCell.appendChild(makeBtn('전과','warning',()=>openTransferDialog(patient.id)));
       if(patient.deleted){
@@ -1164,6 +1294,7 @@
     const deleted=state.patients.filter(p=>p.deleted).length;
     el('patientCountMeta').textContent=`활성 ${active}명 · 삭제보관 ${deleted}명`;
     updateFloorSummary();
+    renderDailyCheckSection();
   }
 
   /* ══ Med Editor ══ */

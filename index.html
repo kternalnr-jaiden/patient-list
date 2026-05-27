@@ -555,7 +555,7 @@
   } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js';
   import {
     getFirestore, collection, doc, setDoc, getDocs, updateDoc,
-    serverTimestamp, query, orderBy
+    addDoc, deleteDoc, serverTimestamp, query, orderBy, where
   } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js';
 
   /* ══ 주치의 목록 ══ */
@@ -679,6 +679,7 @@
       state.patients = snap.docs.map(d => ({ id:d.id, ...d.data() }));
       el('syncStatus').textContent = '☁ Firestore 연결됨';
       render();
+      loadDailyTasks();
     } catch(err) {
       console.error(err);
       const raw = localStorage.getItem('prescription-helper-patients');
@@ -1101,53 +1102,60 @@
   el('closeTransferDialogBtn').addEventListener('click',()=>el('transferDialog').close());
 
 
-  /* ══ 금일 확인사항 ══ */
-  const TASKS_KEY = 'daily-tasks-v1';
+  /* ══ 금일 확인사항 (Firestore) ══ */
+  let dailyTasksCache = [];
   let taskTargetPatientId = null;
 
-  function getDailyTasks() {
+  async function loadDailyTasks() {
+    const today = getKSTDateOnly();
     try {
-      const raw = localStorage.getItem(TASKS_KEY);
-      if (!raw) return {};
-      const data = JSON.parse(raw);
-      if (data.date !== getKSTDateOnly()) return {};
-      return data.tasks || {};
-    } catch(e) { return {}; }
-  }
-  function saveDailyTasks(tasks) {
-    localStorage.setItem(TASKS_KEY, JSON.stringify({ date: getKSTDateOnly(), tasks }));
-  }
-  function addDailyTask(patientId, text) {
-    const tasks = getDailyTasks();
-    if (!tasks[patientId]) tasks[patientId] = [];
-    tasks[patientId].push({ id: crypto.randomUUID(), text: text.trim(), checked: false });
-    saveDailyTasks(tasks);
-    renderDailyCheckSection();
-  }
-  function toggleDailyTask(patientId, taskId) {
-    const tasks = getDailyTasks();
-    const item = (tasks[patientId] || []).find(t => t.id === taskId);
-    if (item) { item.checked = !item.checked; saveDailyTasks(tasks); renderDailyCheckSection(); }
-  }
-  function deleteDailyTask(patientId, taskId) {
-    const tasks = getDailyTasks();
-    if (tasks[patientId]) {
-      tasks[patientId] = tasks[patientId].filter(t => t.id !== taskId);
-      if (!tasks[patientId].length) delete tasks[patientId];
+      const snap = await getDocs(
+        query(collection(db, 'dailyTasks'), where('date', '==', today))
+      );
+      dailyTasksCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      dailyTasksCache.sort((a, b) => (a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
+    } catch(e) {
+      console.error('dailyTasks load error:', e);
+      dailyTasksCache = [];
     }
-    saveDailyTasks(tasks);
     renderDailyCheckSection();
   }
+
+  async function addDailyTask(patientId, text) {
+    const p = state.patients.find(p => p.id === patientId);
+    const newTask = {
+      date: getKSTDateOnly(), patientId,
+      patientName: p ? p.patientName : '',
+      text: text.trim(), checked: false, createdAt: serverTimestamp()
+    };
+    try {
+      const ref = await addDoc(collection(db, 'dailyTasks'), newTask);
+      dailyTasksCache.push({ id: ref.id, date: newTask.date, patientId,
+        patientName: newTask.patientName, text: newTask.text, checked: false });
+    } catch(e) { console.error('addDailyTask error:', e); }
+    renderDailyCheckSection();
+  }
+
+  async function toggleDailyTask(taskId) {
+    const item = dailyTasksCache.find(t => t.id === taskId);
+    if (!item) return;
+    item.checked = !item.checked;
+    renderDailyCheckSection();
+    try {
+      await updateDoc(doc(db, 'dailyTasks', taskId), { checked: item.checked });
+    } catch(e) { item.checked = !item.checked; renderDailyCheckSection(); }
+  }
+
+  async function deleteDailyTask(taskId) {
+    dailyTasksCache = dailyTasksCache.filter(t => t.id !== taskId);
+    renderDailyCheckSection();
+    try { await deleteDoc(doc(db, 'dailyTasks', taskId)); }
+    catch(e) { console.error('deleteDailyTask error:', e); }
+  }
+
   function renderDailyCheckSection() {
     const sec = el('dailyCheckSection');
-    const tasks = getDailyTasks();
-    const allItems = [];
-    Object.entries(tasks).forEach(([pid, items]) => {
-      const p = state.patients.find(p => p.id === pid);
-      const name = p?.patientName || '?';
-      items.forEach(item => allItems.push({ ...item, patientId: pid, patientName: name }));
-    });
-    if (!allItems.length) { sec.style.display = 'none'; return; }
+    if (!dailyTasksCache.length) { sec.style.display = 'none'; return; }
     sec.style.display = '';
     sec.innerHTML = '';
     const header = document.createElement('div');
@@ -1156,33 +1164,34 @@
     sec.appendChild(header);
     const list = document.createElement('div');
     list.style.cssText = 'display:flex;flex-wrap:wrap;gap:5px;';
-    allItems.forEach(item => {
+    dailyTasksCache.forEach(item => {
       const pill = document.createElement('span');
       pill.className = 'daily-task-pill' + (item.checked ? ' done' : '');
       const txt = document.createElement('span');
       txt.className = 'task-text';
-      txt.textContent = `${item.patientName} - ${item.text}`;
+      txt.textContent = item.patientName + ' - ' + item.text;
       const chkBtn = document.createElement('button');
       chkBtn.className = 'task-check-btn' + (item.checked ? ' undo' : '');
       chkBtn.title = item.checked ? '미완료로 되돌리기' : '완료 체크';
       chkBtn.textContent = item.checked ? '↩' : '✓';
-      chkBtn.addEventListener('click', () => toggleDailyTask(item.patientId, item.id));
+      const tid = item.id;
+      chkBtn.addEventListener('click', () => toggleDailyTask(tid));
       const delBtn = document.createElement('button');
-      delBtn.className = 'task-del-btn';
-      delBtn.title = '삭제';
-      delBtn.textContent = '✕';
-      delBtn.addEventListener('click', () => deleteDailyTask(item.patientId, item.id));
-      pill.appendChild(txt);
-      pill.appendChild(chkBtn);
-      pill.appendChild(delBtn);
+      delBtn.className = 'task-del-btn'; delBtn.title = '삭제'; delBtn.textContent = '✕';
+      const iName = item.patientName, iText = item.text, iId = item.id;
+      delBtn.addEventListener('click', () => {
+        if (confirm(iName + ' - ' + iText + '\n삭제하시겠습니까?')) deleteDailyTask(iId);
+      });
+      pill.appendChild(txt); pill.appendChild(chkBtn); pill.appendChild(delBtn);
       list.appendChild(pill);
     });
     sec.appendChild(list);
   }
+
   function openTaskDialog(patientId) {
     taskTargetPatientId = patientId;
     const p = state.patients.find(p => p.id === patientId);
-    el('taskDialogTitle').textContent = `금일 확인사항 — ${p?.patientName || ''}`;
+    el('taskDialogTitle').textContent = '금일 확인사항 — ' + (p ? p.patientName : '');
     el('taskInputText').value = '';
     el('taskAddDialog').showModal();
     setTimeout(() => el('taskInputText').focus(), 80);

@@ -1116,6 +1116,7 @@
       dailyTasksCache.sort((a, b) => (a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
     } catch(e) {
       console.error('dailyTasks load error:', e);
+      console.warn('Firebase 보안 규칙에서 dailyTasks 컬렉션 허용 필요');
       dailyTasksCache = [];
     }
     renderDailyCheckSection();
@@ -1123,17 +1124,28 @@
 
   async function addDailyTask(patientId, text) {
     const p = state.patients.find(p => p.id === patientId);
-    const newTask = {
-      date: getKSTDateOnly(), patientId,
+    // 즉각 UI 반영 (optimistic) — Firestore 성공 여부와 무관하게 먼저 표시
+    const tempId = 'local-' + crypto.randomUUID();
+    const tempTask = {
+      id: tempId, date: getKSTDateOnly(), patientId,
       patientName: p ? p.patientName : '',
-      text: text.trim(), checked: false, createdAt: serverTimestamp()
+      text: text.trim(), checked: false
     };
-    try {
-      const ref = await addDoc(collection(db, 'dailyTasks'), newTask);
-      dailyTasksCache.push({ id: ref.id, date: newTask.date, patientId,
-        patientName: newTask.patientName, text: newTask.text, checked: false });
-    } catch(e) { console.error('addDailyTask error:', e); }
+    dailyTasksCache.push(tempTask);
     renderDailyCheckSection();
+    // 백그라운드 Firestore 저장
+    try {
+      const ref = await addDoc(collection(db, 'dailyTasks'), {
+        date: tempTask.date, patientId, patientName: tempTask.patientName,
+        text: tempTask.text, checked: false, createdAt: serverTimestamp()
+      });
+      // temp ID → 실제 Firestore ID 교체
+      const idx = dailyTasksCache.findIndex(t => t.id === tempId);
+      if (idx >= 0) dailyTasksCache[idx].id = ref.id;
+    } catch(e) {
+      console.error('dailyTasks Firestore 저장 오류:', e);
+      // 저장 실패해도 로컬 캐시는 유지 (새로고침 전까지는 보임)
+    }
   }
 
   async function toggleDailyTask(taskId) {
@@ -1149,6 +1161,7 @@
   async function deleteDailyTask(taskId) {
     dailyTasksCache = dailyTasksCache.filter(t => t.id !== taskId);
     renderDailyCheckSection();
+    if (taskId.startsWith('local-')) return; // 미저장 항목
     try { await deleteDoc(doc(db, 'dailyTasks', taskId)); }
     catch(e) { console.error('deleteDailyTask error:', e); }
   }

@@ -1286,11 +1286,11 @@
       const checked=isCheckedThisWeek(patient); chk.checked=checked;
       const lbl=document.createElement('label'); lbl.htmlFor=`chk-${patient.id}`;
       lbl.className='note-check-label'+(checked?' done':'');
-      lbl.textContent=checked?'✓ 월 오더완료':'월 오더확인';
+      lbl.textContent=checked?'✓ 이번주 오더완료':'이번주 오더확인';
       chk.addEventListener('change',async()=>{
         patient.prescriptionNoteCheckedWeek=chk.checked?getThisMonday():'';
         lbl.className='note-check-label'+(chk.checked?' done':'');
-        lbl.textContent=chk.checked?'✓ 월 오더완료':'월 오더확인';
+        lbl.textContent=chk.checked?'✓ 이번주 오더완료':'이번주 오더확인';
         saveLocal();
         try{await updateDoc(doc(db,'patients',patient.id),{prescriptionNoteCheckedWeek:patient.prescriptionNoteCheckedWeek,updatedAt:serverTimestamp()});}
         catch(err){console.error(err);}

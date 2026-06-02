@@ -786,8 +786,7 @@
     const m=t.match(/^(\d{1,2})[./-](\d{1,2})$/); if(!m)return'';
     const mm=String(m[1]).padStart(2,'0'), dd=String(m[2]).padStart(2,'0');
     const candidate=`${CURRENT_YEAR}-${mm}-${dd}`;
-    const today=new Date(); today.setHours(0,0,0,0);
-    return new Date(candidate)>today ? `${CURRENT_YEAR-1}-${mm}-${dd}` : candidate;
+    return candidate > getKSTDateOnly() ? `${CURRENT_YEAR-1}-${mm}-${dd}` : candidate;
   }
   function calcAge(birthDate,pastedAge) {
     if(birthDate){

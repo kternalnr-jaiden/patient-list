@@ -235,6 +235,25 @@
     .task-del-btn{border:none;background:none;cursor:pointer;font-size:11px;font-weight:700;
       padding:0 2px;line-height:1;color:#d1d5db;}
     .task-del-btn:hover{color:#dc2626;}
+    /* 오더 처방 모드 */
+.order-mode-active th:nth-child(1),.order-mode-active td:nth-child(1),
+.order-mode-active th:nth-child(4),.order-mode-active td:nth-child(4),
+.order-mode-active th:nth-child(5),.order-mode-active td:nth-child(5),
+.order-mode-active th:nth-child(6),.order-mode-active td:nth-child(6),
+.order-mode-active th:nth-child(7),.order-mode-active td:nth-child(7){display:none!important;}
+.order-mode-active td{font-size:15px!important;padding:10px 14px!important;line-height:1.7!important;}
+.order-mode-active .cell-stack .main{font-size:15px!important;}
+.order-mode-active .cell-stack .sub{font-size:13px!important;}
+.order-mode-active .lab-today{font-size:14px!important;}
+.order-mode-active .note-check-label{font-size:12px!important;}
+.order-mode-active .discharge-date{font-size:11px!important;}
+/* 복사 태그 */
+.copy-tag-btn{display:inline-block;background:#dbeafe;color:#1e40af;border:1.5px solid #93c5fd;
+  border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;cursor:pointer;
+  margin:0 2px;transition:.15s;font-family:inherit;vertical-align:middle;}
+.copy-tag-btn:hover{background:#bfdbfe;}
+.copy-tag-btn.copied{background:#dcfce7;border-color:#6ee7b7;color:#065f46;}
+.order-mode-active .copy-tag-btn{font-size:14px!important;padding:4px 12px!important;}
     @page{size:A4 landscape;margin:6mm;}
     @media print{
       body{min-width:auto;background:white;}
@@ -303,6 +322,7 @@
       <button class="btn" data-sort="stayDesc">재원일수 ↓</button>
       <button class="btn soft" id="toggleDeletedBtn">삭제 환자 보기</button>
       <button class="btn" id="notepadBtn">✏ 필기 모드</button>
+      <button class="btn" id="orderModeBtn">📋 오더 처방 모드</button>
       <button class="btn success" id="printBtn">🖨 A4 가로 출력</button>
       <a href="https://aloha-neurology-v2.lovable.app/" target="_blank" rel="noopener" class="shortcut-btn green">📋 판독 입력</a>
       <a href="https://kternalnr-jaiden.github.io/bobath-helper/index.html" target="_blank" rel="noopener" class="shortcut-btn blue">💊 약처방 도우미</a>
@@ -1220,7 +1240,32 @@
   el('taskInputText').addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); saveTask(); }
   });
-
+/* ══ 복사 태그 파싱 ══ */
+function renderNoteWithCopyTags(text) {
+  const div=document.createElement('div');
+  div.style.cssText='font-size:9px;line-height:1.6;';
+  if(!text){return div;}
+  text.split(/(\[[^\]]+\])/).forEach(part=>{
+    const m=part.match(/^\[([^\]]+)\]$/);
+    if(m){
+      const btn=document.createElement('button');
+      btn.className='copy-tag-btn'; btn.type='button'; btn.textContent=m[1];
+      btn.title='클릭 → 복사: '+m[1];
+      btn.addEventListener('click', e=>{
+        e.stopPropagation();
+        navigator.clipboard.writeText(m[1]).then(()=>{
+          btn.classList.add('copied');
+          const orig=btn.textContent; btn.textContent='✓ 복사됨';
+          setTimeout(()=>{btn.classList.remove('copied');btn.textContent=orig;},1200);
+        });
+      });
+      div.appendChild(btn);
+    } else if(part){
+      div.appendChild(document.createTextNode(part));
+    }
+  });
+  return div;
+}
   /* ══ Render ══ */
   function sortPatients(list){
     const arr=[...list];
@@ -1279,8 +1324,8 @@
       visitWrap.appendChild(vChk); visitWrap.appendChild(vNo); noCell.appendChild(visitWrap);
       // 처방 참고사항
       const noteTd=cells[8];
-      const noteText=document.createElement('div'); noteText.textContent=patient.prescriptionNote||'';
-      noteText.style.cssText='font-size:9px;line-height:1.4;'; noteTd.appendChild(noteText);
+const noteText=renderNoteWithCopyTags(patient.prescriptionNote||'');
+noteTd.appendChild(noteText);
       const checkRow=document.createElement('div'); checkRow.className='note-check-row';
       const chk=document.createElement('input'); chk.type='checkbox'; chk.id=`chk-${patient.id}`;
       const checked=isCheckedThisWeek(patient); chk.checked=checked;
@@ -1497,6 +1542,13 @@
   });
   el('notepadBtn').addEventListener('click',openNotepad);
   el('closeNotepadBtn').addEventListener('click',()=>el('notepadDialog').close());
+  /* ── 오더 처방 모드 ── */
+const _table = document.querySelector('table');
+el('orderModeBtn').addEventListener('click', ()=>{
+  const on = _table.classList.toggle('order-mode-active');
+  el('orderModeBtn').textContent = on ? '✕ 기본 모드로' : '📋 오더 처방 모드';
+  el('orderModeBtn').classList.toggle('primary', on);
+});
 
 </script>
 </body>

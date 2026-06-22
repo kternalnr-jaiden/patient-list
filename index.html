@@ -905,8 +905,10 @@
     const checks=getVisitChecks(); if(checked)checks[patientId]=true; else delete checks[patientId];
     localStorage.setItem(VISIT_KEY,JSON.stringify({date:getKSTDateOnly(),checks}));
   }
-  function updateFloorSummary(){
-    const checks=getVisitChecks(), active=state.patients.filter(p=>!p.deleted);
+function updateFloorSummary(){
+    const checks=getVisitChecks(), active=state.patients.filter(p=>!p.deleted&&(
+      !p.attendingDoctorEmail||p.attendingDoctorEmail===currentDoctor?.email||
+      (Array.isArray(p.sharedWith)&&p.sharedWith.includes(currentDoctor?.email))));
     const floorMap={}, labTodayNames=[];
     active.forEach(p=>{
       const rs=p.roomSortKey||''; if(rs){
@@ -1444,7 +1446,12 @@ noteTd.appendChild(noteText);
   function openNotepad(){renderNotepad();el('notepadDialog').showModal();}
   function renderNotepad(){
     const body=el('notepadBody'); body.innerHTML='';
-    const rows=[...state.patients].filter(p=>!p.deleted).sort((a,b)=>String(a.roomSortKey||'').localeCompare(String(b.roomSortKey||'')));
+const rows=[...state.patients]
+      .filter(p=>!p.deleted&&(
+        !p.attendingDoctorEmail||
+        p.attendingDoctorEmail===currentDoctor?.email||
+        (Array.isArray(p.sharedWith)&&p.sharedWith.includes(currentDoctor?.email))))
+      .sort((a,b)=>String(a.roomSortKey||'').localeCompare(String(b.roomSortKey||''))); 
     if(!rows.length){body.innerHTML='<div class="notepad-empty">등록된 환자가 없습니다.</div>';return;}
     const floors=[...new Set(rows.map(p=>parseInt((p.roomSortKey||'').slice(0,2),10)).filter(Boolean))].sort((a,b)=>a-b);
     const nav=document.createElement('div'); nav.className='np-floor-nav';
@@ -1478,6 +1485,30 @@ noteTd.appendChild(noteText);
       if(saved){const img=new Image();img.onload=()=>canvas.getContext('2d').drawImage(img,0,0);img.src=saved;}
       setupNotepadCanvas(canvas,patient.id);
     });
+    // ── 기타 환자 행 ──
+    const extraRow=document.createElement('div'); extraRow.className='notepad-row';
+    extraRow.style.cssText='border-top:2px dashed #cbd5e1;background:#f8fafc;';
+    const extraInfo=document.createElement('div'); extraInfo.className='notepad-info';
+    extraInfo.innerHTML=`
+      <div class="np-room" style="color:#9ca3af;font-size:13px;">기타</div>
+      <div class="np-name" style="color:#6b7280;">기타 환자</div>
+      <div class="np-meta">자유 필기</div>`;
+    const extraWrap=document.createElement('div'); extraWrap.className='notepad-canvas-wrap';
+    const extraCanvas=document.createElement('canvas'); extraCanvas.className='notepad-canvas';
+    if(npTool.mode==='text')extraCanvas.classList.add('text-cursor');
+    extraCanvas.width=2400; extraCanvas.height=260;
+    extraWrap.appendChild(extraCanvas);
+    const extraClear=document.createElement('button'); extraClear.className='np-clear-btn';
+    extraClear.textContent='지 우 기';
+    extraClear.addEventListener('click',()=>{
+      extraCanvas.getContext('2d').clearRect(0,0,extraCanvas.width,extraCanvas.height);
+      localStorage.removeItem(NP_KEY+'extra');
+    });
+    extraRow.appendChild(extraInfo); extraRow.appendChild(extraWrap); extraRow.appendChild(extraClear);
+    body.appendChild(extraRow);
+    const savedExtra=localStorage.getItem(NP_KEY+'extra');
+    if(savedExtra){const img=new Image();img.onload=()=>extraCanvas.getContext('2d').drawImage(img,0,0);img.src=savedExtra;}
+    setupNotepadCanvas(extraCanvas,'extra');
   }
   function scrollNotepadToFloor(floor){
     const body=el('notepadBody'), anchor=body.querySelector(`.np-floor-anchor[data-floor="${floor}"]`), nav=body.querySelector('.np-floor-nav');

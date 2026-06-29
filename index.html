@@ -54,7 +54,7 @@
 
     /* Layout */
     .stack{display:grid;gap:12px;}
-    .stack-lg{display:grid;gap:16px;}
+    .stack-lg{display:grid;gap:14px;}
     .two{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
     .three{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
     .four{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
@@ -64,6 +64,45 @@
     .field input:focus,.field textarea:focus,.field select:focus{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(59,130,246,.12);}
     .field input[readonly]{background:#f8fafc;color:var(--muted);cursor:default;}
     textarea{resize:vertical;min-height:74px;}
+
+    /* ── 폼 섹션 카드 (통일된 스타일) ── */
+    .form-section{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:12px;
+      overflow:hidden;
+    }
+    .form-section-header{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      background:var(--panel-2);
+      border-bottom:1px solid var(--line);
+    }
+    .form-section-num{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:22px;height:22px;
+      background:var(--primary);
+      color:#fff;
+      border-radius:50%;
+      font-size:11px;
+      font-weight:800;
+      flex-shrink:0;
+    }
+    .form-section-title{
+      font-size:13px;
+      font-weight:800;
+      color:var(--text);
+      margin:0;
+    }
+    .form-section-body{
+      padding:14px;
+      display:grid;
+      gap:12px;
+    }
 
     /* Buttons */
     .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
@@ -137,7 +176,6 @@
     .pill:hover{background:#e0ecff;border-color:#bfdbfe;}
 
     /* Misc */
-    .section-title{font-size:13px;font-weight:800;margin-bottom:6px;}
     .divider{height:1px;background:var(--line);margin:4px 0;}
     .empty{padding:24px 10px;text-align:center;color:var(--muted);font-size:13px;border:1px dashed var(--line);border-radius:12px;background:#fcfdff;}
     .footer-note{font-size:12px;color:var(--muted);margin-top:10px;}
@@ -163,9 +201,9 @@
     .modal-header h3{margin:0;font-size:16px;}
     .modal-body{padding:16px 18px;display:grid;gap:14px;}
     .modal-footer{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;background:var(--panel-2);}
-    #patientFormDialog{width:min(920px,calc(100vw - 32px));max-height:calc(100vh - 48px);}
+    #patientFormDialog{width:min(940px,calc(100vw - 32px));max-height:calc(100vh - 48px);}
     #patientFormDialog[open]{display:flex;flex-direction:column;}
-    #patientFormDialog .modal-body{overflow-y:auto;flex:1;}
+    #patientFormDialog .modal-body{overflow-y:auto;flex:1;padding:14px 16px;}
     #medEditDialog{width:min(720px,calc(100vw - 32px));}
     #shareDialog{width:min(520px,calc(100vw - 32px));max-height:80vh;}
     #shareDialog[open]{display:flex;flex-direction:column;}
@@ -325,7 +363,7 @@
       <button class="btn" id="orderModeBtn">📋 오더 처방 모드</button>
       <button class="btn success" id="printBtn">🖨 A4 가로 출력</button>
       <a href="https://aloha-neurology-v2.lovable.app/" target="_blank" rel="noopener" class="shortcut-btn green">📋 판독 입력</a>
-<a href="https://kternalnr-jaiden.github.io/bobath-helper/index.html" target="_blank" rel="noopener" class="shortcut-btn blue">💊 약처방 도우미</a>
+      <a href="https://kternalnr-jaiden.github.io/bobath-helper/index.html" target="_blank" rel="noopener" class="shortcut-btn blue">💊 약처방 도우미</a>
       <a href="https://script.google.com/macros/s/AKfycbzB3gW5cU9Anv7Gp03VHTdyN6GYnW1s5hB-nKq0rjWNQkKyp4VU6si0HVy0DqB7x_r9/exec" target="_blank" rel="noopener" class="shortcut-btn" style="background:#fdf4ff;color:#6b21a8;border-color:#d8b4fe;">📄 신환PDF</a>
     </div>
     <div class="toolbar-right">
@@ -336,7 +374,7 @@
   <!-- View Bar -->
   <div class="view-bar">
     <div class="view-tabs">
-<button class="view-tab" data-view="all">👥 전체 환자</button>
+      <button class="view-tab" data-view="all">👥 전체 환자</button>
       <button class="view-tab active" data-view="mine">👤 나의 환자</button>
       <button class="view-tab" data-view="other">🔍 타 주치의</button>
       <button class="view-tab" data-view="dept">🏥 과별</button>
@@ -381,113 +419,147 @@
     </div>
   </section>
 </div>
-<!-- 환자 등록/수정 Dialog -->
+
+<!-- ══ 환자 등록/수정 Dialog ══ -->
 <dialog id="patientFormDialog">
   <div class="modal-header">
     <h3 id="patientFormTitle">환자 등록</h3>
     <button class="btn" id="closePatientFormBtn">✕ 닫기</button>
   </div>
   <div class="modal-body stack-lg">
-    <div class="stack">
-      <div class="section-title">1) 환자 한 줄 복붙</div>
-      <div class="field"><label>복붙 입력</label>
-        <textarea id="pastePatient" rows="2" placeholder="예: 1019-01&#9;0000015840&#9;김금자&#9;F&#9;82&#9;04.29"></textarea>
+
+    <!-- 섹션 1: 환자 한 줄 복붙 -->
+    <div class="form-section">
+      <div class="form-section-header">
+        <span class="form-section-num">1</span>
+        <h4 class="form-section-title">환자 한 줄 복붙</h4>
       </div>
-      <div class="actions"><button class="btn soft" id="parsePatientBtn">환자 복붙 파싱</button></div>
-    </div>
-    <div class="divider"></div>
-    <div class="stack">
-      <div class="section-title">2) 주상병 복붙</div>
-      <div class="field"><label>상병 입력</label>
-        <textarea id="pasteDiagnosis" rows="2" placeholder="예: 상세불명의 뇌내출혈&#9;상세불명의 뇌내출혈&#9;2026-03-24"></textarea>
-      </div>
-      <div class="actions"><button class="btn soft" id="parseDiagnosisBtn">상병 복붙 파싱</button></div>
-    </div>
-    <div class="divider"></div>
-    <div class="stack">
-      <div class="section-title">3) 개별 입력</div>
-      <div class="two">
-        <div class="field"><label>병실 원본</label><input id="roomRaw" placeholder="1019-01"/></div>
-        <div class="field"><label>호실 정렬키</label><input id="roomSortKey" placeholder="1019"/></div>
-      </div>
-      <div class="four">
-        <div class="field"><label>bed</label><input id="bedNo" placeholder="01"/></div>
-        <div class="field"><label>환자 번호</label><input id="patientNo" placeholder="0000015840"/></div>
-        <div class="field"><label>환자 이름</label><input id="patientName" placeholder="김금자"/></div>
-        <div class="field"><label>성별</label>
-          <select id="sex"><option value="">선택</option><option value="M">M</option><option value="F">F</option></select>
+      <div class="form-section-body">
+        <div class="field">
+          <label>복붙 입력</label>
+          <textarea id="pastePatient" rows="2" placeholder="예: 1019-01&#9;0000015840&#9;김금자&#9;F&#9;82&#9;04.29"></textarea>
         </div>
-      </div>
-      <div class="four">
-        <div class="field"><label>생년월일</label><input id="birthDate" type="date"/></div>
-        <div class="field"><label>붙여넣기 나이</label><input id="pastedAge" type="number" min="0" step="1" placeholder="82"/></div>
-        <div class="field"><label>입원날짜</label><input id="admissionDate" type="date"/></div>
-        <div class="field"><label>퇴원예정일</label><input id="expectedDischargeDate" type="date"/></div>
-      </div>
-      <div class="two">
-        <div class="field"><label>주상병</label><input id="primaryDiagnosis" placeholder="상세불명의 뇌내출혈"/></div>
-        <div class="field"><label>onset 날짜</label><input id="primaryDiagnosisOnsetDate" type="date"/></div>
-      </div>
-      <div class="two">
-        <div class="field"><label>진료과</label>
-          <select id="patientDept">
-            <option value="">선택</option>
-            <option value="재활의학과">재활의학과</option>
-            <option value="신경과">신경과</option>
-            <option value="내과">내과</option>
-          </select>
-        </div>
-<div class="field"><label>담당 주치의 (자동 설정)</label>
-          <input id="patientDoctorDisplay" readonly placeholder="로그인 의사로 자동 설정"/>
-        </div>
-      </div>
-      <div class="two">
-        <div class="field"><label>재활협진의</label>
-          <select id="rehabDoctor">
-            <option value="">미지정</option>
-            <option value="김성훈">김성훈</option>
-            <option value="이승환">이승환</option>
-            <option value="이현아">이현아</option>
-            <option value="강유진">강유진</option>
-          </select>
-        </div>
-        <div class="field" style="display:flex;flex-direction:column;justify-content:flex-end;">
-          <button type="button" class="btn soft" id="autoRehabBtn">🔄 협진의 자동지정</button>
-        </div>
+        <div class="actions">
+          <button class="btn soft" id="parsePatientBtn">환자 복붙 파싱</button>
         </div>
       </div>
     </div>
-    <div class="divider"></div>
-    <div class="stack">
-      <div class="section-title">4) 약물 / 참고사항</div>
-      <div class="field"><label>약 복붙 입력</label>
-        <textarea id="pasteMeds" rows="5" placeholder="케프라 액 150ml&#9;&#9;1ml&#9;145&#9;5&#9;*&#9;2&#9;1&#9;BID&#10;▶ DC 아트로벤트 흡입액…  ← DC쌍 자동제외"></textarea>
+
+    <!-- 섹션 2: 주상병 복붙 -->
+    <div class="form-section">
+      <div class="form-section-header">
+        <span class="form-section-num">2</span>
+        <h4 class="form-section-title">주상병 복붙</h4>
       </div>
-      <div class="actions">
-        <button class="btn soft" id="parseMedsBtn">약 복붙 파싱</button>
-        <button class="btn" id="clearMedsBtn">약 목록 비우기</button>
+      <div class="form-section-body">
+        <div class="field">
+          <label>상병 입력</label>
+          <textarea id="pasteDiagnosis" rows="2" placeholder="예: 상세불명의 뇌내출혈&#9;상세불명의 뇌내출혈&#9;2026-03-24"></textarea>
+        </div>
+        <div class="actions">
+          <button class="btn soft" id="parseDiagnosisBtn">상병 복붙 파싱</button>
+        </div>
       </div>
-      <div id="dcHintMsg" class="dc-hint"></div>
-      <div class="pill-list" id="medPills"></div>
-      <div class="two">
-        <div class="field"><label>마지막 lab 날짜</label>
-          <div class="lab-row">
-            <input id="lastLabDate" type="date"/>
-            <div class="lab-prev-row">
-              <label>이전 lab:</label>
-              <input id="prevLabDate" type="date"/>
-              <button type="button" class="btn-xs" id="moveToPreLabBtn">← 이전날짜로 이동</button>
-            </div>
+    </div>
+
+    <!-- 섹션 3: 개별 입력 -->
+    <div class="form-section">
+      <div class="form-section-header">
+        <span class="form-section-num">3</span>
+        <h4 class="form-section-title">개별 입력</h4>
+      </div>
+      <div class="form-section-body">
+        <div class="two">
+          <div class="field"><label>병실 원본</label><input id="roomRaw" placeholder="1019-01"/></div>
+          <div class="field"><label>호실 정렬키</label><input id="roomSortKey" placeholder="1019"/></div>
+        </div>
+        <div class="four">
+          <div class="field"><label>bed</label><input id="bedNo" placeholder="01"/></div>
+          <div class="field"><label>환자 번호</label><input id="patientNo" placeholder="0000015840"/></div>
+          <div class="field"><label>환자 이름</label><input id="patientName" placeholder="김금자"/></div>
+          <div class="field"><label>성별</label>
+            <select id="sex"><option value="">선택</option><option value="M">M</option><option value="F">F</option></select>
           </div>
         </div>
-        <div class="field"><label>최근 약 변경 내역 (자유 입력)</label>
-          <textarea id="recentMedChangeInput" rows="3" placeholder="2026-05-12 케프라 용량 증량&#10;2026-05-10 아트로벤트 추가"></textarea>
+        <div class="four">
+          <div class="field"><label>생년월일</label><input id="birthDate" type="date"/></div>
+          <div class="field"><label>붙여넣기 나이</label><input id="pastedAge" type="number" min="0" step="1" placeholder="82"/></div>
+          <div class="field"><label>입원날짜</label><input id="admissionDate" type="date"/></div>
+          <div class="field"><label>퇴원예정일</label><input id="expectedDischargeDate" type="date"/></div>
+        </div>
+        <div class="two">
+          <div class="field"><label>주상병</label><input id="primaryDiagnosis" placeholder="상세불명의 뇌내출혈"/></div>
+          <div class="field"><label>onset 날짜</label><input id="primaryDiagnosisOnsetDate" type="date"/></div>
+        </div>
+        <div class="two">
+          <div class="field"><label>진료과</label>
+            <select id="patientDept">
+              <option value="">선택</option>
+              <option value="재활의학과">재활의학과</option>
+              <option value="신경과">신경과</option>
+              <option value="내과">내과</option>
+            </select>
+          </div>
+          <div class="field"><label>담당 주치의 (자동 설정)</label>
+            <input id="patientDoctorDisplay" readonly placeholder="로그인 의사로 자동 설정"/>
+          </div>
+        </div>
+        <div class="two">
+          <div class="field"><label>재활협진의</label>
+            <select id="rehabDoctor">
+              <option value="">미지정</option>
+              <option value="김성훈">김성훈</option>
+              <option value="이승환">이승환</option>
+              <option value="이현아">이현아</option>
+              <option value="강유진">강유진</option>
+            </select>
+          </div>
+          <div class="field" style="display:flex;flex-direction:column;justify-content:flex-end;">
+            <button type="button" class="btn soft" id="autoRehabBtn">🔄 협진의 자동지정</button>
+          </div>
         </div>
       </div>
-      <div class="field"><label>처방 참고 사항</label>
-        <textarea id="prescriptionNote" placeholder="자유 입력"></textarea>
+    </div>
+
+    <!-- 섹션 4: 약물 / 참고사항 -->
+    <div class="form-section">
+      <div class="form-section-header">
+        <span class="form-section-num">4</span>
+        <h4 class="form-section-title">약물 / 참고사항</h4>
+      </div>
+      <div class="form-section-body">
+        <div class="field">
+          <label>약 복붙 입력</label>
+          <textarea id="pasteMeds" rows="5" placeholder="케프라 액 150ml&#9;&#9;1ml&#9;145&#9;5&#9;*&#9;2&#9;1&#9;BID&#10;▶ DC 아트로벤트 흡입액…  ← DC쌍 자동제외"></textarea>
+        </div>
+        <div class="actions">
+          <button class="btn soft" id="parseMedsBtn">약 복붙 파싱</button>
+          <button class="btn" id="clearMedsBtn">약 목록 비우기</button>
+        </div>
+        <div id="dcHintMsg" class="dc-hint"></div>
+        <div class="pill-list" id="medPills"></div>
+        <div class="two">
+          <div class="field"><label>마지막 lab 날짜</label>
+            <div class="lab-row">
+              <input id="lastLabDate" type="date"/>
+              <div class="lab-prev-row">
+                <label>이전 lab:</label>
+                <input id="prevLabDate" type="date"/>
+                <button type="button" class="btn-xs" id="moveToPreLabBtn">← 이전날짜로 이동</button>
+              </div>
+            </div>
+          </div>
+          <div class="field"><label>최근 약 변경 내역 (자유 입력)</label>
+            <textarea id="recentMedChangeInput" rows="3" placeholder="2026-05-12 케프라 용량 증량&#10;2026-05-10 아트로벤트 추가"></textarea>
+          </div>
+        </div>
+        <div class="field">
+          <label>처방 참고 사항</label>
+          <textarea id="prescriptionNote" placeholder="자유 입력"></textarea>
+        </div>
       </div>
     </div>
+
   </div>
   <div class="modal-footer">
     <button class="btn" id="resetFormBtn">↺ 입력 초기화</button>
@@ -524,7 +596,7 @@
   <div class="modal-body" style="gap:0;">
     <div id="shareCurrentList"></div>
     <div class="divider" style="margin:10px 0;"></div>
-    <div class="section-title" style="margin-bottom:8px;">공유할 주치의 선택</div>
+    <div class="form-section-title" style="font-size:13px;font-weight:800;margin-bottom:8px;">공유할 주치의 선택</div>
     <div id="shareDoctorList" style="display:flex;flex-direction:column;gap:6px;"></div>
   </div>
 </dialog>
@@ -537,7 +609,7 @@
   </div>
   <div class="modal-body">
     <div id="transferCurrentInfo" style="padding:10px 12px;background:#f8fafc;border-radius:10px;font-size:13px;border:1px solid var(--line);"></div>
-    <div class="section-title" style="margin-top:4px;">새 주치의 선택</div>
+    <div class="form-section-title" style="font-size:13px;font-weight:800;margin-top:4px;">새 주치의 선택</div>
     <div id="transferDoctorList"></div>
   </div>
 </dialog>
@@ -567,6 +639,7 @@
   </div>
   <div class="notepad-body" id="notepadBody"></div>
 </dialog>
+
 <!-- 금일 확인사항 추가 Dialog -->
 <dialog id="taskAddDialog" style="width:min(420px,calc(100vw - 32px));">
   <div class="modal-header">
@@ -606,14 +679,38 @@
   ];
   const DEPARTMENTS = [...new Set(DOCTORS.map(d => d.dept))];
   const REHAB_DOCTORS = ['김성훈','이승환','이현아','강유진'];
-  function getRehabDoctorByBed(bedNo) {
-    const n = parseInt(bedNo, 10);
-    if (!n || n <= 0) return '';
-    const r = n % 3;
+
+  /**
+   * 재활협진 자동배정
+   * roomSortKey 예시: '601' (6층 1호실), '1001' (10층 1호실)
+   * 층수를 제거한 순수 호실 번호로 배정:
+   *   6xx, 7xx, 8xx, 9xx → 뒤 2자리가 호실
+   *   10xx               → 뒤 2자리가 호실
+   * 호실 번호 % 3 == 1 → 김성훈 (1,4,7,10,13,16,19호...)
+   * 호실 번호 % 3 == 2 → 이승환 (2,5,8,11,14,17,20호...)
+   * 호실 번호 % 3 == 0 → 이현아 (3,6,9,12,15,18호...)
+   */
+  function getRehabDoctorByRoomSortKey(roomSortKey) {
+    const s = String(roomSortKey || '').replace(/\D/g, '');
+    if (!s) return '';
+    let hosilStr = '';
+    if (s.length === 3) {
+      // 예: '601' → 층='6', 호실='01'
+      hosilStr = s.slice(1);
+    } else if (s.length === 4) {
+      // 예: '1001' → 층='10', 호실='01'
+      hosilStr = s.slice(2);
+    } else {
+      hosilStr = s;
+    }
+    const hosil = parseInt(hosilStr, 10);
+    if (!hosil || hosil <= 0) return '';
+    const r = hosil % 3;
     if (r === 1) return '김성훈';
     if (r === 2) return '이승환';
-    return '이현아'; // r===0
+    return '이현아'; // r === 0
   }
+
   const ALLOWED_EMAILS = DOCTORS.map(d => d.email);
   let currentDoctor = null;
 
@@ -711,7 +808,7 @@
     primaryDiagnosis:el('primaryDiagnosis'), primaryDiagnosisOnsetDate:el('primaryDiagnosisOnsetDate'),
     lastLabDate:el('lastLabDate'), prevLabDate:el('prevLabDate'),
     recentMedChangeInput:el('recentMedChangeInput'), prescriptionNote:el('prescriptionNote'),
-patientDept:el('patientDept'), patientDoctorDisplay:el('patientDoctorDisplay'),
+    patientDept:el('patientDept'), patientDoctorDisplay:el('patientDoctorDisplay'),
     rehabDoctor:el('rehabDoctor')
   };
 
@@ -931,7 +1028,7 @@ patientDept:el('patientDept'), patientDoctorDisplay:el('patientDoctorDisplay'),
     const checks=getVisitChecks(); if(checked)checks[patientId]=true; else delete checks[patientId];
     localStorage.setItem(VISIT_KEY,JSON.stringify({date:getKSTDateOnly(),checks}));
   }
-function updateFloorSummary(){
+  function updateFloorSummary(){
     const checks=getVisitChecks(), active=state.patients.filter(p=>!p.deleted&&(
       !p.attendingDoctorEmail||p.attendingDoctorEmail===currentDoctor?.email||
       (Array.isArray(p.sharedWith)&&p.sharedWith.includes(currentDoctor?.email))));
@@ -967,7 +1064,7 @@ function updateFloorSummary(){
       admissionDate:formEls.admissionDate.value||'', expectedDischargeDate:formEls.expectedDischargeDate.value||'',
       primaryDiagnosis:formEls.primaryDiagnosis.value.trim(), primaryDiagnosisOnsetDate:formEls.primaryDiagnosisOnsetDate.value||'',
       department:dept, attendingDoctorEmail:attEmail, attendingDoctorName:attName,
-rehabDoctor: formEls.rehabDoctor.value || '',
+      rehabDoctor: formEls.rehabDoctor.value || '',
       sharedWith: existing?.sharedWith || [],
       medications:state.medicationsDraft, recentMedChanges:formEls.recentMedChangeInput.value.trim(),
       lastLabDate:formEls.lastLabDate.value||'', prevLabDate:formEls.prevLabDate.value||'',
@@ -985,7 +1082,7 @@ rehabDoctor: formEls.rehabDoctor.value || '',
     formEls.primaryDiagnosis.value=patient.primaryDiagnosis||''; formEls.primaryDiagnosisOnsetDate.value=patient.primaryDiagnosisOnsetDate||'';
     formEls.lastLabDate.value=patient.lastLabDate||''; formEls.prevLabDate.value=patient.prevLabDate||'';
     formEls.prescriptionNote.value=patient.prescriptionNote||'';
-formEls.patientDept.value=patient.department||'';
+    formEls.patientDept.value=patient.department||'';
     formEls.rehabDoctor.value=patient.rehabDoctor||'';
     const docName=patient.attendingDoctorName||getDoctorByEmail(patient.attendingDoctorEmail)?.name||'미지정';
     formEls.patientDoctorDisplay.value=docName;
@@ -1065,10 +1162,9 @@ formEls.patientDept.value=patient.department||'';
   }
   function renderShareDialogContent(p){
     const sharedWith=Array.isArray(p.sharedWith)?p.sharedWith:[];
-    // 현재 공유 목록
     const curList=el('shareCurrentList'); curList.innerHTML='';
     const secTitle=document.createElement('div');
-    secTitle.className='section-title'; secTitle.style.marginBottom='8px';
+    secTitle.style.cssText='font-size:13px;font-weight:800;margin-bottom:8px;';
     secTitle.textContent=sharedWith.length?'현재 공유 중인 주치의':'현재 공유 중인 주치의 없음';
     curList.appendChild(secTitle);
     sharedWith.forEach(email=>{
@@ -1080,11 +1176,10 @@ formEls.patientDept.value=patient.department||'';
       stopBtn.addEventListener('click',()=>unsharePatient(p.id,email));
       row.appendChild(info); row.appendChild(stopBtn); curList.appendChild(row);
     });
-    // 공유 추가 목록
     const listEl=el('shareDoctorList'); listEl.innerHTML='';
     const attEmail=p.attendingDoctorEmail;
     DOCTORS.forEach(d=>{
-      if(d.email===attEmail)return; // 주치의 본인 제외
+      if(d.email===attEmail)return;
       const isShared=sharedWith.includes(d.email);
       const row=document.createElement('div'); row.className='share-doctor-row';
       const info=document.createElement('div');
@@ -1139,7 +1234,6 @@ formEls.patientDept.value=patient.department||'';
     const p=state.patients.find(p=>p.id===patientId); if(!p)return;
     const newDoc=getDoctorByEmail(newDoctorEmail); if(!newDoc)return;
     p.attendingDoctorEmail=newDoc.email; p.attendingDoctorName=newDoc.name; p.department=newDoc.dept;
-    // 새 주치의는 sharedWith에서 제거
     if(Array.isArray(p.sharedWith)) p.sharedWith=p.sharedWith.filter(e=>e!==newDoctorEmail);
     saveLocal();
     try{await updateDoc(doc(db,'patients',patientId),{
@@ -1149,7 +1243,6 @@ formEls.patientDept.value=patient.department||'';
     el('transferDialog').close(); render();
   }
   el('closeTransferDialogBtn').addEventListener('click',()=>el('transferDialog').close());
-
 
   /* ══ 금일 확인사항 (Firestore) ══ */
   let dailyTasksCache = [];
@@ -1165,7 +1258,6 @@ formEls.patientDept.value=patient.department||'';
       dailyTasksCache.sort((a, b) => (a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
     } catch(e) {
       console.error('dailyTasks load error:', e);
-      console.warn('Firebase 보안 규칙에서 dailyTasks 컬렉션 허용 필요');
       dailyTasksCache = [];
     }
     renderDailyCheckSection();
@@ -1173,7 +1265,6 @@ formEls.patientDept.value=patient.department||'';
 
   async function addDailyTask(patientId, text) {
     const p = state.patients.find(p => p.id === patientId);
-    // 즉각 UI 반영 (optimistic) — Firestore 성공 여부와 무관하게 먼저 표시
     const tempId = 'local-' + crypto.randomUUID();
     const tempTask = {
       id: tempId, date: getKSTDateOnly(), patientId,
@@ -1182,18 +1273,15 @@ formEls.patientDept.value=patient.department||'';
     };
     dailyTasksCache.push(tempTask);
     renderDailyCheckSection();
-    // 백그라운드 Firestore 저장
     try {
       const ref = await addDoc(collection(db, 'dailyTasks'), {
         date: tempTask.date, patientId, patientName: tempTask.patientName,
         text: tempTask.text, checked: false, createdAt: serverTimestamp()
       });
-      // temp ID → 실제 Firestore ID 교체
       const idx = dailyTasksCache.findIndex(t => t.id === tempId);
       if (idx >= 0) dailyTasksCache[idx].id = ref.id;
     } catch(e) {
       console.error('dailyTasks Firestore 저장 오류:', e);
-      // 저장 실패해도 로컬 캐시는 유지 (새로고침 전까지는 보임)
     }
   }
 
@@ -1210,7 +1298,7 @@ formEls.patientDept.value=patient.department||'';
   async function deleteDailyTask(taskId) {
     dailyTasksCache = dailyTasksCache.filter(t => t.id !== taskId);
     renderDailyCheckSection();
-    if (taskId.startsWith('local-')) return; // 미저장 항목
+    if (taskId.startsWith('local-')) return;
     try { await deleteDoc(doc(db, 'dailyTasks', taskId)); }
     catch(e) { console.error('deleteDailyTask error:', e); }
   }
@@ -1270,32 +1358,34 @@ formEls.patientDept.value=patient.department||'';
   el('taskInputText').addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); saveTask(); }
   });
-/* ══ 복사 태그 파싱 ══ */
-function renderNoteWithCopyTags(text) {
-  const div=document.createElement('div');
-  div.style.cssText='font-size:9px;line-height:1.6;';
-  if(!text){return div;}
-  text.split(/(\[[^\]]+\])/).forEach(part=>{
-    const m=part.match(/^\[([^\]]+)\]$/);
-    if(m){
-      const btn=document.createElement('button');
-      btn.className='copy-tag-btn'; btn.type='button'; btn.textContent=m[1];
-      btn.title='클릭 → 복사: '+m[1];
-      btn.addEventListener('click', e=>{
-        e.stopPropagation();
-        navigator.clipboard.writeText(m[1]).then(()=>{
-          btn.classList.add('copied');
-          const orig=btn.textContent; btn.textContent='✓ 복사됨';
-          setTimeout(()=>{btn.classList.remove('copied');btn.textContent=orig;},1200);
+
+  /* ══ 복사 태그 파싱 ══ */
+  function renderNoteWithCopyTags(text) {
+    const div=document.createElement('div');
+    div.style.cssText='font-size:9px;line-height:1.6;';
+    if(!text){return div;}
+    text.split(/(\[[^\]]+\])/).forEach(part=>{
+      const m=part.match(/^\[([^\]]+)\]$/);
+      if(m){
+        const btn=document.createElement('button');
+        btn.className='copy-tag-btn'; btn.type='button'; btn.textContent=m[1];
+        btn.title='클릭 → 복사: '+m[1];
+        btn.addEventListener('click', e=>{
+          e.stopPropagation();
+          navigator.clipboard.writeText(m[1]).then(()=>{
+            btn.classList.add('copied');
+            const orig=btn.textContent; btn.textContent='✓ 복사됨';
+            setTimeout(()=>{btn.classList.remove('copied');btn.textContent=orig;},1200);
+          });
         });
-      });
-      div.appendChild(btn);
-    } else if(part){
-      div.appendChild(document.createTextNode(part));
-    }
-  });
-  return div;
-}
+        div.appendChild(btn);
+      } else if(part){
+        div.appendChild(document.createTextNode(part));
+      }
+    });
+    return div;
+  }
+
   /* ══ Render ══ */
   function sortPatients(list){
     const arr=[...list];
@@ -1329,7 +1419,8 @@ function renderNoteWithCopyTags(text) {
       const lastLabHtml=patient.lastLabDate?`<span class="${isLabToday?'lab-today':''}">${fmtDate(patient.lastLabDate)}</span>`:'';
       tr.innerHTML=`
         <td class="nowrap" style="text-align:center;padding:3px 2px;"></td>
-<td><div class="cell-stack"><span class="main">${patient.roomSortKey||''}${patient.bedNo?'-'+patient.bedNo:''}</span><span class="sub">${patient.patientNo||''}</span>${patient.rehabDoctor?`<span style="font-size:9px;color:#0369a1;font-weight:700;background:#e0f2fe;border:1px solid #7dd3fc;padding:1px 5px;border-radius:4px;margin-top:2px;display:inline-block;">재활 ${patient.rehabDoctor}</span>`:''} ${isSharedToMe&&patient.attendingDoctorName?`<span class="shared-doctor-tag">${patient.attendingDoctorName}</span>`:''}</div></td>        <td><div class="cell-stack"><span class="main">${patient.patientName||''}</span><span class="sub">${patient.sex||''}${age!==''?'/'+age:''}</span></div></td>
+        <td><div class="cell-stack"><span class="main">${patient.roomSortKey||''}${patient.bedNo?'-'+patient.bedNo:''}</span><span class="sub">${patient.patientNo||''}</span>${patient.rehabDoctor?`<span style="font-size:9px;color:#0369a1;font-weight:700;background:#e0f2fe;border:1px solid #7dd3fc;padding:1px 5px;border-radius:4px;margin-top:2px;display:inline-block;">재활 ${patient.rehabDoctor}</span>`:''} ${isSharedToMe&&patient.attendingDoctorName?`<span class="shared-doctor-tag">${patient.attendingDoctorName}</span>`:''}</div></td>
+        <td><div class="cell-stack"><span class="main">${patient.patientName||''}</span><span class="sub">${patient.sex||''}${age!==''?'/'+age:''}</span></div></td>
         <td><div class="cell-stack">
           <span class="main">${fmtDate(patient.admissionDate)}${stayDays?' ('+stayDays+'일)':''}</span>
           ${patient.expectedDischargeDate?'<span class="discharge-date">→ '+fmtDate(patient.expectedDischargeDate)+'</span>':'<span class="sub">→ 미정</span>'}
@@ -1353,8 +1444,8 @@ function renderNoteWithCopyTags(text) {
       visitWrap.appendChild(vChk); visitWrap.appendChild(vNo); noCell.appendChild(visitWrap);
       // 처방 참고사항
       const noteTd=cells[8];
-const noteText=renderNoteWithCopyTags(patient.prescriptionNote||'');
-noteTd.appendChild(noteText);
+      const noteText=renderNoteWithCopyTags(patient.prescriptionNote||'');
+      noteTd.appendChild(noteText);
       const checkRow=document.createElement('div'); checkRow.className='note-check-row';
       const chk=document.createElement('input'); chk.type='checkbox'; chk.id=`chk-${patient.id}`;
       const checked=isCheckedThisWeek(patient); chk.checked=checked;
@@ -1416,12 +1507,22 @@ noteTd.appendChild(noteText);
   }
 
   /* ══ Event Listeners ══ */
-  el('autoRehabBtn').addEventListener('click',()=>{
-    const bed = formEls.bedNo.value.trim();
-    if(!bed){ alert('bed 번호를 먼저 입력하세요.'); return; }
-    const doctor = getRehabDoctorByBed(bed);
+  el('autoRehabBtn').addEventListener('click', () => {
+    // roomSortKey 우선, 없으면 roomRaw에서 계산
+    const sortKey = formEls.roomSortKey.value.trim()
+      || padRoomSort(formEls.roomRaw.value.split('-')[0] || '');
+    if (!sortKey || sortKey === '0000') {
+      alert('병실 원본 또는 호실 정렬키를 먼저 입력하세요.');
+      return;
+    }
+    const doctor = getRehabDoctorByRoomSortKey(sortKey);
+    if (!doctor) {
+      alert('호실 번호를 인식할 수 없습니다. 병실 형식을 확인하세요. (예: 601-01)');
+      return;
+    }
     formEls.rehabDoctor.value = doctor;
   });
+
   el('moveToPreLabBtn').addEventListener('click',()=>{
     const cur=formEls.lastLabDate.value; if(!cur){alert('먼저 마지막 lab 날짜를 입력하세요.');return;}
     formEls.prevLabDate.value=cur; formEls.lastLabDate.value=''; formEls.lastLabDate.focus();
@@ -1479,12 +1580,12 @@ noteTd.appendChild(noteText);
   function openNotepad(){renderNotepad();el('notepadDialog').showModal();}
   function renderNotepad(){
     const body=el('notepadBody'); body.innerHTML='';
-const rows=[...state.patients]
+    const rows=[...state.patients]
       .filter(p=>!p.deleted&&(
         !p.attendingDoctorEmail||
         p.attendingDoctorEmail===currentDoctor?.email||
         (Array.isArray(p.sharedWith)&&p.sharedWith.includes(currentDoctor?.email))))
-      .sort((a,b)=>String(a.roomSortKey||'').localeCompare(String(b.roomSortKey||''))); 
+      .sort((a,b)=>String(a.roomSortKey||'').localeCompare(String(b.roomSortKey||'')));
     if(!rows.length){body.innerHTML='<div class="notepad-empty">등록된 환자가 없습니다.</div>';return;}
     const floors=[...new Set(rows.map(p=>parseInt((p.roomSortKey||'').slice(0,2),10)).filter(Boolean))].sort((a,b)=>a-b);
     const nav=document.createElement('div'); nav.className='np-floor-nav';
@@ -1518,7 +1619,6 @@ const rows=[...state.patients]
       if(saved){const img=new Image();img.onload=()=>canvas.getContext('2d').drawImage(img,0,0);img.src=saved;}
       setupNotepadCanvas(canvas,patient.id);
     });
-    // ── 기타 환자 행 ──
     const extraRow=document.createElement('div'); extraRow.className='notepad-row';
     extraRow.style.cssText='border-top:2px dashed #cbd5e1;background:#f8fafc;';
     const extraInfo=document.createElement('div'); extraInfo.className='notepad-info';
@@ -1606,13 +1706,14 @@ const rows=[...state.patients]
   });
   el('notepadBtn').addEventListener('click',openNotepad);
   el('closeNotepadBtn').addEventListener('click',()=>el('notepadDialog').close());
+
   /* ── 오더 처방 모드 ── */
-const _table = document.querySelector('table');
-el('orderModeBtn').addEventListener('click', ()=>{
-  const on = _table.classList.toggle('order-mode-active');
-  el('orderModeBtn').textContent = on ? '✕ 기본 모드로' : '📋 오더 처방 모드';
-  el('orderModeBtn').classList.toggle('primary', on);
-});
+  const _table = document.querySelector('table');
+  el('orderModeBtn').addEventListener('click', ()=>{
+    const on = _table.classList.toggle('order-mode-active');
+    el('orderModeBtn').textContent = on ? '✕ 기본 모드로' : '📋 오더 처방 모드';
+    el('orderModeBtn').classList.toggle('primary', on);
+  });
 
 </script>
 </body>

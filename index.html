@@ -325,7 +325,8 @@
       <button class="btn" id="orderModeBtn">📋 오더 처방 모드</button>
       <button class="btn success" id="printBtn">🖨 A4 가로 출력</button>
       <a href="https://aloha-neurology-v2.lovable.app/" target="_blank" rel="noopener" class="shortcut-btn green">📋 판독 입력</a>
-      <a href="https://kternalnr-jaiden.github.io/bobath-helper/index.html" target="_blank" rel="noopener" class="shortcut-btn blue">💊 약처방 도우미</a>
+<a href="https://kternalnr-jaiden.github.io/bobath-helper/index.html" target="_blank" rel="noopener" class="shortcut-btn blue">💊 약처방 도우미</a>
+      <a href="https://script.google.com/macros/s/AKfycbzB3gW5cU9Anv7Gp03VHTdyN6GYnW1s5hB-nKq0rjWNQkKyp4VU6si0HVy0DqB7x_r9/exec" target="_blank" rel="noopener" class="shortcut-btn" style="background:#fdf4ff;color:#6b21a8;border-color:#d8b4fe;">📄 신환PDF</a>
     </div>
     <div class="toolbar-right">
       <span class="meta" id="patientCountMeta">환자 0명</span>
@@ -436,8 +437,23 @@
             <option value="내과">내과</option>
           </select>
         </div>
-        <div class="field"><label>담당 주치의 (자동 설정)</label>
+<div class="field"><label>담당 주치의 (자동 설정)</label>
           <input id="patientDoctorDisplay" readonly placeholder="로그인 의사로 자동 설정"/>
+        </div>
+      </div>
+      <div class="two">
+        <div class="field"><label>재활협진의</label>
+          <select id="rehabDoctor">
+            <option value="">미지정</option>
+            <option value="김성훈">김성훈</option>
+            <option value="이승환">이승환</option>
+            <option value="이현아">이현아</option>
+            <option value="강유진">강유진</option>
+          </select>
+        </div>
+        <div class="field" style="display:flex;flex-direction:column;justify-content:flex-end;">
+          <button type="button" class="btn soft" id="autoRehabBtn">🔄 협진의 자동지정</button>
+        </div>
         </div>
       </div>
     </div>
@@ -589,6 +605,15 @@
     { name:'고명범', email:'kmb.internal@gmail.com', dept:'내과'      },
   ];
   const DEPARTMENTS = [...new Set(DOCTORS.map(d => d.dept))];
+  const REHAB_DOCTORS = ['김성훈','이승환','이현아','강유진'];
+  function getRehabDoctorByBed(bedNo) {
+    const n = parseInt(bedNo, 10);
+    if (!n || n <= 0) return '';
+    const r = n % 3;
+    if (r === 1) return '김성훈';
+    if (r === 2) return '이승환';
+    return '이현아'; // r===0
+  }
   const ALLOWED_EMAILS = DOCTORS.map(d => d.email);
   let currentDoctor = null;
 
@@ -686,7 +711,8 @@
     primaryDiagnosis:el('primaryDiagnosis'), primaryDiagnosisOnsetDate:el('primaryDiagnosisOnsetDate'),
     lastLabDate:el('lastLabDate'), prevLabDate:el('prevLabDate'),
     recentMedChangeInput:el('recentMedChangeInput'), prescriptionNote:el('prescriptionNote'),
-    patientDept:el('patientDept'), patientDoctorDisplay:el('patientDoctorDisplay')
+patientDept:el('patientDept'), patientDoctorDisplay:el('patientDoctorDisplay'),
+    rehabDoctor:el('rehabDoctor')
   };
 
   /* ══ Firestore ══ */
@@ -941,6 +967,7 @@ function updateFloorSummary(){
       admissionDate:formEls.admissionDate.value||'', expectedDischargeDate:formEls.expectedDischargeDate.value||'',
       primaryDiagnosis:formEls.primaryDiagnosis.value.trim(), primaryDiagnosisOnsetDate:formEls.primaryDiagnosisOnsetDate.value||'',
       department:dept, attendingDoctorEmail:attEmail, attendingDoctorName:attName,
+rehabDoctor: formEls.rehabDoctor.value || '',
       sharedWith: existing?.sharedWith || [],
       medications:state.medicationsDraft, recentMedChanges:formEls.recentMedChangeInput.value.trim(),
       lastLabDate:formEls.lastLabDate.value||'', prevLabDate:formEls.prevLabDate.value||'',
@@ -958,7 +985,8 @@ function updateFloorSummary(){
     formEls.primaryDiagnosis.value=patient.primaryDiagnosis||''; formEls.primaryDiagnosisOnsetDate.value=patient.primaryDiagnosisOnsetDate||'';
     formEls.lastLabDate.value=patient.lastLabDate||''; formEls.prevLabDate.value=patient.prevLabDate||'';
     formEls.prescriptionNote.value=patient.prescriptionNote||'';
-    formEls.patientDept.value=patient.department||'';
+formEls.patientDept.value=patient.department||'';
+    formEls.rehabDoctor.value=patient.rehabDoctor||'';
     const docName=patient.attendingDoctorName||getDoctorByEmail(patient.attendingDoctorEmail)?.name||'미지정';
     formEls.patientDoctorDisplay.value=docName;
     if(typeof patient.recentMedChanges==='string')formEls.recentMedChangeInput.value=patient.recentMedChanges;
@@ -974,7 +1002,7 @@ function updateFloorSummary(){
     state.editingId=null;
     Object.values(formEls).forEach(inp=>inp.value='');
     if(currentDoctor){
-      formEls.patientDept.value=currentDoctor.dept;
+      formEls.patientDept.value=currentDoctor.dept;formEls.rehabDoctor.value='';
       formEls.patientDoctorDisplay.value=currentDoctor.name;
     }
     el('pastePatient').value=''; el('pasteDiagnosis').value=''; el('pasteMeds').value='';
@@ -985,7 +1013,7 @@ function updateFloorSummary(){
   function resetForm(){
     state.editingId=null;
     Object.values(formEls).forEach(inp=>inp.value='');
-    if(currentDoctor){formEls.patientDept.value=currentDoctor.dept;formEls.patientDoctorDisplay.value=currentDoctor.name;}
+    if(currentDoctor){formEls.patientDept.value=currentDoctor.dept;formEls.rehabDoctor.value='';formEls.patientDoctorDisplay.value=currentDoctor.name;}
     el('pastePatient').value=''; el('pasteDiagnosis').value=''; el('pasteMeds').value='';
     state.medicationsDraft=[]; refreshMedDraftPills();
     el('patientFormTitle').textContent='환자 등록';
@@ -1301,8 +1329,7 @@ function renderNoteWithCopyTags(text) {
       const lastLabHtml=patient.lastLabDate?`<span class="${isLabToday?'lab-today':''}">${fmtDate(patient.lastLabDate)}</span>`:'';
       tr.innerHTML=`
         <td class="nowrap" style="text-align:center;padding:3px 2px;"></td>
-        <td><div class="cell-stack"><span class="main">${patient.roomSortKey||''}${patient.bedNo?'-'+patient.bedNo:''}</span><span class="sub">${patient.patientNo||''}</span>${isSharedToMe&&patient.attendingDoctorName?`<span class="shared-doctor-tag">${patient.attendingDoctorName}</span>`:''}</div></td>
-        <td><div class="cell-stack"><span class="main">${patient.patientName||''}</span><span class="sub">${patient.sex||''}${age!==''?'/'+age:''}</span></div></td>
+<td><div class="cell-stack"><span class="main">${patient.roomSortKey||''}${patient.bedNo?'-'+patient.bedNo:''}</span><span class="sub">${patient.patientNo||''}</span>${patient.rehabDoctor?`<span style="font-size:9px;color:#0369a1;font-weight:700;background:#e0f2fe;border:1px solid #7dd3fc;padding:1px 5px;border-radius:4px;margin-top:2px;display:inline-block;">재활 ${patient.rehabDoctor}</span>`:''} ${isSharedToMe&&patient.attendingDoctorName?`<span class="shared-doctor-tag">${patient.attendingDoctorName}</span>`:''}</div></td>        <td><div class="cell-stack"><span class="main">${patient.patientName||''}</span><span class="sub">${patient.sex||''}${age!==''?'/'+age:''}</span></div></td>
         <td><div class="cell-stack">
           <span class="main">${fmtDate(patient.admissionDate)}${stayDays?' ('+stayDays+'일)':''}</span>
           ${patient.expectedDischargeDate?'<span class="discharge-date">→ '+fmtDate(patient.expectedDischargeDate)+'</span>':'<span class="sub">→ 미정</span>'}
@@ -1389,6 +1416,12 @@ noteTd.appendChild(noteText);
   }
 
   /* ══ Event Listeners ══ */
+  el('autoRehabBtn').addEventListener('click',()=>{
+    const bed = formEls.bedNo.value.trim();
+    if(!bed){ alert('bed 번호를 먼저 입력하세요.'); return; }
+    const doctor = getRehabDoctorByBed(bed);
+    formEls.rehabDoctor.value = doctor;
+  });
   el('moveToPreLabBtn').addEventListener('click',()=>{
     const cur=formEls.lastLabDate.value; if(!cur){alert('먼저 마지막 lab 날짜를 입력하세요.');return;}
     formEls.prevLabDate.value=cur; formEls.lastLabDate.value=''; formEls.lastLabDate.focus();

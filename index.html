@@ -120,6 +120,8 @@
     .cell-stack .main{font-size:10px;font-weight:700;}
     .cell-stack .sub{font-size:9px;color:var(--muted);}
     .lab-prev{font-size:9px;color:var(--muted);margin-top:2px;}
+    .lab-next-recommend{font-size:9px;color:#9ca3af;margin-top:2px;}
+    .lab-due-highlight{display:inline-block;background:#dbeafe;color:#1e40af;padding:2px 6px;border-radius:6px;font-weight:800;box-shadow:inset 0 0 0 1px #93c5fd;}
     .note-check-row{display:flex;align-items:center;gap:5px;margin-top:4px;padding-top:4px;border-top:1px dashed var(--line);}
     .note-check-row input[type=checkbox]{width:13px;height:13px;cursor:pointer;accent-color:var(--success);}
     .note-check-label{font-size:8px;cursor:pointer;color:var(--muted);user-select:none;}
@@ -696,6 +698,35 @@
     return new Date(Date.now()+9*3600000).toISOString().split('T')[0];
   }
   function isTodayKST(d) { return !!d && d === getKSTDateOnly(); }
+  function addDaysToDateStr(dateStr, days) {
+    const dt = new Date(dateStr + 'T00:00:00Z');
+    dt.setUTCDate(dt.getUTCDate() + days);
+    return dt.toISOString().split('T')[0];
+  }
+  function getKSTDayOfWeek(dateStr) {
+    // 0=일,1=월,...5=금,6=토 — dateStr이 어느 요일인지 (KST 기준 날짜이므로 UTC 파싱으로 충분)
+    const dt = new Date(dateStr + 'T00:00:00Z');
+    return dt.getUTCDay();
+  }
+  function isLabDueHighlight(lastLabDate) {
+    if (!lastLabDate) return false;
+    const todayStr = getKSTDateOnly();
+    const yesterdayStr = addDaysToDateStr(todayStr, -1);
+    if (lastLabDate === yesterdayStr) return true;
+    // 금요일 lab인 경우 토/일/월요일까지 계속 강조
+    const lastDow = getKSTDayOfWeek(lastLabDate);
+    if (lastDow === 5) {
+      const todayDow = getKSTDayOfWeek(todayStr);
+      // 금요일 다음 토(6),일(0),월(1) 까지 허용. 날짜 차이도 0~3일 이내인지 함께 확인.
+      const diffDays = Math.round((new Date(todayStr+'T00:00:00Z') - new Date(lastLabDate+'T00:00:00Z')) / 86400000);
+      if (diffDays >= 1 && diffDays <= 3 && (todayDow===6 || todayDow===0 || todayDow===1)) return true;
+    }
+    return false;
+  }
+  function getNextRecommendedLabDate(lastLabDate) {
+    if (!lastLabDate) return '';
+    return addDaysToDateStr(lastLabDate, 21);
+  }
   function refreshPrintDate() { el('printDate').textContent = getKSTDateString(); }
   el('printBtn').addEventListener('click', () => { refreshPrintDate(); window.print(); });
 
@@ -1331,10 +1362,13 @@ function renderNoteWithCopyTags(text) {
       if(typeof patient.recentMedChanges==='string')changeText=patient.recentMedChanges;
       else if(Array.isArray(patient.recentMedChanges))changeText=patient.recentMedChanges.map(m=>m.summary).join('\n');
       const isLabToday=isTodayKST(patient.lastLabDate);
-      const lastLabHtml=patient.lastLabDate?`<span class="${isLabToday?'lab-today':''}">${fmtDate(patient.lastLabDate)}</span>`:'';
+      const isLabDue=isLabDueHighlight(patient.lastLabDate);
+      const labCssClass=isLabToday?'lab-today':(isLabDue?'lab-due-highlight':'');
+      const lastLabHtml=patient.lastLabDate?`<span class="${labCssClass}">${fmtDate(patient.lastLabDate)}</span>`:'';
+      const nextRecommendedLabDate=getNextRecommendedLabDate(patient.lastLabDate);
       tr.innerHTML=`
         <td class="nowrap" style="text-align:center;padding:3px 2px;"></td>
-<td><div class="cell-stack"><span class="main">${patient.roomSortKey||''}${patient.bedNo?'-'+patient.bedNo:''}</span><span class="sub">${patient.patientNo||''}</span>${patient.rehabDoctor?`<span style="font-size:9px;color:#0369a1;font-weight:700;background:#e0f2fe;border:1px solid #7dd3fc;padding:1px 5px;border-radius:4px;margin-top:2px;display:inline-block;">재활 ${patient.rehabDoctor}</span>`:''} ${isSharedToMe&&patient.attendingDoctorName?`<span class="shared-doctor-tag">${patient.attendingDoctorName}</span>`:''}</div></td>        <td><div class="cell-stack"><span class="main">${patient.patientName||''}</span><span class="sub">${patient.sex||''}${age!==''?'/'+age:''}</span></div></td>
+<td><div class="cell-stack"><span class="main">${patient.roomSortKey||''}${patient.bedNo?'-'+patient.bedNo:''}</span><span class="sub">${patient.patientNo||''}</span>${patient.rehabDoctor?`<span style="font-size:9px;color:#0369a1;font-weight:700;">재활 ${patient.rehabDoctor}</span>`:''} ${isSharedToMe&&patient.attendingDoctorName?`<span class="shared-doctor-tag">${patient.attendingDoctorName}</span>`:''}</div></td>        <td><div class="cell-stack"><span class="main">${patient.patientName||''}</span><span class="sub">${patient.sex||''}${age!==''?'/'+age:''}</span></div></td>
         <td><div class="cell-stack">
           <span class="main">${fmtDate(patient.admissionDate)}${stayDays?' ('+stayDays+'일)':''}</span>
           ${patient.expectedDischargeDate?'<span class="discharge-date">→ '+fmtDate(patient.expectedDischargeDate)+'</span>':'<span class="sub">→ 미정</span>'}
@@ -1342,7 +1376,7 @@ function renderNoteWithCopyTags(text) {
         <td>${patient.primaryDiagnosis||''}${patient.primaryDiagnosisOnsetDate?'<div class="small">'+patient.primaryDiagnosisOnsetDate+'</div>':''}</td>
         <td class="meds-cell">${medsText}</td>
         <td class="change-cell">${changeText}</td>
-        <td class="nowrap">${lastLabHtml}${patient.prevLabDate?'<div class="lab-prev">(이전: '+patient.prevLabDate+')</div>':''}</td>
+        <td class="nowrap">${lastLabHtml}${patient.prevLabDate?'<div class="lab-prev">(이전: '+patient.prevLabDate+')</div>':''}${nextRecommendedLabDate?'<div class="lab-next-recommend">다음: '+nextRecommendedLabDate+'</div>':''}</td>
         <td></td>
         <td class="nowrap"></td>
       `;

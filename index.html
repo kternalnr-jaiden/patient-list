@@ -603,7 +603,7 @@
     { name:'이현아', email:'hyuna5575@gmail.com',    dept:'재활의학과' },
     { name:'김기태', email:'kternalnr@gmail.com',    dept:'신경과'    },
     { name:'박기홍', email:'pkh.neuro@gmail.com',    dept:'신경과'    },
-    { name:'고명범', email:'kmb.internal@gmail.com', dept:'내과'      },
+    { name:'고명범', email:'cardio42@gmail.com',      dept:'내과'      },
   ];
   const DEPARTMENTS = [...new Set(DOCTORS.map(d => d.dept))];
   const REHAB_DOCTORS = ['김성훈','이승환','이현아','강유진'];
@@ -621,11 +621,19 @@
     if (r === 2) return '이승환';
     return '이현아'; // r===0
   }
-  const ALLOWED_EMAILS = DOCTORS.map(d => d.email);
+  // PA 계정: 주치의 목록에 없고 공유된 환자만 열람 가능
+  const PA_ACCOUNTS = [
+    { name:'김유진', email:'ejleeatempo@gmail.com', role:'PA' },
+  ];
+  const ALLOWED_EMAILS = [...DOCTORS.map(d => d.email), ...PA_ACCOUNTS.map(p => p.email)];
   let currentDoctor = null;
+  let currentPA = null;
 
   function getDoctorByEmail(email) {
     return DOCTORS.find(d => d.email === email) || null;
+  }
+  function getPAByEmail(email) {
+    return PA_ACCOUNTS.find(p => p.email === email) || null;
   }
 
   const firebaseConfig = {
@@ -649,10 +657,11 @@
   /* ══ 인증 ══ */
   function unlockApp(user) {
     currentDoctor = getDoctorByEmail(user.email);
+    currentPA = getPAByEmail(user.email);
     sessionStorage.setItem('presc-auth','ok');
     el('lockScreen').classList.add('hidden');
     el('mainApp').style.display = '';
-    const deptInfo = currentDoctor ? ` · ${currentDoctor.dept}` : '';
+    const deptInfo = currentDoctor ? ` · ${currentDoctor.dept}` : (currentPA ? ' · PA' : '');
     el('authUserBadge').textContent = '👤 ' + (user.displayName || user.email) + deptInfo;
     refreshPrintDate();
     renderViewSubBar();
@@ -823,6 +832,10 @@ patientDept:el('patientDept'), patientDoctorDisplay:el('patientDoctorDisplay'),
   });
 
   function filterByView(list) {
+    // PA 계정: 공유된 환자만 열람 가능 (뷰 모드 무관)
+    if (currentPA) {
+      return list.filter(p => Array.isArray(p.sharedWith) && p.sharedWith.includes(currentPA.email));
+    }
     if (!currentDoctor) return list;
     switch (state.viewMode) {
       case 'mine':
@@ -979,7 +992,7 @@ function updateFloorSummary(){
           floorMap[f].total++; if(!checks[p.id])floorMap[f].unchecked++;
         }
       }
-      if(isTodayKST(p.lastLabDate))labTodayNames.push(p.patientName);
+      if(isTodayKST(p.lastLabDate)||isTodayKST(p.prevLabDate))labTodayNames.push(p.patientName);
     });
     const floors=Object.keys(floorMap).sort((a,b)=>a-b);
     const summaryEl=el('floorSummary'); if(!floors.length){summaryEl.textContent='';return;}
@@ -1035,6 +1048,7 @@ formEls.patientDept.value=patient.department||'';
     el('patientFormDialog').showModal();
   }
   function openNewPatientForm(){
+    if(currentPA){alert('PA 계정은 환자 등록이 제한됩니다.');return;}
     state.editingId=null;
     Object.values(formEls).forEach(inp=>inp.value='');
     if(currentDoctor){
@@ -1362,8 +1376,10 @@ function renderNoteWithCopyTags(text) {
       if(typeof patient.recentMedChanges==='string')changeText=patient.recentMedChanges;
       else if(Array.isArray(patient.recentMedChanges))changeText=patient.recentMedChanges.map(m=>m.summary).join('\n');
       const isLabToday=isTodayKST(patient.lastLabDate);
+      const isPrevLabToday=isTodayKST(patient.prevLabDate);
       const isLabDue=isLabDueHighlight(patient.lastLabDate);
       const labCssClass=isLabToday?'lab-today':(isLabDue?'lab-due-highlight':'');
+      const prevLabCssClass=isPrevLabToday?'lab-today':'';
       const lastLabHtml=patient.lastLabDate?`<span class="${labCssClass}">${fmtDate(patient.lastLabDate)}</span>`:'';
       const nextRecommendedLabDate=getNextRecommendedLabDate(patient.lastLabDate);
       tr.innerHTML=`
@@ -1376,7 +1392,7 @@ function renderNoteWithCopyTags(text) {
         <td>${patient.primaryDiagnosis||''}${patient.primaryDiagnosisOnsetDate?'<div class="small">'+patient.primaryDiagnosisOnsetDate+'</div>':''}</td>
         <td class="meds-cell">${medsText}</td>
         <td class="change-cell">${changeText}</td>
-        <td class="nowrap">${lastLabHtml}${patient.prevLabDate?'<div class="lab-prev">(이전: '+patient.prevLabDate+')</div>':''}${nextRecommendedLabDate?'<div class="lab-next-recommend">다음: '+nextRecommendedLabDate+'</div>':''}</td>
+        <td class="nowrap">${lastLabHtml}${patient.prevLabDate?`<div class="lab-prev">(이전: <span class="${prevLabCssClass}">${patient.prevLabDate}</span>)</div>`:''  }${nextRecommendedLabDate?'<div class="lab-next-recommend">다음: '+nextRecommendedLabDate+'</div>':''}</td>
         <td></td>
         <td class="nowrap"></td>
       `;

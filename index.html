@@ -602,9 +602,9 @@
     { name:'이승환', email:'elduque@gmail.com',       dept:'재활의학과' },
     { name:'이현아', email:'hyuna5575@gmail.com',     dept:'재활의학과' },
     { name:'김기태', email:'kternalnr@gmail.com',     dept:'신경과'    },
-    { name:'박기홍', email:'khparknr@gmail.com',     dept:'신경과'    },
+    { name:'박기홍', email:'pkh.neuro@gmail.com',     dept:'신경과'    },
     { name:'고명범', email:'cardio42@gmail.com',      dept:'내과'      },
-    { name:'김유진', email:'dbwls7645@gmail.com',   dept:'기타', role:'PA' },
+    { name:'김유진', email:'ejleeatempo@gmail.com',   dept:'기타', role:'PA' },
   ];
   const DEPARTMENTS = [...new Set(DOCTORS.map(d => d.dept))];
   const REHAB_DOCTORS = ['김성훈','이승환','이현아','강유진'];
@@ -658,6 +658,13 @@
     el('mainApp').style.display = '';
     const deptInfo = currentDoctor ? ` · ${currentDoctor.dept}${currentDoctor.role==='PA'?' (PA)':''}` : '';
     el('authUserBadge').textContent = '👤 ' + (user.displayName || user.email) + deptInfo;
+    // PA 계정은 '전체 환자' 탭으로 시작 (filterByView에서 공유 환자만 필터링)
+    if (currentDoctor?.role === 'PA') {
+      state.viewMode = 'all';
+      document.querySelectorAll('.view-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.view === 'all');
+      });
+    }
     refreshPrintDate();
     renderViewSubBar();
     loadPatients();

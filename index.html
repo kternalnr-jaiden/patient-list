@@ -448,7 +448,7 @@
           <select id="rehabDoctor">
             <option value="">미지정</option>
             <option value="김성훈">김성훈</option>
-            <option value="이승환">이승환</option>
+            <option value="조일륜">조일륜</option>
             <option value="이현아">이현아</option>
             <option value="강유진">강유진</option>
           </select>
@@ -597,17 +597,18 @@
 
   /* ══ 주치의 목록 ══ */
   const DOCTORS = [
-    { name:'강유진', email:'dbwls7645@gmail.com',          dept:'재활의학과' },
     { name:'김성훈', email:'kimsh.rehab@gmail.com',  dept:'재활의학과' },
     { name:'이승환', email:'elduque@gmail.com',       dept:'재활의학과' },
+    { name:'조일륜', email:'joilyun.rehab@gmail.com', dept:'재활의학과' },
     { name:'이현아', email:'hyuna5575@gmail.com',     dept:'재활의학과' },
+    { name:'강유진', email:'123@gmail.com',           dept:'재활의학과' },
     { name:'김기태', email:'kternalnr@gmail.com',     dept:'신경과'    },
     { name:'박기홍', email:'pkh.neuro@gmail.com',     dept:'신경과'    },
     { name:'고명범', email:'cardio42@gmail.com',      dept:'내과'      },
-    { name:'김유진', email:'ejleeatempo@gmail.com',   dept:'기타', role:'PA' },
+    { name:'김유진', email:'dbwls7645@gmail.com',     dept:'기타', role:'PA' },
   ];
   const DEPARTMENTS = [...new Set(DOCTORS.map(d => d.dept))];
-  const REHAB_DOCTORS = ['김성훈','이승환','이현아','강유진'];
+  const REHAB_DOCTORS = ['김성훈','조일륜','이현아','강유진'];
   function getRoomUnitNumber(roomValue) {
     const digits = String(roomValue || '').replace(/\D/g, '');
     if (!digits) return NaN;
@@ -619,7 +620,7 @@
     if (!unit || unit <= 0) return '';
     const r = unit % 3;
     if (r === 1) return '김성훈';
-    if (r === 2) return '이승환';
+    if (r === 2) return '조일륜';
     return '이현아'; // r===0
   }
   const ALLOWED_EMAILS = DOCTORS.map(d => d.email);
@@ -917,12 +918,38 @@ patientDept:el('patientDept'), patientDoctorDisplay:el('patientDoctorDisplay'),
   function mergeNoteLines(lines){
     const result=[];
     for(let i=0;i<lines.length;i++){
-      const line=lines[i], next=(i+1<lines.length)?lines[i+1]:null;
-      if(next&&/^[『「【]/.test(next)){
-        result.push(line.split('\t')[0].trim()+'\t'+next.split('\t').slice(1).join('\t')); i++;
-      } else result.push(line);
+      const line=lines[i];
+      // 『 또는 「 또는 【 로 시작하는 참고 블록이 다음 줄에 있으면 닫힘(』」】)까지 합치기
+      if(i+1<lines.length && /^[『「【]/.test(lines[i+1])){
+        // 여러 줄에 걸친 참고 블록 수집
+        let noteParts=[];
+        let j=i+1;
+        while(j<lines.length){
+          const noteLine=lines[j].trim();
+          noteParts.push(noteLine);
+          if(/[』」】]/.test(noteLine)){break;}
+          j++;
+        }
+        // 참고 블록에서 의미있는 텍스트만 추출 (『참고:』, [따로 포장] 등 제거, [Powder] 같은 약제 관련만 남김)
+        const noteText=noteParts.join(' ')
+          .replace(/[『「【]/g,'').replace(/[』」】]/g,'')
+          .replace(/참고\s*:/g,'')
+          .replace(/\[따로\s*포장\]/g,'')
+          .replace(/\[\s*\]/g,'')
+          .trim();
+        const baseName=line.split('\t')[0].trim();
+        const restTabs=line.split('\t').slice(1).join('\t');
+        result.push((noteText ? `${baseName} [${noteText}]` : baseName) + (restTabs?'\t'+restTabs:''));
+        i=j;
+      } else {
+        result.push(line);
+      }
     }
     return result;
+  }
+  function filterNursing(lines){
+    // [Nr] 로 시작하는 간호처방 라인 제거
+    return lines.filter(line=>!/^\[Nr\]/i.test(line));
   }
   function filterDCPairs(lines){
     const dcNames=new Set();
@@ -1498,7 +1525,7 @@ noteTd.appendChild(noteText);
   });
   el('parseMedsBtn').addEventListener('click',()=>{
     const allLines=el('pasteMeds').value.split('\n').map(v=>v.trim()).filter(Boolean); if(!allLines.length)return alert('약 복붙 내용을 입력해주세요.');
-    const merged=mergeNoteLines(allLines), filtered=filterDCPairs(merged), removed=merged.length-filtered.length;
+    const merged=mergeNoteLines(allLines), noNursing=filterNursing(merged), filtered=filterDCPairs(noNursing), removed=merged.length-filtered.length;
     state.medicationsDraft.push(...filtered.map(parseMedicationLine).filter(Boolean)); refreshMedDraftPills();
     if(removed>0){const h=el('dcHintMsg');h.textContent=`✓ DC 처리로 ${removed}개 줄 제외됨`;h.style.display='block';setTimeout(()=>{h.style.display='none';},3500);}
   });

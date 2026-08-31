@@ -1701,7 +1701,16 @@ noteTd.appendChild(noteText);
   el('savePatientBtn').addEventListener('click',savePatient);
   el('resetFormBtn').addEventListener('click',resetForm);
   el('openNewPatientBtn').addEventListener('click',openNewPatientForm);
-  el('closePatientFormBtn').addEventListener('click',()=>el('patientFormDialog').close());
+  el('closePatientFormBtn').addEventListener('click',async()=>{
+    if(state.editingId){
+      const choice=confirm('Save changes before closing?\n\nOK = Save & Close\nCancel = Discard & Close');
+      if(choice){
+        await savePatient();
+        return; // savePatient 안에서 닫힘
+      }
+    }
+    el('patientFormDialog').close(); resetForm();
+  });
   el('toggleDeletedBtn').addEventListener('click',()=>{
     state.showDeleted=!state.showDeleted;
     el('toggleDeletedBtn').textContent=state.showDeleted?'활성 환자 보기':'삭제 환자 보기'; render();

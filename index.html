@@ -114,6 +114,20 @@
     tbody tr.shared-patient-row.visited{background:#f0e7ff!important;}
     .nowrap{white-space:nowrap;}
     .small{font-size:9px;color:var(--muted);}
+    /* HTN/DM */
+    .hd-row{display:flex;gap:4px;margin-top:3px;flex-wrap:wrap;}
+    .hd-badge{font-size:9px;font-weight:700;padding:1px 4px;border-radius:4px;}
+    .hd-pos{background:#fee2e2;color:#b91c1c;}
+    .hd-neg{background:#f1f5f9;color:#94a3b8;}
+    /* 항혈전제 */
+    .at-row{display:flex;gap:3px;margin-top:2px;flex-wrap:wrap;}
+    .at-badge{font-size:9px;font-weight:600;padding:1px 4px;border-radius:4px;background:#fef9c3;color:#854d0e;}
+    .at-badge.hold{background:#fee2e2;color:#991b1b;text-decoration:line-through;}
+    /* 튜브 */
+    .tube-row{display:flex;gap:3px;margin-top:2px;flex-wrap:wrap;}
+    .tube-badge{font-size:9px;font-weight:700;padding:1px 4px;border-radius:4px;background:#e0f2fe;color:#0369a1;}
+    /* VFSS/HbA1c */
+    .vfss-row{font-size:9px;color:#6b7280;margin-bottom:2px;}
     .meds-cell{font-size:10px;line-height:1.6;word-break:break-word;}
     .change-cell{font-size:10px;white-space:pre-line;}
     .cell-stack{display:flex;flex-direction:column;gap:1px;}
@@ -420,6 +434,19 @@
           <select id="sex"><option value="">선택</option><option value="M">M</option><option value="F">F</option></select>
         </div>
       </div>
+      <!-- 튜브 -->
+      <div class="field"><label>삽관 / 튜브</label>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:4px;">
+          <label style="display:flex;align-items:center;gap:3px;font-size:12px;"><input type="checkbox" id="tubeL"> L-tube</label>
+          <label style="display:flex;align-items:center;gap:3px;font-size:12px;"><input type="checkbox" id="tubeT"> T-tube</label>
+          <label style="display:flex;align-items:center;gap:3px;font-size:12px;"><input type="checkbox" id="tubePEG"> PEG</label>
+          <label style="display:flex;align-items:center;gap:3px;font-size:12px;"><input type="checkbox" id="tubeF"> Foley</label>
+          <label style="display:flex;align-items:center;gap:3px;font-size:12px;">
+            <input type="checkbox" id="tubePICC"> PICC
+            <select id="tubePICC_side" style="font-size:10px;padding:1px 2px;"><option value="Rt">Rt</option><option value="Lt">Lt</option></select>
+          </label>
+        </div>
+      </div>
       <div class="four">
         <div class="field"><label>생년월일</label><input id="birthDate" type="date"/></div>
         <div class="field"><label>붙여넣기 나이</label><input id="pastedAge" type="number" min="0" step="1" placeholder="82"/></div>
@@ -429,6 +456,59 @@
       <div class="two">
         <div class="field"><label>주상병</label><input id="primaryDiagnosis" placeholder="상세불명의 뇌내출혈"/></div>
         <div class="field"><label>onset 날짜</label><input id="primaryDiagnosisOnsetDate" type="date"/></div>
+      </div>
+      <!-- HTN / DM -->
+      <div class="two">
+        <div class="field"><label>혈압 / 당뇨</label>
+          <div style="display:flex;gap:16px;align-items:center;margin-top:4px;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:12px;"><input type="checkbox" id="hasHTN"> 고혈압(H+)</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:12px;"><input type="checkbox" id="hasDM"> 당뇨(D+)</label>
+          </div>
+        </div>
+      </div>
+      <!-- 항혈전/항응고제 -->
+      <div class="field"><label>항혈전 / 항응고제</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;" id="antiplateletWrap">
+          <!-- ASA -->
+          <label style="display:flex;align-items:center;gap:3px;font-size:12px;">
+            <input type="checkbox" id="apASA"> ASA
+            <select id="apASA_hold" style="font-size:10px;padding:1px 2px;"><option value="">복용중</option><option value="H">중단(H)</option></select>
+          </label>
+          <!-- CPD -->
+          <label style="display:flex;align-items:center;gap:3px;font-size:12px;">
+            <input type="checkbox" id="apCPD"> CPD
+            <select id="apCPD_hold" style="font-size:10px;padding:1px 2px;"><option value="">복용중</option><option value="H">중단(H)</option></select>
+          </label>
+          <!-- CSZ -->
+          <label style="display:flex;align-items:center;gap:3px;font-size:12px;">
+            <input type="checkbox" id="apCSZ"> CSZ
+            <select id="apCSZ_hold" style="font-size:10px;padding:1px 2px;"><option value="">복용중</option><option value="H">중단(H)</option></select>
+          </label>
+          <!-- Api -->
+          <label style="display:flex;align-items:center;gap:3px;font-size:12px;">
+            <input type="checkbox" id="apApi"> Api
+            <input id="apApi_dose" placeholder="용량" style="width:70px;font-size:10px;padding:1px 3px;">
+            <select id="apApi_hold" style="font-size:10px;padding:1px 2px;"><option value="">복용중</option><option value="H">중단(H)</option></select>
+          </label>
+          <!-- Edo -->
+          <label style="display:flex;align-items:center;gap:3px;font-size:12px;">
+            <input type="checkbox" id="apEdo"> Edo
+            <input id="apEdo_dose" placeholder="용량" style="width:70px;font-size:10px;padding:1px 3px;">
+            <select id="apEdo_hold" style="font-size:10px;padding:1px 2px;"><option value="">복용중</option><option value="H">중단(H)</option></select>
+          </label>
+          <!-- Riv -->
+          <label style="display:flex;align-items:center;gap:3px;font-size:12px;">
+            <input type="checkbox" id="apRiv"> Riv
+            <input id="apRiv_dose" placeholder="용량" style="width:70px;font-size:10px;padding:1px 3px;">
+            <select id="apRiv_hold" style="font-size:10px;padding:1px 2px;"><option value="">복용중</option><option value="H">중단(H)</option></select>
+          </label>
+          <!-- War -->
+          <label style="display:flex;align-items:center;gap:3px;font-size:12px;">
+            <input type="checkbox" id="apWar"> War
+            <input id="apWar_dose" placeholder="용량" style="width:70px;font-size:10px;padding:1px 3px;">
+            <select id="apWar_hold" style="font-size:10px;padding:1px 2px;"><option value="">복용중</option><option value="H">중단(H)</option></select>
+          </label>
+        </div>
       </div>
       <div class="two">
         <div class="field"><label>진료과</label>
@@ -483,6 +563,19 @@
         </div>
         <div class="field"><label>최근 약 변경 내역 (자유 입력)</label>
           <textarea id="recentMedChangeInput" rows="3" placeholder="2026-05-12 케프라 용량 증량&#10;2026-05-10 아트로벤트 추가"></textarea>
+        </div>
+      </div>
+      <div class="field"><label>VFSS / HbA1c</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:11px;font-weight:600;">VFSS</span>
+            <input id="vfssDate" type="date" style="font-size:11px;padding:2px 4px;"/>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:11px;font-weight:600;">HbA1c</span>
+            <input id="hba1cValue" placeholder="수치" style="width:60px;font-size:11px;padding:2px 4px;"/>
+            <input id="hba1cDate" type="date" style="font-size:11px;padding:2px 4px;"/>
+          </div>
         </div>
       </div>
       <div class="field"><label>처방 참고 사항</label>
@@ -734,6 +827,30 @@
       if (diffDays >= 1 && diffDays <= 3 && (todayDow===6 || todayDow===0 || todayDow===1)) return true;
     }
     return false;
+  }
+  function renderAntiplatelet(ap){
+    if(!ap)return'';
+    const order=['ASA','CPD','CSZ','Api','Edo','Riv','War'];
+    return order.filter(k=>ap[k]).map(k=>{
+      const d=ap[k]; let txt=k;
+      if(d.dose)txt+=`(${d.dose})`;
+      if(d.hold==='H')txt+=`(H)`;
+      const cls='at-badge'+(d.hold==='H'?' hold':'');
+      return`<span class="${cls}">${txt}</span>`;
+    }).join('');
+  }
+  function renderTubes(tb){
+    if(!tb)return'';
+    const parts=[];
+    if(tb.L)parts.push('L');if(tb.T)parts.push('T');
+    if(tb.PEG)parts.push('PEG');if(tb.F)parts.push('F');
+    if(tb.PICC)parts.push(`PICC(${tb.PICC})`);
+    return parts.map(t=>`<span class="tube-badge">${t}</span>`).join('');
+  }
+  function renderHDRow(hasHTN,hasDM){
+    const h=`<span class="hd-badge ${hasHTN?'hd-pos':'hd-neg'}">H${hasHTN?'+':'-'}</span>`;
+    const d=`<span class="hd-badge ${hasDM?'hd-pos':'hd-neg'}">D${hasDM?'+':'-'}</span>`;
+    return`<div class="hd-row">${h}${d}</div>`;
   }
   function getNextRecommendedLabDate(lastLabDate) {
     if (!lastLabDate) return '';
@@ -1044,6 +1161,19 @@ function updateFloorSummary(){
       birthDate:formEls.birthDate.value||'', pastedAge:formEls.pastedAge.value?Number(formEls.pastedAge.value):'',
       admissionDate:formEls.admissionDate.value||'', expectedDischargeDate:formEls.expectedDischargeDate.value||'',
       primaryDiagnosis:formEls.primaryDiagnosis.value.trim(), primaryDiagnosisOnsetDate:formEls.primaryDiagnosisOnsetDate.value||'',
+      hasHTN:el('hasHTN').checked, hasDM:el('hasDM').checked,
+      antiplatelet:{
+        ASA:el('apASA').checked?{hold:el('apASA_hold').value}:null,
+        CPD:el('apCPD').checked?{hold:el('apCPD_hold').value}:null,
+        CSZ:el('apCSZ').checked?{hold:el('apCSZ_hold').value}:null,
+        Api:el('apApi').checked?{dose:el('apApi_dose').value.trim(),hold:el('apApi_hold').value}:null,
+        Edo:el('apEdo').checked?{dose:el('apEdo_dose').value.trim(),hold:el('apEdo_hold').value}:null,
+        Riv:el('apRiv').checked?{dose:el('apRiv_dose').value.trim(),hold:el('apRiv_hold').value}:null,
+        War:el('apWar').checked?{dose:el('apWar_dose').value.trim(),hold:el('apWar_hold').value}:null,
+      },
+      tubes:{L:el('tubeL').checked,T:el('tubeT').checked,PEG:el('tubePEG').checked,F:el('tubeF').checked,PICC:el('tubePICC').checked?el('tubePICC_side').value:null},
+      vfssDate:el('vfssDate').value||'',
+      hba1cValue:el('hba1cValue').value.trim(), hba1cDate:el('hba1cDate').value||'',
       department:dept, attendingDoctorEmail:attEmail, attendingDoctorName:attName,
 rehabDoctor: formEls.rehabDoctor.value || '',
       sharedWith: existing?.sharedWith || [],
@@ -1061,6 +1191,27 @@ rehabDoctor: formEls.rehabDoctor.value || '',
     formEls.birthDate.value=patient.birthDate||''; formEls.pastedAge.value=patient.pastedAge||'';
     formEls.admissionDate.value=patient.admissionDate||''; formEls.expectedDischargeDate.value=patient.expectedDischargeDate||'';
     formEls.primaryDiagnosis.value=patient.primaryDiagnosis||''; formEls.primaryDiagnosisOnsetDate.value=patient.primaryDiagnosisOnsetDate||'';
+    // HTN/DM
+    el('hasHTN').checked=!!patient.hasHTN; el('hasDM').checked=!!patient.hasDM;
+    // 항혈전제
+    const ap=patient.antiplatelet||{};
+    const apDrugs=['ASA','CPD','CSZ','Api','Edo','Riv','War'];
+    apDrugs.forEach(k=>{
+      const d=ap[k];
+      el('ap'+k).checked=!!d;
+      if(el('ap'+k+'_hold'))el('ap'+k+'_hold').value=d?.hold||'';
+      if(el('ap'+k+'_dose'))el('ap'+k+'_dose').value=d?.dose||'';
+    });
+    // 튜브
+    const tb=patient.tubes||{};
+    el('tubeL').checked=!!tb.L; el('tubeT').checked=!!tb.T;
+    el('tubePEG').checked=!!tb.PEG; el('tubeF').checked=!!tb.F;
+    el('tubePICC').checked=!!tb.PICC;
+    if(tb.PICC)el('tubePICC_side').value=tb.PICC;
+    // VFSS/HbA1c
+    el('vfssDate').value=patient.vfssDate||'';
+    el('hba1cValue').value=patient.hba1cValue||'';
+    el('hba1cDate').value=patient.hba1cDate||'';
     formEls.lastLabDate.value=patient.lastLabDate||''; formEls.prevLabDate.value=patient.prevLabDate||'';
     formEls.prescriptionNote.value=patient.prescriptionNote||'';
 formEls.patientDept.value=patient.department||'';
@@ -1094,6 +1245,16 @@ formEls.patientDept.value=patient.department||'';
     Object.values(formEls).forEach(inp=>inp.value='');
     if(currentDoctor){formEls.patientDept.value=currentDoctor.dept;formEls.rehabDoctor.value='';formEls.patientDoctorDisplay.value=currentDoctor.name;}
     el('pastePatient').value=''; el('pasteDiagnosis').value=''; el('pasteMeds').value='';
+    // 새 필드 초기화
+    el('hasHTN').checked=false; el('hasDM').checked=false;
+    ['ASA','CPD','CSZ','Api','Edo','Riv','War'].forEach(k=>{
+      el('ap'+k).checked=false;
+      if(el('ap'+k+'_hold'))el('ap'+k+'_hold').value='';
+      if(el('ap'+k+'_dose'))el('ap'+k+'_dose').value='';
+    });
+    ['tubeL','tubeT','tubePEG','tubeF','tubePICC'].forEach(id=>el(id).checked=false);
+    el('tubePICC_side').value='Rt';
+    el('vfssDate').value=''; el('hba1cValue').value=''; el('hba1cDate').value='';
     state.medicationsDraft=[]; refreshMedDraftPills();
     el('patientFormTitle').textContent='환자 등록';
   }
@@ -1413,12 +1574,13 @@ function renderNoteWithCopyTags(text) {
       const nextRecommendedLabDate=getNextRecommendedLabDate(patient.lastLabDate);
       tr.innerHTML=`
         <td class="nowrap" style="text-align:center;padding:3px 2px;"></td>
-<td><div class="cell-stack"><span class="main">${patient.roomSortKey||''}${patient.bedNo?'-'+patient.bedNo:''}</span><span class="sub">${patient.patientNo||''}</span>${patient.rehabDoctor?`<span style="font-size:9px;color:#0369a1;font-weight:700;">재활 ${patient.rehabDoctor}</span>`:''} ${isSharedToMe&&patient.attendingDoctorName?`<span class="shared-doctor-tag">${patient.attendingDoctorName}</span>`:''}</div></td>        <td><div class="cell-stack"><span class="main">${patient.patientName||''}</span><span class="sub">${patient.sex||''}${age!==''?'/'+age:''}</span></div></td>
+<td><div class="cell-stack"><span class="main">${patient.roomSortKey||''}${patient.bedNo?'-'+patient.bedNo:''}</span><span class="sub">${patient.patientNo||''}</span>${patient.rehabDoctor?`<span style="font-size:9px;color:#0369a1;font-weight:700;">재활 ${patient.rehabDoctor}</span>`:''} ${isSharedToMe&&patient.attendingDoctorName?`<span class="shared-doctor-tag">${patient.attendingDoctorName}</span>`:''}</div></td>
+        <td><div class="cell-stack"><span class="main">${patient.patientName||''}</span><span class="sub">${patient.sex||''}${age!==''?'/'+age:''}</span><div class="tube-row">${renderTubes(patient.tubes)}</div></div></td>
         <td><div class="cell-stack">
           <span class="main">${fmtDate(patient.admissionDate)}${stayDays?' ('+stayDays+'일)':''}</span>
           ${patient.expectedDischargeDate?'<span class="discharge-date">→ '+fmtDate(patient.expectedDischargeDate)+'</span>':'<span class="sub">→ 미정</span>'}
         </div></td>
-        <td>${patient.primaryDiagnosis||''}${patient.primaryDiagnosisOnsetDate?'<div class="small">'+patient.primaryDiagnosisOnsetDate+'</div>':''}</td>
+        <td><div>${patient.primaryDiagnosis||''}${patient.primaryDiagnosisOnsetDate?'<div class="small">'+patient.primaryDiagnosisOnsetDate+'</div>':''}</div>${renderHDRow(patient.hasHTN,patient.hasDM)}<div class="at-row">${renderAntiplatelet(patient.antiplatelet)}</div></td>
         <td class="meds-cell">${medsText}</td>
         <td class="change-cell">${changeText}</td>
         <td class="nowrap">${lastLabHtml}${patient.prevLabDate?`<div class="lab-prev">(이전: <span class="${prevLabCssClass}">${patient.prevLabDate}</span>)</div>`:''  }${nextRecommendedLabDate?'<div class="lab-next-recommend">다음: '+nextRecommendedLabDate+'</div>':''}</td>
@@ -1437,6 +1599,12 @@ function renderNoteWithCopyTags(text) {
       visitWrap.appendChild(vChk); visitWrap.appendChild(vNo); noCell.appendChild(visitWrap);
       // 처방 참고사항
       const noteTd=cells[8];
+      // 첫줄: VFSS / HbA1c
+      const vfssHba1cParts=[];
+      if(patient.vfssDate)vfssHba1cParts.push(`VFSS: ${patient.vfssDate}`);
+      if(patient.hba1cValue||patient.hba1cDate)vfssHba1cParts.push(`HbA1c: ${patient.hba1cValue||''}${patient.hba1cDate?' ('+patient.hba1cDate+')':''}`);
+      if(vfssHba1cParts.length){const vRow=document.createElement('div');vRow.className='vfss-row';vRow.textContent=vfssHba1cParts.join(' · ');noteTd.appendChild(vRow);}
+      // 둘째줄: 참고사항 free text
 const noteText=renderNoteWithCopyTags(patient.prescriptionNote||'');
 noteTd.appendChild(noteText);
       const checkRow=document.createElement('div'); checkRow.className='note-check-row';
